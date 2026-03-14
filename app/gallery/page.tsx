@@ -1,0 +1,57 @@
+import { PrismaClient } from '@prisma/client';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { GalleryClient } from '@/components/gallery/GalleryClient';
+
+const prisma = new PrismaClient();
+
+// Revalidate occasionally if images are added frequently, but static by default
+export const revalidate = 3600;
+
+export const metadata = {
+  title: 'Portfolio & Gallery | Mike Beauty Studio Kigali',
+  description: 'View our stunning portfolio of luxury lash extensions, featuring Classic, Hybrid, and Volume transformations.',
+};
+
+export default async function GalleryPage() {
+  // Fetch all media of type 'image', including their related service to get the category
+  const mediaItems = await prisma.media.findMany({
+    where: {
+      type: 'image',
+    },
+    include: {
+      service: {
+        select: {
+          name: true,
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    }
+  });
+
+  return (
+    <div className="bg-charcoal min-h-screen pt-32 pb-24 text-cream-white relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="mb-16">
+          <SectionHeading 
+            title="Studio Portfolio"
+            subtitle="Browse our recent transformations. Filter by style to find the exact look you desire for your next appointment."
+            alignment="center"
+            className="text-white [&>h2]:text-white [&>span]:text-gold"
+          />
+        </div>
+
+        {mediaItems.length > 0 ? (
+          <GalleryClient items={mediaItems} />
+        ) : (
+          <div className="text-center py-32 border border-white/10">
+            <p className="font-playfair text-xl text-gray-400">Our gallery is currently being curated. Please check back soon.</p>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

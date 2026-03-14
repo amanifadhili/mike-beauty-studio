@@ -1,0 +1,22 @@
+
+> mike-beauty-studio@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.1s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/9) ...
+Error occurred prerendering page "/about". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: Event handlers cannot be passed to Client Component props.
+  {className: ..., onClick: function onClick, children: ...}
+                            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '3138637321'
+}
+Export encountered an error on /about/page: /about, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null

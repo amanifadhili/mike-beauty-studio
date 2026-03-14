@@ -1,0 +1,5 @@
+app/gallery/page.tsx(47,26): error TS2322: Type '({ service: { name: string; } | null; } & { id: string; createdAt: Date; url: string; type: string; category: string | null; serviceId: string | null; })[]' is not assignable to type 'GalleryItem[]'.
+  Type '{ service: { name: string; } | null; } & { id: string; createdAt: Date; url: string; type: string; category: string | null; serviceId: string | null; }' is not assignable to type 'GalleryItem'.
+    Types of property 'serviceId' are incompatible.
+      Type 'string | null' is not assignable to type 'string'.
+        Type 'null' is not assignable to type 'string'.
