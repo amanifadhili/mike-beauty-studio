@@ -2,6 +2,9 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
 
 export async function addGalleryMedia(data: {
   url: string;
@@ -30,15 +33,23 @@ export async function addGalleryMedia(data: {
 
 export async function deleteGalleryMedia(mediaId: string) {
   try {
-    await prisma.media.delete({
-      where: { id: mediaId }
-    });
+    const media = await prisma.media.findUnique({ where: { id: mediaId } });
+    
+    await prisma.media.delete({ where: { id: mediaId } });
+
+    // If the file was uploaded locally (not an external URL), delete it from disk
+    if (media?.url?.startsWith('/uploads/')) {
+      const filePath = path.join(process.cwd(), 'public', media.url);
+      if (existsSync(filePath)) {
+        await unlink(filePath);
+      }
+    }
 
     revalidatePath('/admin/gallery');
     revalidatePath('/gallery');
     return { success: true };
   } catch (error) {
     console.error('Failed to delete gallery media:', error);
-    return { success: false, error: 'Failed to truncate media.' };
+    return { success: false, error: 'Failed to delete media.' };
   }
 }

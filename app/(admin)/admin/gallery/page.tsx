@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import { GalleryURLAdder } from '@/components/admin/GalleryUploader';
+import { GalleryUploader } from '@/components/admin/GalleryUploader';
 import { deleteGalleryMedia } from '@/app/actions/adminGallery';
 import Image from 'next/image';
 
@@ -34,10 +34,10 @@ export default async function AdminGalleryPage() {
       
       <SectionHeading 
         title="Gallery Manager"
-        subtitle="Upload new content to your public portfolio via direct Unsplash URLs."
+        subtitle="Upload images and videos directly from your device to your public portfolio."
       />
 
-      <GalleryURLAdder availableServices={services} />
+      <GalleryUploader availableServices={services} />
 
       <div>
         <h3 className="font-playfair text-2xl text-white mb-6">Current Portfolio ({media.length})</h3>

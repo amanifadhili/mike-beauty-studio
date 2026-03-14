@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Allow locally uploaded files served from /public/uploads/
+    localPatterns: [
+      {
+        pathname: '/uploads/**',
+      },
+    ],
   },
 };
 
