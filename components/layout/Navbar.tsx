@@ -44,11 +44,16 @@ export function Navbar() {
     };
   }, [isMenuOpen]);
 
-  const bgColor = isScrolled || isMenuOpen
+  // On the homepage: transparent until scrolled (hero image shows behind).
+  // On all other pages (gallery, about, contact, etc.): always show frosted bg
+  // so that charcoal text is readable over the dark bg-charcoal page background.
+  const isHomePage = pathname === '/';
+
+  const bgColor = isScrolled || isMenuOpen || !isHomePage
     ? 'bg-cream/95 backdrop-blur-sm shadow-sm'
     : 'bg-transparent';
 
-  const textColor = isScrolled || isMenuOpen || pathname !== '/'
+  const textColor = isScrolled || isMenuOpen || !isHomePage
     ? 'text-charcoal'
     : 'text-cream';
 

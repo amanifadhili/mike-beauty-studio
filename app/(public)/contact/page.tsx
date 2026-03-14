@@ -1,6 +1,7 @@
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { getSettings } from '@/lib/settings';
+import { MapWrapper } from '@/components/contact/MapWrapper';
 
 export const metadata = {
   title: 'Contact Us | Mike Beauty Studio Kigali',
@@ -83,18 +84,9 @@ export default async function ContactPage() {
 
           </div>
 
-          {/* Map Column */}
-          <div className="h-full min-h-[400px] lg:min-h-full bg-[#222] border border-white/5 relative grayscale hover:grayscale-0 transition-all duration-700">
-            {/* Using a standard generic Google Maps embed for Kigali Heights as placeholder */}
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1m3!1d15950.046342893976!2d30.088195849999997!3d-1.9547517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca6823c1fdcd5%3A0x6a1a4c9c10712fd1!2sKigali%20Heights!5e0!3m2!1sen!2srw!4v1700000000000!5m2!1sen!2srw" 
-              width="100%" 
-              height="100%" 
-              style={{ border: 0, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
+          {/* Map Column — Interactive Leaflet + OpenStreetMap, zero API key */}
+          <div className="h-full min-h-[400px] lg:min-h-full border border-white/5 relative overflow-hidden">
+            <MapWrapper />
           </div>
 
         </div>
