@@ -43,6 +43,15 @@ const navLinks = [
         ),
       },
       {
+        name: 'Categories',
+        href: '/admin/categories',
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        ),
+      },
+      {
         name: 'Gallery',
         href: '/admin/gallery',
         icon: (
@@ -132,7 +141,7 @@ function SidebarPanel({ userEmail, onClose }: { userEmail?: string; onClose?: ()
     : 'AD';
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#111111]">
+    <div className="w-full h-full flex flex-col" style={{ background: 'var(--admin-overlay)' }}>
 
       {/* Brand Header */}
       <div className="h-20 flex items-center px-6 border-b border-white/[0.06] shrink-0">

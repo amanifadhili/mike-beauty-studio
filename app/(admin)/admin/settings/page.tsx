@@ -20,7 +20,7 @@ export default async function AdminSettingsPage() {
         <p className="text-gray-600 text-sm font-sans mt-1">Manage global configuration for your public-facing website.</p>
       </div>
 
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 lg:p-8">
+      <div className="admin-surface border border-white/[0.06] rounded-xl p-6 lg:p-8">
         <SettingsEditor initialSettings={currentSettings} />
       </div>
 

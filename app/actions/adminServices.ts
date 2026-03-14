@@ -27,6 +27,8 @@ export async function saveService(data: {
   description: string;
   price: number;
   duration: string;
+  categoryId?: string | null;
+  workerIds?: string[];
 }) {
   try {
     if (data.id) {
@@ -37,7 +39,11 @@ export async function saveService(data: {
           name: data.name,
           description: data.description,
           price: data.price,
-          duration: data.duration
+          duration: data.duration,
+          categoryId: data.categoryId || null,
+          workers: {
+            set: data.workerIds ? data.workerIds.map(id => ({ id })) : []
+          }
         }
       });
     } else {
@@ -48,7 +54,11 @@ export async function saveService(data: {
           description: data.description,
           price: data.price,
           duration: data.duration,
-          active: true // Default to true on creation
+          active: true, // Default to true on creation
+          categoryId: data.categoryId || null,
+          workers: {
+            connect: data.workerIds ? data.workerIds.map(id => ({ id })) : []
+          }
         }
       });
     }

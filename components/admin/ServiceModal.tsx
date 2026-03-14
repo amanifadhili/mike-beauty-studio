@@ -9,16 +9,34 @@ type ServiceData = {
   description: string;
   price: number;
   duration: string;
+  categoryId?: string | null;
+  workers?: { id: string }[];
 };
+
+type CategoryOption = { id: string; name: string };
+type WorkerOption = { id: string; user: { name: string } };
 
 interface ServiceModalProps {
   initialData?: ServiceData | null;
+  categories: CategoryOption[];
+  workers: WorkerOption[];
   onClose: () => void;
 }
 
-export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
+export function ServiceModal({ initialData, categories, workers, onClose }: ServiceModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorPayload, setErrorPayload] = useState<string | null>(null);
+  
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
+  const [selectedWorkers, setSelectedWorkers] = useState<string[]>(
+    initialData?.workers?.map(w => w.id) || []
+  );
+
+  const toggleWorker = (id: string) => {
+    setSelectedWorkers(prev => 
+      prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,6 +50,8 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
       description: formData.get('description') as string,
       price: parseInt(formData.get('price') as string, 10),
       duration: formData.get('duration') as string,
+      categoryId: categoryId || null,
+      workerIds: selectedWorkers,
     };
 
     const result = await saveService(data);
@@ -46,7 +66,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#1a1a1a] border border-white/10 p-8 max-w-lg w-full relative shadow-2xl">
+      <div className="admin-surface-alt border border-white/10 p-8 max-w-lg w-full relative shadow-2xl">
         
         <button 
           onClick={onClose}
@@ -74,19 +94,52 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
             <input 
               required id="name" name="name" type="text" 
               defaultValue={initialData?.name}
-              className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
+              className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
               placeholder="e.g. Volume Set"
             />
           </div>
 
-  // Category removed to align with Prisma Schema          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <label htmlFor="description" className="text-gray-400 uppercase tracking-wider text-xs">Description</label>
             <textarea 
-              required id="description" name="description" rows={3}
+              required id="description" name="description" rows={2}
               defaultValue={initialData?.description}
-              className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors resize-none"
+              className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors resize-none"
               placeholder="Describe the treatment..."
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-gray-400 uppercase tracking-wider text-xs">Category</label>
+              <select
+                value={categoryId}
+                onChange={e => setCategoryId(e.target.value)}
+                className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors appearance-none"
+              >
+                <option value="">-- No Category --</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-gray-400 uppercase tracking-wider text-xs">Qualified Workers</label>
+              <div className="w-full admin-input border border-white/10 px-4 py-2 flex flex-col gap-2 max-h-32 overflow-y-auto">
+                {workers.map(w => (
+                  <label key={w.id} className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedWorkers.includes(w.id)}
+                      onChange={() => toggleWorker(w.id)}
+                      className="accent-gold"
+                    />
+                    <span className="text-white text-sm">{w.user.name}</span>
+                  </label>
+                ))}
+                {workers.length === 0 && <span className="text-gray-500 text-sm">No workers available</span>}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -95,7 +148,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
               <input 
                 required id="price" name="price" type="number" min="0"
                 defaultValue={initialData?.price}
-                className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
+                className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
                 placeholder="25000"
               />
             </div>
@@ -105,7 +158,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
               <input 
                 required id="duration" name="duration" type="text"
                 defaultValue={initialData?.duration}
-                className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
+                className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
                 placeholder="e.g. 2 hours"
               />
             </div>
@@ -122,7 +175,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gold text-charcoal hover:bg-[#c9a633] transition-colors tracking-wide disabled:opacity-50"
+              className="px-6 py-3 bg-gold text-charcoal hover:bg-gold/90 transition-colors tracking-wide disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : 'Save Service'}
             </button>

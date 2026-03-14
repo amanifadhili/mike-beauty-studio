@@ -29,7 +29,7 @@ function SettingField({
           defaultValue={defaultValue}
           placeholder={placeholder}
           rows={4}
-          className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors font-sans resize-none"
+          className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors font-sans resize-none"
         />
       ) : (
         <input
@@ -37,7 +37,7 @@ function SettingField({
           name={name}
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className="w-full bg-[#2a2a2a] border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors font-sans"
+          className="w-full admin-input border-none border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors font-sans"
         />
       )}
     </div>

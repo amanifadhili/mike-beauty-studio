@@ -37,7 +37,7 @@ export default async function AdminGalleryPage() {
           <h1 className="font-playfair text-3xl text-white">Gallery Manager</h1>
           <p className="text-gray-600 text-sm font-sans mt-1">Upload images and videos directly from your device to your public portfolio.</p>
         </div>
-        <div className="flex items-center gap-2 bg-[#161616] border border-white/[0.06] px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 admin-surface border border-white/[0.06] px-4 py-2 rounded-lg">
           <span className="text-gray-600 font-sans text-xs">Total</span>
           <span className="text-white font-semibold font-sans">{media.length}</span>
         </div>
@@ -49,13 +49,13 @@ export default async function AdminGalleryPage() {
         <h2 className="font-playfair text-xl text-white mb-4">Current Portfolio</h2>
         
         {media.length === 0 ? (
-          <div className="bg-[#1a1a1a] border border-white/5 p-12 text-center text-gray-500 font-sans">
+          <div className="admin-surface-alt border border-white/5 p-12 text-center text-gray-500 font-sans">
             No media found.
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {media.map((item) => (
-              <div key={item.id} className="relative group bg-[#1a1a1a] border border-white/5 overflow-hidden aspect-square">
+              <div key={item.id} className="relative group admin-surface-alt border border-white/5 overflow-hidden aspect-square">
                 
                 <Image 
                   src={item.url} 

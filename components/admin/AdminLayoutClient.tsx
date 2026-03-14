@@ -32,7 +32,7 @@ export function AdminLayoutClient({ userEmail, userName, children }: AdminLayout
   }, [isSidebarOpen]);
 
   return (
-    <div className="bg-[#0e0e0e] min-h-screen text-cream-white flex">
+    <div className="admin-page text-cream-white flex">
 
       {/* Sidebar — fixed on desktop, slide-over on mobile */}
       <AdminSidebar
@@ -45,7 +45,7 @@ export function AdminLayoutClient({ userEmail, userName, children }: AdminLayout
       <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
 
         {/* Sticky top navbar */}
-        <header className="sticky top-0 z-40 h-14 bg-[#111111]/95 backdrop-blur-sm border-b border-white/[0.06] flex items-center justify-between px-4 sm:px-6">
+        <header className="sticky top-0 z-40 h-14 backdrop-blur-sm border-b flex items-center justify-between px-4 sm:px-6" style={{ background: 'var(--admin-overlay)', borderColor: 'var(--admin-border)' }}>
 
           {/* Left: hamburger (mobile) + breadcrumb (desktop) */}
           <div className="flex items-center gap-3">

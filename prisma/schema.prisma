@@ -39,6 +39,17 @@ model Worker {
   transactions Transaction[]
   payments     WorkerPayment[]
   advances     WorkerAdvance[]
+  services     Service[]       // Many-to-many: Workers qualified to perform specific services
+}
+
+model ServiceCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  order     Int      @default(0) // For manual sorting in the UI
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services  Service[]
 }
 
 model Service {
@@ -48,9 +59,12 @@ model Service {
   description String
   duration    String // e.g. "2 hours"
   active      Boolean  @default(true)
+  categoryId  String?  // Optional relation to a category
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  category     ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  workers      Worker[]         // Many-to-many: Workers qualified to perform this service
   medias       Media[]
   bookings     Booking[]
   transactions Transaction[]

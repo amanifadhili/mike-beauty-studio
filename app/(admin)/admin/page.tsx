@@ -85,7 +85,7 @@ export default async function AdminOverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statCards.map((card) => {
           const inner = (
-            <div className={`relative bg-[#161616] border ${card.border} p-6 rounded-xl overflow-hidden group transition-all duration-300 hover:border-white/10`}>
+            <div className={`relative admin-surface border ${card.border} p-6 rounded-xl overflow-hidden group transition-all duration-300 hover:border-white/10`}>
               {/* Subtle glow blob */}
               <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-60 transition-opacity group-hover:opacity-100 ${card.glow.replace('before:', '')}`} />
               
@@ -117,7 +117,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="admin-surface border border-white/[0.06] rounded-xl overflow-hidden">
         <div className="px-4 sm:px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
           <div>
             <h2 className="font-playfair text-lg text-white">Recent Bookings</h2>

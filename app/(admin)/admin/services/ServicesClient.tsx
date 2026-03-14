@@ -10,11 +10,24 @@ type ServiceData = {
   name: string;
   description: string;
   price: number;
-  duration: string; // PRISMA SCHEMA HAS THIS AS A STRING, not number
+  duration: string;
   active: boolean;
+  categoryId?: string | null;
+  workers?: { id: string }[];
 };
 
-export function ServicesDashboardClient({ initialServices }: { initialServices: ServiceData[] }) {
+type CategoryData = { id: string; name: string; order: number };
+type WorkerData = { id: string; user: { name: string } };
+
+export function ServicesDashboardClient({ 
+  initialServices,
+  categories,
+  workers 
+}: { 
+  initialServices: ServiceData[];
+  categories: CategoryData[];
+  workers: WorkerData[];
+}) {
   const [services] = useState<ServiceData[]>(initialServices);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceData | null>(null);
@@ -55,7 +68,7 @@ export function ServicesDashboardClient({ initialServices }: { initialServices: 
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2.5 rounded-lg font-sans text-sm tracking-wide hover:bg-[#c9a633] transition-colors"
+          className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2.5 rounded-lg font-sans text-sm tracking-wide hover:bg-gold/90 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -64,72 +77,105 @@ export function ServicesDashboardClient({ initialServices }: { initialServices: 
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service) => (
-          <div key={service.id} className="bg-[#1a1a1a] border border-white/5 p-6 flex flex-col h-full relative group">
-            
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-gray-500 mb-1 block">
-                  Service
-                </span>
-                <h3 className="font-playfair text-xl text-white">{service.name}</h3>
-              </div>
+      <div className="space-y-12">
+        {/* Helper function to render a category block */}
+        {(() => {
+          const categorizedSections = categories.map(cat => ({
+            ...cat,
+            services: services.filter(s => s.categoryId === cat.id)
+          })).filter(cat => cat.services.length > 0);
+
+          const uncategorized = services.filter(s => !s.categoryId);
+
+          return (
+            <>
+              {categorizedSections.map(section => (
+                <div key={section.id} className="space-y-4">
+                  <h2 className="text-xl font-playfair text-gold border-b border-white/10 pb-2">{section.name}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {section.services.map(service => renderServiceCard(service))}
+                  </div>
+                </div>
+              ))}
               
-              {/* Status Toggle Bubble */}
-              <button 
-                onClick={() => handleToggleActive(service.id, service.active)}
-                className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
-                  service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
-                }`}
-                title={service.active ? "Click to Disable" : "Click to Enable"}
-              />
-            </div>
-
-            <p className="text-gray-400 text-sm font-sans mb-6 flex-grow">
-              {service.description}
-            </p>
-
-            <div className="flex justify-between items-end pt-4 border-t border-white/5">
-              <div>
-                <div className="font-playfair text-lg text-gold">{service.price.toLocaleString()} RWF</div>
-                <div className="font-sans text-xs text-gray-500">{service.duration} mins</div>
-              </div>
-
-              <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => handleOpenEdit(service)}
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleDelete(service.id)}
-                  className="text-gray-400 hover:text-red-400 transition-colors text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-
-            {/* Inactive Overlay Overlay */}
-            {!service.active && (
-              <div className="absolute inset-0 bg-black/60 pointer-events-none flex items-center justify-center">
-                <span className="bg-charcoal/80 border border-white/10 px-4 py-2 font-sans text-xs uppercase tracking-widest text-red-400">
-                  Inactive
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
+              {uncategorized.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-playfair text-gray-400 border-b border-white/10 pb-2">Uncategorized Services</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {uncategorized.map(service => renderServiceCard(service))}
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       {isModalOpen && (
         <ServiceModal 
           initialData={editingService} 
+          categories={categories}
+          workers={workers}
           onClose={() => setIsModalOpen(false)} 
         />
       )}
     </>
   );
+
+  function renderServiceCard(service: ServiceData) {
+    return (
+      <div key={service.id} className="admin-surface-alt border border-white/5 p-6 flex flex-col relative group">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <span className="text-xs uppercase tracking-widest text-gray-500 mb-1 block">
+              {service.workers?.length || 0} Assig. Staff
+            </span>
+            <h3 className="font-playfair text-xl text-white">{service.name}</h3>
+          </div>
+          
+          <button 
+            onClick={() => handleToggleActive(service.id, service.active)}
+            className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
+              service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+            }`}
+            title={service.active ? "Click to Disable" : "Click to Enable"}
+          />
+        </div>
+
+        <p className="text-gray-400 text-sm font-sans mb-6 flex-grow">
+          {service.description}
+        </p>
+
+        <div className="flex justify-between items-end pt-4 border-t border-white/5">
+          <div>
+            <div className="font-playfair text-lg text-gold">{service.price.toLocaleString()} RWF</div>
+            <div className="font-sans text-xs text-gray-500">{service.duration} mins</div>
+          </div>
+
+          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={() => handleOpenEdit(service)}
+              className="text-gray-400 hover:text-white transition-colors text-sm"
+            >
+              Edit
+            </button>
+            <button 
+              onClick={() => handleDelete(service.id)}
+              className="text-gray-400 hover:text-red-400 transition-colors text-sm"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+
+        {!service.active && (
+          <div className="absolute inset-0 bg-black/60 pointer-events-none flex items-center justify-center">
+            <span className="bg-charcoal/80 border border-white/10 px-4 py-2 font-sans text-xs uppercase tracking-widest text-red-400">
+              Inactive
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
 }
