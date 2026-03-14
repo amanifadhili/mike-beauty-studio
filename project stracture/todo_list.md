@@ -50,14 +50,14 @@ This checklist tracks the precise implementation of the 10-Phase web architectur
 - [x] Develop `/contact` page with Google Maps embed, dynamic opening hours, and contact links
 
 ## Phase 8: Admin Dashboard - Layout & Overview
-- [ ] Create protected `/admin` route layout with professional sidebar navigation
-- [ ] Implement Dashboard Overview page showing quick, real-time metrics
+- [x] Create protected `/admin` route layout with professional sidebar navigation
+- [x] Implement Dashboard Overview page showing quick, real-time metrics
 
 ## Phase 9: Admin Dashboard - Management Modules
-- [ ] Implement Service Management module (Add, Edit, Delete, Disable services)
-- [ ] Build Gallery Manager module (Upload media, assign categories)
-- [ ] Create Booking Requests viewer (Data table with search, filter, and status update)
-- [ ] Add basic Customer Database view
+- [x] Implement Service Management module (Add, Edit, Delete, Disable services)
+- [x] Build Gallery Manager module (Upload media, assign categories)
+- [x] Create Booking Requests viewer (Data table with search, filter, and status update)
+- [x] Add basic Customer Database view
 
 ## Phase 10: Final Polish, Performance, & SEO
 - [ ] Conduct comprehensive animation audit and refine GSAP/Three.js performance to 60fps

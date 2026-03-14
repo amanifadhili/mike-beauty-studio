@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import './globals.css';
 
 const inter = Inter({
@@ -17,6 +14,8 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
+import { ConditionalLayoutUI } from '@/components/layout/ConditionalLayoutUI';
+
 export const metadata: Metadata = {
   title: 'Mike Beauty Studio | Premium Lash Extensions in Kigali',
   description: 'Award-winning beauty studio offering classic, hybrid, volume, and mega volume lash extensions in Kigali, Rwanda.',
@@ -30,12 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} ${playfair.variable} antialiased flex flex-col min-h-screen`}>
-        <Navbar />
-        <main className="flex-grow">
+        <ConditionalLayoutUI>
           {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
+        </ConditionalLayoutUI>
       </body>
     </html>
   );
