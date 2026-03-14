@@ -51,9 +51,25 @@ export function BookingTable({ initialBookings }: { initialBookings: BookingWith
     );
   }
 
+  const StatusSelect = ({ booking }: { booking: BookingWithService }) => (
+    <select
+      value={booking.status}
+      onChange={(e) => handleStatusChange(booking.id, e.target.value)}
+      disabled={isUpdating === booking.id}
+      className="w-full bg-[#1e1e1e] border border-white/10 text-white text-xs uppercase tracking-wider py-2 px-3 rounded-lg focus:outline-none focus:border-gold cursor-pointer disabled:opacity-40 transition-colors hover:border-white/20"
+    >
+      <option value="NEW">New</option>
+      <option value="CONFIRMED">Confirm</option>
+      <option value="COMPLETED">Complete</option>
+      <option value="CANCELLED">Cancel</option>
+    </select>
+  );
+
   return (
     <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
-      <div className="overflow-x-auto">
+
+      {/* ─── Desktop Table (md+) ─── */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full font-sans text-sm text-left whitespace-nowrap">
           <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.05]">
             <tr>
@@ -68,15 +84,11 @@ export function BookingTable({ initialBookings }: { initialBookings: BookingWith
           <tbody className="divide-y divide-white/[0.04]">
             {bookings.map((booking) => (
               <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors">
-
-                {/* Status Badge */}
                 <td className="px-6 py-4">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${STATUS_STYLES[booking.status] || 'border-gray-600/40 text-gray-400 bg-white/5'}`}>
                     {booking.status}
                   </span>
                 </td>
-
-                {/* Client */}
                 <td className="px-6 py-4">
                   <p className="text-white font-medium">{booking.name}</p>
                   <a
@@ -87,20 +99,14 @@ export function BookingTable({ initialBookings }: { initialBookings: BookingWith
                     {booking.phone}
                   </a>
                 </td>
-
-                {/* Service */}
                 <td className="px-6 py-4">
                   <p className="text-gray-300">{booking.service.name}</p>
                   <p className="text-gray-600 text-xs mt-0.5">{booking.service.price.toLocaleString()} RWF</p>
                 </td>
-
-                {/* Date */}
                 <td className="px-6 py-4">
                   <p className="text-gray-300">{new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   <p className="text-gray-600 text-xs mt-0.5">{booking.preferredTime}</p>
                 </td>
-
-                {/* Notes */}
                 <td className="px-6 py-4 max-w-[180px]">
                   {booking.notes ? (
                     <p className="text-gray-500 text-xs truncate" title={booking.notes}>{booking.notes}</p>
@@ -108,26 +114,63 @@ export function BookingTable({ initialBookings }: { initialBookings: BookingWith
                     <span className="text-gray-700 text-xs italic">None</span>
                   )}
                 </td>
-
-                {/* Status Selector */}
                 <td className="px-6 py-4 text-right">
-                  <select
-                    value={booking.status}
-                    onChange={(e) => handleStatusChange(booking.id, e.target.value)}
-                    disabled={isUpdating === booking.id}
-                    className="bg-[#1e1e1e] border border-white/10 text-white text-xs uppercase tracking-wider py-2 px-3 rounded-lg focus:outline-none focus:border-gold cursor-pointer disabled:opacity-40 transition-colors hover:border-white/20"
-                  >
-                    <option value="NEW">New</option>
-                    <option value="CONFIRMED">Confirm</option>
-                    <option value="COMPLETED">Complete</option>
-                    <option value="CANCELLED">Cancel</option>
-                  </select>
+                  <StatusSelect booking={booking} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* ─── Mobile Card Stack (below md) ─── */}
+      <div className="md:hidden divide-y divide-white/[0.05]">
+        {bookings.map((booking) => (
+          <div key={booking.id} className="p-4 space-y-3">
+
+            {/* Top row: Status badge + date */}
+            <div className="flex items-center justify-between">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${STATUS_STYLES[booking.status] || 'border-gray-600/40 text-gray-400 bg-white/5'}`}>
+                {booking.status}
+              </span>
+              <span className="text-gray-600 font-sans text-xs">
+                {new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {booking.preferredTime}
+              </span>
+            </div>
+
+            {/* Client */}
+            <div>
+              <p className="text-white font-sans font-medium text-sm">{booking.name}</p>
+              <a
+                href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`}
+                target="_blank" rel="noreferrer"
+                className="text-gray-600 hover:text-emerald-400 text-xs font-mono transition-colors"
+              >
+                {booking.phone}
+              </a>
+            </div>
+
+            {/* Service */}
+            <div className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+              <p className="text-gray-300 font-sans text-sm">{booking.service.name}</p>
+              <p className="text-gray-500 font-sans text-xs">{booking.service.price.toLocaleString()} RWF</p>
+            </div>
+
+            {/* Notes */}
+            {booking.notes && (
+              <p className="text-gray-500 font-sans text-xs italic border-l-2 border-white/10 pl-3">
+                {booking.notes}
+              </p>
+            )}
+
+            {/* Status Updater */}
+            <div className="pt-1">
+              <StatusSelect booking={booking} />
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }

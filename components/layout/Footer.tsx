@@ -8,7 +8,7 @@ export async function Footer() {
 
   return (
     <footer className="bg-charcoal text-cream pt-16 pb-8 border-t border-[#444]">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-12">
         {/* Brand */}
         <div className="md:col-span-1">
           <Link href="/" className="font-playfair text-3xl tracking-tight block mb-6">

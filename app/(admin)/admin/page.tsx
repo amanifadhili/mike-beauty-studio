@@ -118,17 +118,18 @@ export default async function AdminOverviewPage() {
 
       {/* Recent Activity */}
       <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
+        <div className="px-4 sm:px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
           <div>
             <h2 className="font-playfair text-lg text-white">Recent Bookings</h2>
             <p className="text-gray-600 text-xs font-sans mt-0.5">Latest 5 requests</p>
           </div>
-          <Link href="/admin/bookings" className="text-xs font-sans text-gold hover:text-gold/80 transition-colors tracking-wider uppercase">
+          <Link href="/admin/bookings" className="text-xs font-sans text-gold hover:text-gold/80 transition-colors tracking-wider uppercase shrink-0">
             View All →
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop table (md+) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full font-sans text-sm text-left">
             <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.04]">
               <tr>
@@ -163,6 +164,30 @@ export default async function AdminOverviewPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list (below md) */}
+        <div className="md:hidden divide-y divide-white/[0.05]">
+          {recentActivity && recentActivity.length > 0 ? (
+            recentActivity.map((booking) => (
+              <div key={booking.id} className="px-4 py-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-white font-sans font-medium text-sm">{booking.name}</p>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
+                    {booking.status}
+                  </span>
+                </div>
+                <p className="text-gray-400 font-sans text-xs">{booking.service.name}</p>
+                <p className="text-gray-600 font-sans text-xs">
+                  {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
+                </p>
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-10 text-center text-gray-600 font-sans text-sm">
+              No recent booking activity found.
+            </div>
+          )}
         </div>
       </div>
     </div>

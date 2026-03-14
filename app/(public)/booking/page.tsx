@@ -19,7 +19,7 @@ export default async function BookingPage({
   const preSelectedServiceId = searchParams.service || '';
 
   return (
-    <div className="bg-charcoal min-h-screen pt-32 pb-24 text-cream-white relative z-10">
+    <div className="bg-charcoal min-h-screen pt-24 md:pt-32 pb-24 text-cream-white relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-16">
@@ -34,7 +34,7 @@ export default async function BookingPage({
         <div className="flex flex-col lg:flex-row gap-12 max-w-5xl mx-auto">
           
           {/* Form Column */}
-          <div className="flex-1 bg-[#222222] p-8 md:p-12 border border-white/5">
+          <div className="flex-1 bg-[#222222] p-5 sm:p-8 md:p-12 border border-white/5">
             <BookingForm 
               services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))} 
               preSelectedServiceId={preSelectedServiceId}
@@ -42,7 +42,7 @@ export default async function BookingPage({
           </div>
 
           {/* Info Card Column */}
-          <div className="w-full lg:w-96 space-y-8 lg:mt-0 mt-8">
+          <div className="w-full lg:w-96 space-y-8 order-last lg:order-none">
             <div className="bg-[#1a1a1a] p-8 border border-white/5">
               <h3 className="font-playfair text-2xl text-gold mb-4">Studio Policies</h3>
               <ul className="space-y-4 font-sans text-sm text-gray-300">

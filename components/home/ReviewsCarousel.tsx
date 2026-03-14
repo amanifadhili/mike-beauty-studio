@@ -63,7 +63,7 @@ export function ReviewsCarousel() {
   }, []);
 
   return (
-    <section className="py-32 bg-charcoal overflow-hidden text-cream-white relative pl-4 md:pl-8">
+    <section className="py-16 md:py-32 bg-charcoal overflow-hidden text-cream-white relative pl-4 md:pl-8">
       <div className="max-w-7xl mx-auto mb-16 px-4">
         <SectionHeading 
           title="Client Experiences"
@@ -79,7 +79,7 @@ export function ReviewsCarousel() {
         {[...REVIEWS, ...REVIEWS].map((review, index) => (
           <div 
             key={`${review.id}-${index}`}
-            className="w-[300px] md:w-[400px] shrink-0 mr-8 bg-[#2a2a2a] p-8 border border-white/10"
+            className="w-[260px] sm:w-[300px] md:w-[400px] shrink-0 mr-8 bg-[#2a2a2a] p-8 border border-white/10"
           >
             <div className="flex gap-1 mb-6">
               {[...Array(review.rating)].map((_, i) => (

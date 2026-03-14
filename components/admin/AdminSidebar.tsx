@@ -6,6 +6,8 @@ import { logOut } from '@/app/actions/authActions';
 
 interface AdminSidebarProps {
   userEmail?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const navLinks = [
@@ -57,7 +59,8 @@ const navLinks = [
   },
 ];
 
-export function AdminSidebar({ userEmail }: AdminSidebarProps) {
+/** The inner sidebar panel — shared between desktop (fixed) and mobile (drawer) */
+function SidebarPanel({ userEmail, onClose }: { userEmail?: string; onClose?: () => void }) {
   const pathname = usePathname();
 
   const initials = userEmail
@@ -65,12 +68,12 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
     : 'AD';
 
   return (
-    <aside className="w-64 bg-[#111111] border-r border-white/[0.06] hidden md:flex flex-col fixed top-0 left-0 h-screen z-50">
+    <div className="w-full h-full flex flex-col bg-[#111111]">
 
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-6 border-b border-white/[0.06]">
-        <Link href="/admin" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 bg-gold/10 border border-gold/30 flex items-center justify-center">
+      <div className="h-20 flex items-center px-6 border-b border-white/[0.06] shrink-0">
+        <Link href="/admin" onClick={onClose} className="flex items-center gap-3 group">
+          <div className="w-8 h-8 bg-gold/10 border border-gold/30 flex items-center justify-center shrink-0">
             <svg className="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z"/>
             </svg>
@@ -80,6 +83,19 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
             <span className="font-sans text-[10px] text-gold/70 uppercase tracking-[0.15em]">Admin Studio</span>
           </div>
         </Link>
+
+        {/* Close button — only visible in mobile drawer mode */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close navigation"
+            className="ml-auto md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors text-gray-500 hover:text-white"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -94,18 +110,19 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group font-sans text-sm ${
+              onClick={onClose}
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group font-sans text-sm ${
                 isActive
                   ? 'bg-gold/10 text-gold'
                   : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]'
               }`}
             >
-              <span className={`transition-colors ${isActive ? 'text-gold' : 'text-gray-600 group-hover:text-gray-400'}`}>
+              <span className={`transition-colors shrink-0 ${isActive ? 'text-gold' : 'text-gray-600 group-hover:text-gray-400'}`}>
                 {link.icon}
               </span>
               <span className="tracking-wide">{link.name}</span>
               {isActive && (
-                <span className="ml-auto w-1 h-1 rounded-full bg-gold" />
+                <span className="ml-auto w-1 h-1 rounded-full bg-gold shrink-0" />
               )}
             </Link>
           );
@@ -113,7 +130,7 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
       </nav>
 
       {/* Footer / User Area */}
-      <div className="p-4 border-t border-white/[0.06] space-y-3">
+      <div className="p-4 border-t border-white/[0.06] space-y-3 shrink-0">
         {/* User pill */}
         {userEmail && (
           <div className="flex items-center gap-3 px-3 py-2 bg-white/[0.03] rounded-lg">
@@ -130,7 +147,7 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
         <form action={logOut}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/[0.06] transition-all duration-200 text-sm font-sans group"
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/[0.06] transition-all duration-200 text-sm font-sans group"
           >
             <svg className="w-4 h-4 shrink-0 transition-colors group-hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -139,6 +156,42 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
           </button>
         </form>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export function AdminSidebar({ userEmail, isOpen = false, onClose }: AdminSidebarProps) {
+  return (
+    <>
+      {/* ─── DESKTOP: fixed sidebar (always visible on md+) ─── */}
+      <aside className="w-64 border-r border-white/[0.06] hidden md:block fixed top-0 left-0 h-screen z-50">
+        <SidebarPanel userEmail={userEmail} />
+      </aside>
+
+      {/* ─── MOBILE: off-canvas slide-over drawer ─── */}
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        aria-hidden="true"
+        className={`
+          md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm
+          transition-opacity duration-300
+          ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+        `}
+      />
+
+      {/* Drawer panel */}
+      <aside
+        className={`
+          md:hidden fixed top-0 left-0 h-screen w-72 z-50
+          transform transition-transform duration-300 ease-in-out
+          border-r border-white/[0.06]
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+        aria-label="Mobile navigation"
+      >
+        <SidebarPanel userEmail={userEmail} onClose={onClose} />
+      </aside>
+    </>
   );
 }

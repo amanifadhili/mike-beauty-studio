@@ -121,7 +121,7 @@ export function GalleryUploader({ availableServices }: { availableServices: Serv
   };
 
   return (
-    <div className="bg-[#1a1a1a] border border-white/5 p-8 mb-12 space-y-6">
+    <div className="bg-[#1a1a1a] border border-white/5 p-4 sm:p-8 mb-12 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-playfair text-xl text-white">Upload New Media</h3>
         {successCount > 0 && (
@@ -180,7 +180,7 @@ export function GalleryUploader({ availableServices }: { availableServices: Serv
       {/* Preview Grid */}
       {selectedFiles.length > 0 && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {selectedFiles.map((item, i) => (
               <div key={i} className="relative aspect-square bg-[#2a2a2a] group overflow-hidden">
                 

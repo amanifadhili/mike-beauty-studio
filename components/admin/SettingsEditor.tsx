@@ -76,7 +76,7 @@ export function SettingsEditor({ initialSettings }: { initialSettings: Record<st
               setActiveTab(tab);
               setMessage(null);
             }}
-            className={`text-left px-4 py-3 font-sans text-sm tracking-wide transition-colors border-l-2 ${
+            className={`text-left px-4 py-3.5 font-sans text-sm tracking-wide transition-colors border-l-2 ${
               activeTab === tab 
                 ? 'bg-white/10 text-gold border-gold' 
                 : 'text-gray-400 hover:text-white border-transparent hover:bg-white/5'

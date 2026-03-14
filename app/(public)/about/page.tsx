@@ -13,7 +13,7 @@ export default function AboutPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Hero Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-16 lg:mb-32">
           <div className="relative aspect-[4/5] w-full">
             <Image
               src="https://images.unsplash.com/photo-1512496015851-a1c84277b102?q=80&w=1000&auto=format&fit=crop"
@@ -45,7 +45,7 @@ export default function AboutPage() {
               </p>
             </div>
             
-            <div className="pt-8 flex gap-6">
+            <div className="pt-8 flex flex-wrap gap-4">
               <div className="border-l-2 border-gold pl-6">
                 <span className="block font-playfair text-3xl text-gold mb-1">5+</span>
                 <span className="font-sans text-xs uppercase tracking-widest text-gray-400">Years Mastery</span>
@@ -59,7 +59,7 @@ export default function AboutPage() {
         </div>
 
         {/* Global Standard Section */}
-        <div className="bg-[#1a1a1a] p-12 md:p-24 text-center border top border-white/5 relative">
+        <div className="bg-[#1a1a1a] p-8 sm:p-12 md:p-24 text-center border top border-white/5 relative">
           <SectionHeading 
             title="A Global Standard in Kigali"
             subtitle="We bring international luxury standards to the heart of Rwanda."

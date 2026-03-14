@@ -148,13 +148,13 @@ export function Hero() {
       {/* Content */}
       <div 
         ref={textRef}
-        className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-16"
+        className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-20 sm:mt-16"
       >
         <span className="text-[var(--color-gold)] font-sans tracking-[0.2em] text-sm md:text-base uppercase mb-4 block">
           Award-Winning Beauty Studio
         </span>
         
-        <h1 className="text-white font-playfair text-5xl md:text-7xl lg:text-8xl leading-tight mb-6 drop-shadow-lg">
+        <h1 className="text-white font-playfair text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-tight mb-6 drop-shadow-lg">
           Elevate Your <br/> <span className="italic text-[var(--color-gold)]">Natural Beauty</span>
         </h1>
         
