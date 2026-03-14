@@ -14,10 +14,8 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-import { ConditionalLayoutUI } from '@/components/layout/ConditionalLayoutUI';
-
 export const metadata: Metadata = {
-  metadataBase: new URL('https://mikebeautystudio.com'), // Replace with actual domain later
+  metadataBase: new URL('https://mikebeautystudio.com'),
   title: {
     default: 'Mike Beauty Studio | Premium Lash Extensions in Kigali',
     template: '%s | Mike Beauty Studio',
@@ -46,10 +44,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${playfair.variable} antialiased flex flex-col min-h-screen`}>
-        <ConditionalLayoutUI>
-          {children}
-        </ConditionalLayoutUI>
+      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+        {children}
       </body>
     </html>
   );

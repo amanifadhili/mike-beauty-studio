@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { GalleryClient } from '@/components/gallery/GalleryClient';
 
-const prisma = new PrismaClient();
-
-// Revalidate occasionally if images are added frequently, but static by default
-export const revalidate = 3600;
+// Force dynamic so gallery always reflects the latest uploads
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Portfolio & Gallery | Mike Beauty Studio Kigali',
@@ -13,21 +11,14 @@ export const metadata = {
 };
 
 export default async function GalleryPage() {
-  // Fetch all media of type 'image', including their related service to get the category
   const mediaItems = await prisma.media.findMany({
-    where: {
-      type: 'image',
-    },
+    where: { type: 'image' },
     include: {
       service: {
-        select: {
-          name: true,
-        }
+        select: { name: true }
       }
     },
-    orderBy: {
-      createdAt: 'desc',
-    }
+    orderBy: { createdAt: 'desc' },
   });
 
   return (
