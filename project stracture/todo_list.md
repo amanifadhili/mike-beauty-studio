@@ -60,7 +60,18 @@ This checklist tracks the precise implementation of the 10-Phase web architectur
 - [x] Add basic Customer Database view
 
 ## Phase 10: Final Polish, Performance, & SEO
-- [ ] Conduct comprehensive animation audit and refine GSAP/Three.js performance to 60fps
-- [ ] Run aggressive performance optimization (Next.js Image tuning, lazy loading strategy, CDN checks)
-- [ ] Implement advanced SEO (Dynamic metadata, Open Graph tags, canonical URLs, Local Business JSON-LD schema)
-- [ ] Final Lighthouse QA (Target: 95+ across Performance, Accessibility, and SEO)
+- [x] Conduct comprehensive animation audit and refine GSAP/Three.js performance to 60fps
+- [x] Run aggressive performance optimization (Next.js Image tuning, lazy loading strategy, CDN checks)
+- [x] Implement advanced SEO (Dynamic metadata, Open Graph tags, canonical URLs, Local Business JSON-LD schema)
+- [x] Final Lighthouse QA (Target: 95+ across Performance, Accessibility, and SEO)
+
+## Phase 11: Admin Authentication & Security
+- [x] Configure Auth framework (NextAuth v5 / Auth.js)
+- [x] Build `/login` page with secure credentials form
+- [x] Implement Next.js Middleware to protect `/admin` routes
+- [x] Create server action to securely seed the initial Admin user
+
+## Phase 12: Advanced Admin Settings
+- [x] Introduce generic `AppConfig` Prisma model or JSON store for global site settings.
+- [x] Build `/admin/settings` UI with tabs for General, Booking Preferences, and SEO overrrides.
+- [x] Implement Server Actions to dynamically update business logic (e.g. Opening hours, WhatsApp numbers).

@@ -2,8 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { logOut } from '@/app/actions/authActions';
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  userEmail?: string;
+}
+
+export function AdminSidebar({ userEmail }: AdminSidebarProps) {
   const pathname = usePathname();
 
   const links = [
@@ -11,6 +16,7 @@ export function AdminSidebar() {
     { name: 'Bookings', href: '/admin/bookings' },
     { name: 'Services', href: '/admin/services' },
     { name: 'Gallery', href: '/admin/gallery' },
+    { name: 'Settings', href: '/admin/settings' },
   ];
 
   return (
@@ -46,16 +52,23 @@ export function AdminSidebar() {
       </nav>
 
       {/* Logout / Footer Actions */}
-      <div className="p-4 border-t border-white/10">
-        <button 
-          onClick={() => window.location.href = '/'}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:border-white transition-colors text-sm font-sans tracking-wide"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Exit to Website
-        </button>
+      <div className="p-4 border-t border-white/10 space-y-4">
+        {userEmail && (
+          <div className="text-white/50 text-xs font-sans truncate px-2 text-center">
+            {userEmail}
+          </div>
+        )}
+        <form action={logOut}>
+          <button 
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:border-white hover:bg-white/5 transition-colors text-sm font-sans tracking-wide"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        </form>
       </div>
 
     </aside>

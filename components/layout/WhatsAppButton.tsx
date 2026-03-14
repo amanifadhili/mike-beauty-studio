@@ -1,9 +1,10 @@
-'use client';
-
 import React from 'react';
+import { getSettings } from '@/lib/settings';
 
-export function WhatsAppButton() {
-  const phoneNumber = '250788000000'; // Replace with actual WhatsApp number
+export async function WhatsAppButton() {
+  const settings = await getSettings();
+  const rawPhoneNumber = settings['WHATSAPP_NUMBER'] || '+250788000000';
+  const phoneNumber = rawPhoneNumber.replace(/\D/g, ''); // Ensure only numbers for wa.me link
   const message = encodeURIComponent('Hello Mike Beauty Studio, I would like to book an appointment.');
   
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;

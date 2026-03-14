@@ -1,13 +1,33 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding ...');
 
-  // Clear existing services to avoid duplicates during seeding re-runs
+  // Clear existing data
   await prisma.media.deleteMany();
   await prisma.service.deleteMany();
+  // Don't delete users automatically, but if we need to reset we could. Instead we'll upsert.
+
+  // 1. Seed Secure Admin User
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@mikebeautystudio.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Password123!';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      name: 'Studio Admin',
+      password: hashedPassword,
+      role: 'ADMIN'
+    }
+  });
+
+  console.log(`Created/Ensured Admin user: ${admin.email}`);
 
   // Create Services with nested Media (High quality lash placeholder images from Unsplash)
   const servicesData = [

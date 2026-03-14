@@ -17,8 +17,19 @@ export async function generateMetadata({ params }: Props) {
   }
 
   return {
-    title: `${service.name} | Mike Beauty Studio Kigali`,
+    title: `${service.name} | Premium Lash Extensions`,
     description: service.description,
+    openGraph: {
+      title: `${service.name} at Mike Beauty Studio`,
+      description: service.description,
+      type: 'article', // Using article for specific services
+      url: `https://mikebeautystudio.com/services/${service.id}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${service.name} | Mike Beauty Studio`,
+      description: service.description,
+    }
   };
 }
 

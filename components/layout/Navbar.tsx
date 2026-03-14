@@ -59,8 +59,12 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu Button - simple for now */}
-        <button className={`md:hidden ${textColor}`}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button 
+          className={`md:hidden ${textColor}`}
+          aria-label="Open mobile menu"
+          aria-expanded="false"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>

@@ -75,12 +75,14 @@ export function GalleryClient({ items }: GalleryClientProps) {
               }}
             >
               {/* Note: since we use unsplash random URLs, sizes are arbitrary, fitting masonry perfectly */}
-              <div className="w-full relative bg-[#2a2a2a]">
-                <img 
+              <div className="w-full relative bg-[#2a2a2a] aspect-[3/4]">
+                <Image 
                   src={item.url} 
                   alt={item.service?.name || 'Uncategorized'} 
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority={localIndex < 4} // Load first 4 images immediately for LCP
                 />
               </div>
 

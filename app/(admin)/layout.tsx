@@ -1,4 +1,5 @@
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { auth } from '@/auth';
 
 export const metadata = {
   title: 'Admin Dashboard | Mike Beauty Studio',
@@ -8,11 +9,13 @@ export const metadata = {
   },
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  const userEmail = session?.user?.email || undefined;
   return (
     <div className="bg-charcoal min-h-screen text-cream-white relative flex">
       {/* 
@@ -23,7 +26,7 @@ export default function AdminLayout({
       */}
       
       {/* Desktop Sidebar */}
-      <AdminSidebar />
+      <AdminSidebar userEmail={userEmail} />
 
       {/* Main Content Area */}
       <main className="flex-1 md:pl-64 h-screen overflow-y-auto">

@@ -1,7 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
+import { getSettings } from '@/lib/settings';
 
-export function Footer() {
+export async function Footer() {
+  const settings = await getSettings();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -13,7 +15,7 @@ export function Footer() {
             Mike Beauty Studio
           </Link>
           <p className="font-sans text-sm text-gray-400 max-w-xs leading-relaxed">
-            Premium lash extensions and luxury beauty services in the heart of Kigali. Experience elegance and precision.
+            {settings['SEO_DESCRIPTION'] || 'Premium lash extensions and luxury beauty services in the heart of Kigali. Experience elegance and precision.'}
           </p>
         </div>
 
@@ -38,13 +40,16 @@ export function Footer() {
         <div>
           <h4 className="font-sans tracking-widest text-gold text-sm uppercase mb-6">Visit Us</h4>
           <address className="not-italic font-sans text-sm text-gray-400 space-y-4">
-            <p>123 Beauty Lane, KN 5 Rd.</p>
-            <p>Kigali, Rwanda</p>
+            <p className="whitespace-pre-line">{settings['STUDIO_ADDRESS'] || '123 Beauty Lane, KN 5 Rd.\nKigali, Rwanda'}</p>
             <p>
-              <a href="tel:+250788000000" className="hover:text-white transition-colors">+250 788 000 000</a>
+              <a href={`tel:${settings['PHONE_NUMBER'] || '+250788000000'}`} className="hover:text-white transition-colors" aria-label="Call Mike Beauty Studio">
+                {settings['PHONE_NUMBER'] || '+250 788 000 000'}
+              </a>
             </p>
             <p>
-              <a href="mailto:hello@mikebeautystudio.rw" className="hover:text-white transition-colors">hello@mikebeautystudio.rw</a>
+              <a href={`mailto:${settings['CONTACT_EMAIL'] || 'hello@mikebeautystudio.rw'}`} className="hover:text-white transition-colors" aria-label="Email Mike Beauty Studio">
+                {settings['CONTACT_EMAIL'] || 'hello@mikebeautystudio.rw'}
+              </a>
             </p>
           </address>
         </div>
@@ -55,11 +60,11 @@ export function Footer() {
           <ul className="font-sans text-sm text-gray-400 space-y-4">
             <li className="flex justify-between">
               <span>Mon - Fri</span>
-              <span>9:00 AM - 7:00 PM</span>
+              <span>{settings['HOURS_WEEKDAY'] || '9:00 AM - 7:00 PM'}</span>
             </li>
             <li className="flex justify-between">
               <span>Saturday</span>
-              <span>10:00 AM - 6:00 PM</span>
+              <span>{settings['HOURS_WEEKEND'] || '10:00 AM - 6:00 PM'}</span>
             </li>
             <li className="flex justify-between text-gray-500">
               <span>Sunday</span>

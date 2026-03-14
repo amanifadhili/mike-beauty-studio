@@ -69,3 +69,9 @@ model Review {
   createdAt DateTime @default(now())
 }
 
+model AppSetting {
+  key       String   @id // e.g., "WHATSAPP_NUMBER", "STUDIO_ADDRESS"
+  value     String
+  category  String   // 'GENERAL', 'BOOKING', 'SOCIAL'
+  updatedAt DateTime @updatedAt
+}
