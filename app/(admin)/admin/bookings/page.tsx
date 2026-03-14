@@ -25,6 +25,12 @@ export default async function AdminBookingsPage() {
     }
   });
 
+  // Fetch active workers for the conversion modal
+  const workers = await prisma.worker.findMany({
+    where: { status: 'ACTIVE' },
+    include: { user: { select: { name: true } } }
+  });
+
   return (
     <div className="animate-fade-in-up space-y-6">
       
@@ -40,7 +46,7 @@ export default async function AdminBookingsPage() {
         </div>
       </div>
 
-      <BookingTable initialBookings={bookings} />
+      <BookingTable initialBookings={bookings} workers={workers} />
       
     </div>
   );

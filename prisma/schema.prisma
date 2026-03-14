@@ -15,34 +15,56 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("ADMIN") // For future RBAC
+  role      String   @default("ADMIN") // For future RBAC: ADMIN, WORKER
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  workerProfile Worker?
+  auditLogs     AuditLog[]
+}
+
+model Worker {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  phone          String?
+  roleTitle      String // e.g., "Lash Technician", "Receptionist"
+  commissionType String   @default("PERCENTAGE") // "PERCENTAGE" or "FIXED"
+  commissionRate Int      @default(0) // Percentage (e.g., 40 for 40%) or Fixed amount in lowest currency unit
+  status         String   @default("ACTIVE") // "ACTIVE", "INACTIVE"
+  balance        Int      @default(0) // Unpaid earnings balance in lowest currency unit
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  payments     WorkerPayment[]
+  advances     WorkerAdvance[]
 }
 
 model Service {
   id          String   @id @default(uuid())
   name        String
-  price       Int      // Storing in smallest currency unit (e.g. RWF)
+  price       Int // Storing in smallest currency unit (e.g. RWF)
   description String
-  duration    String   // e.g. "2 hours"
+  duration    String // e.g. "2 hours"
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  medias    Media[]
-  bookings  Booking[]
+  medias       Media[]
+  bookings     Booking[]
+  transactions Transaction[]
 }
 
 model Media {
   id        String   @id @default(uuid())
   url       String
-  type      String   // "image" or "video"
-  category  String?  // Optional category e.g. "Classic", "Volume"
+  type      String // "image" or "video"
+  category  String? // Optional category e.g. "Classic", "Volume"
   serviceId String?
   createdAt DateTime @default(now())
 
-  service   Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 }
 
 model Booking {
@@ -52,18 +74,98 @@ model Booking {
   preferredDate DateTime
   preferredTime String
   notes         String?
-  status        String   @default("NEW") // "NEW", "CONTACTED", "SCHEDULED", "COMPLETED", "CANCELLED"
+  status        String   @default("NEW") // "NEW", "CONTACTED", "SCHEDULED", "COMPLETED", "CANCELLED", "CONVERTED"
   serviceId     String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  transactions Transaction[] // A booking can result in a transaction
+}
+
+model Transaction {
+  id               String   @id @default(uuid())
+  clientName       String
+  clientPhone      String?
+  serviceId        String
+  workerId         String
+  bookingId        String? // Optional: Null if it's a walk-in
+  price            Int // Actual price charged
+  workerCommission Int // Calculated block for the worker
+  salonShare       Int // Calculated block for the salon
+  paymentMethod    String // "CASH", "MOBILE_MONEY", "BANK_TRANSFER", "CREDIT"
+  source           String // "BOOKING", "WALK_IN"
+  date             DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  service Service        @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  worker  Worker         @relation(fields: [workerId], references: [id], onDelete: Restrict)
+  booking Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  credits ClientCredit[]
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Int
+  category  String // "RENT", "SUPPLIES", "MAINTENANCE", "UTILITIES", "WORKER_PAYOUT", "OTHER"
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkerPayment {
+  id        String   @id @default(uuid())
+  workerId  String
+  amount    Int // Total amount paid out
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+}
+
+model WorkerAdvance {
+  id        String   @id @default(uuid())
+  workerId  String
+  amount    Int
+  date      DateTime @default(now())
+  status    String   @default("PENDING") // "PENDING", "DEDUCTED"
+  createdAt DateTime @default(now())
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+}
+
+model ClientCredit {
+  id             String   @id @default(uuid())
+  transactionId  String
+  clientName     String
+  clientPhone    String?
+  originalAmount Int
+  paidAmount     Int      @default(0)
+  status         String   @default("PENDING") // "PENDING", "CLEARED"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String // The admin/user who performed the action
+  action     String // e.g. "CREATE_TRANSACTION", "UPDATE_EXPENSE", "PAY_WORKER"
+  targetId   String? // ID of the record that was modified
+  targetType String? // e.g. "Transaction", "Expense"
+  details    String // JSON stringified details of the change
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
 }
 
 model Review {
   id        String   @id @default(uuid())
   name      String
-  rating    Int      // 1-5
+  rating    Int // 1-5
   comment   String
   approved  Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -72,6 +174,6 @@ model Review {
 model AppSetting {
   key       String   @id // e.g., "WHATSAPP_NUMBER", "STUDIO_ADDRESS"
   value     String
-  category  String   // 'GENERAL', 'BOOKING', 'SOCIAL'
+  category  String // 'GENERAL', 'BOOKING', 'SOCIAL'
   updatedAt DateTime @updatedAt
 }

@@ -51,11 +51,20 @@ async function main() {
 
   // ── 0. Clear existing data (order matters due to FK constraints) ──────────
   console.log('  ↳ Clearing existing records...');
+  await prisma.auditLog.deleteMany();
+  await prisma.clientCredit.deleteMany();
+  await prisma.workerAdvance.deleteMany();
+  await prisma.workerPayment.deleteMany();
+  await prisma.transaction.deleteMany();
+  await prisma.expense.deleteMany();
+  
   await prisma.appSetting.deleteMany();
   await prisma.review.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.media.deleteMany();
   await prisma.service.deleteMany();
+  await prisma.worker.deleteMany();
+  await prisma.user.deleteMany();
 
   // ── 1. Admin User ──────────────────────────────────────────────────────────
   const adminEmail    = process.env.ADMIN_EMAIL    || 'admin@mikebeautystudio.com';
@@ -192,8 +201,27 @@ async function main() {
   await prisma.media.createMany({ data: galleryMedia });
   console.log(`    ✔ ${galleryMedia.length} gallery items created`);
 
-  // ── 4. Bookings ──────────────────────────────────────────────────────────
-  console.log('  ↳ Creating booking requests...');
+  // ── 7. Workers ─────────────────────────────────────────────────────────────
+  console.log('  ↳ Creating workers...');
+  
+  const worker1User = await prisma.user.create({
+    data: { email: 'sarah@mikebeautystudio.com', name: 'Sarah', password: hashedPassword, role: 'WORKER' }
+  });
+  const worker1 = await prisma.worker.create({
+    data: { userId: worker1User.id, phone: '+250788111222', roleTitle: 'Lash Technician', commissionType: 'PERCENTAGE', commissionRate: 40, balance: 120000 }
+  });
+
+  const worker2User = await prisma.user.create({
+    data: { email: 'anna@mikebeautystudio.com', name: 'Anna', password: hashedPassword, role: 'WORKER' }
+  });
+  const worker2 = await prisma.worker.create({
+    data: { userId: worker2User.id, phone: '+250788333444', roleTitle: 'Lash Technician', commissionType: 'FIXED', commissionRate: 15000, balance: 50000 }
+  });
+  
+  console.log(`    ✔ 2 Workers created (Sarah, Anna)`);
+
+  // ── 4. Bookings & Transactions ──────────────────────────────────────────
+  console.log('  ↳ Creating booking requests and transactions...');
   const classicId  = classicService.id;
   const hybridId   = hybridService.id;
   const volumeId   = volumeService.id;
@@ -217,18 +245,6 @@ async function main() {
       serviceId: hybridId, status: 'NEW',
       notes: null,
     },
-    {
-      name: 'Claudette Mukamana', phone: '+250789345678',
-      preferredDate: daysFromNow(7),  preferredTime: '11:00 AM',
-      serviceId: megaId, status: 'NEW',
-      notes: 'I have sensitive eyes. Please let me know what products you use.',
-    },
-    {
-      name: 'Sandrine Ingabire', phone: '+250738456789',
-      preferredDate: daysFromNow(2),  preferredTime: '09:00 AM',
-      serviceId: browId, status: 'NEW',
-      notes: null,
-    },
     // Confirmed appointments
     {
       name: 'Diane Kaneza', phone: '+250722111222',
@@ -236,35 +252,11 @@ async function main() {
       serviceId: volumeId, status: 'CONFIRMED',
       notes: 'Confirmed via WhatsApp. She is bridal party prep.',
     },
-    {
-      name: 'Yvonne Habimana', phone: '+250788333444',
-      preferredDate: daysFromNow(4),  preferredTime: '01:00 PM',
-      serviceId: makeupId, status: 'CONFIRMED',
-      notes: 'Wedding on Saturday. Bridal trial confirmed for today.',
-    },
-    {
-      name: 'Patricia Murebwayire', phone: '+250728555666',
-      preferredDate: daysFromNow(6),  preferredTime: '10:30 AM',
-      serviceId: refillId, status: 'CONFIRMED',
-      notes: '3-week refill. Previous set was Hybrid.',
-    },
-    // Completed bookings (past)
+    // Completed/Converted booking
     {
       name: 'Jacqueline Nzeyimana', phone: '+250784777888',
       preferredDate: daysFromNow(-3), preferredTime: '11:00 AM',
-      serviceId: classicId, status: 'COMPLETED',
-      notes: null,
-    },
-    {
-      name: 'Flavia Uwimana', phone: '+250788999000',
-      preferredDate: daysFromNow(-7), preferredTime: '02:30 PM',
-      serviceId: megaId, status: 'COMPLETED',
-      notes: 'Client loved the result. Booked next refill.',
-    },
-    {
-      name: 'Esperance Ishimwe', phone: '+250722100200',
-      preferredDate: daysFromNow(-5), preferredTime: '10:00 AM',
-      serviceId: browId, status: 'COMPLETED',
+      serviceId: classicId, status: 'CONVERTED',
       notes: null,
     },
     // Cancelled booking
@@ -277,9 +269,79 @@ async function main() {
   ];
 
   for (const booking of bookings) {
-    await prisma.booking.create({ data: booking });
+    const b = await prisma.booking.create({ data: booking });
+    
+    // If it's converted, create a historical transaction for it.
+    if (b.status === 'CONVERTED') {
+       await prisma.transaction.create({
+         data: {
+           clientName: b.name,
+           clientPhone: b.phone,
+           serviceId: b.serviceId,
+           workerId: worker1.id,
+           bookingId: b.id,
+           price: 35000,
+           workerCommission: 14000,
+           salonShare: 21000,
+           paymentMethod: 'CASH',
+           source: 'BOOKING',
+           date: b.preferredDate
+         }
+       })
+    }
   }
-  console.log(`    ✔ ${bookings.length} bookings created (4 NEW, 3 CONFIRMED, 3 COMPLETED, 1 CANCELLED)`);
+
+  // Add some walk-in transactions
+  await prisma.transaction.create({
+     data: {
+       clientName: 'Walk-In Client 1',
+       serviceId: hybridId,
+       workerId: worker2.id,
+       price: 47000,
+       workerCommission: 15000, // Fixed
+       salonShare: 32000,
+       paymentMethod: 'MOBILE_MONEY',
+       source: 'WALK_IN',
+       date: daysFromNow(-1)
+     }
+  });
+
+  await prisma.transaction.create({
+     data: {
+       clientName: 'Walk-In Client 2',
+       serviceId: megaId,
+       workerId: worker1.id,
+       price: 68000,
+       workerCommission: 27200, // 40%
+       salonShare: 40800,
+       paymentMethod: 'BANK_TRANSFER',
+       source: 'WALK_IN',
+       date: daysFromNow(-2)
+     }
+  });
+
+  console.log(`    ✔ Bookings and Transactions generated.`);
+
+  // ── 8. Financials (Expenses, Advances, etc.) ──────────────────────────────────────────
+  console.log('  ↳ Creating financials (Expenses, Advances)...');
+  
+  await prisma.expense.createMany({
+    data: [
+      { title: 'Lash Supplies (Glue, Tape)', amount: 45000, category: 'SUPPLIES', date: daysFromNow(-4) },
+      { title: 'Internet Bill', amount: 30000, category: 'UTILITIES', date: daysFromNow(-10) },
+      { title: 'Rent (Partial)', amount: 200000, category: 'RENT', date: daysFromNow(-15) }
+    ]
+  });
+
+  await prisma.workerAdvance.create({
+    data: { workerId: worker1.id, amount: 20000, status: 'PENDING', date: daysFromNow(-2) }
+  });
+
+  await prisma.workerPayment.create({
+    data: { workerId: worker2.id, amount: 100000, date: daysFromNow(-7) }
+  });
+
+  console.log(`    ✔ Financials generated.`);
 
   // ── 5. Reviews ──────────────────────────────────────────────────────────
   console.log('  ↳ Creating reviews...');
