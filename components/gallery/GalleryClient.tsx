@@ -57,8 +57,8 @@ export function GalleryClient({ items }: GalleryClientProps) {
       </div>
 
       {/* Masonry Layout using Framer Motion for Layout animations */}
-      {/* Native CSS Masonry: columns-1 to columns-3 depending on breakpoint */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+      {/* Native CSS Masonry: columns-2 on mobile to columns-4 depending on breakpoint */}
+      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
         <AnimatePresence>
           {filteredItems.map((item, localIndex) => (
             <motion.div
@@ -74,13 +74,13 @@ export function GalleryClient({ items }: GalleryClientProps) {
                 setLightboxIndex(localIndex);
               }}
             >
-              {/* Note: since we use unsplash random URLs, sizes are arbitrary, fitting masonry perfectly */}
-              <div className="w-full relative bg-[#2a2a2a] aspect-[3/4]">
+              {/* Using aspect-[4/5] on mobile to prevent extreme height, and [3/4] on larger screens */}
+              <div className="w-full relative bg-[#2a2a2a] aspect-[4/5] md:aspect-[3/4]">
                 <Image 
                   src={item.url} 
                   alt={item.service?.name || 'Uncategorized'} 
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                   priority={localIndex < 4} // Load first 4 images immediately for LCP
                 />

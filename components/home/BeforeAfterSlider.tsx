@@ -43,7 +43,7 @@ export function BeforeAfterSlider() {
   }, [isDragging]);
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-12 md:py-20 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <SectionHeading 
@@ -52,10 +52,10 @@ export function BeforeAfterSlider() {
           alignment="center"
         />
 
-        <div className="mt-16 flex justify-center">
+        <div className="mt-10 md:mt-16 flex justify-center">
           <div 
             ref={containerRef}
-            className="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/9] overflow-hidden bg-gray-100 select-none cursor-ew-resize border border-[#eaeaea]"
+            className="relative w-full max-w-4xl aspect-[3/2] md:aspect-[16/9] overflow-hidden bg-gray-100 select-none cursor-ew-resize border border-[#eaeaea]"
             onMouseDown={(e) => {
               setIsDragging(true);
               handleMove(e.clientX);
