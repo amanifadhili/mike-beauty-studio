@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { SectionHeading } from '@/components/ui/SectionHeading';
 import { GalleryUploader } from '@/components/admin/GalleryUploader';
 import { deleteGalleryMedia } from '@/app/actions/adminGallery';
 import Image from 'next/image';
@@ -30,17 +29,24 @@ export default async function AdminGalleryPage() {
   });
 
   return (
-    <div className="animate-fade-in-up space-y-8">
+    <div className="animate-fade-in-up space-y-6">
       
-      <SectionHeading 
-        title="Gallery Manager"
-        subtitle="Upload images and videos directly from your device to your public portfolio."
-      />
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-[11px] font-sans uppercase tracking-[0.2em] text-gold/70 mb-1">Admin Dashboard</p>
+          <h1 className="font-playfair text-3xl text-white">Gallery Manager</h1>
+          <p className="text-gray-600 text-sm font-sans mt-1">Upload images and videos directly from your device to your public portfolio.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-[#161616] border border-white/[0.06] px-4 py-2 rounded-lg">
+          <span className="text-gray-600 font-sans text-xs">Total</span>
+          <span className="text-white font-semibold font-sans">{media.length}</span>
+        </div>
+      </div>
 
       <GalleryUploader availableServices={services} />
 
       <div>
-        <h3 className="font-playfair text-2xl text-white mb-6">Current Portfolio ({media.length})</h3>
+        <h2 className="font-playfair text-xl text-white mb-4">Current Portfolio</h2>
         
         {media.length === 0 ? (
           <div className="bg-[#1a1a1a] border border-white/5 p-12 text-center text-gray-500 font-sans">

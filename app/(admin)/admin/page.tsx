@@ -1,12 +1,15 @@
 import { getDashboardMetrics } from '@/app/actions/admin';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import Link from 'next/link';
 
 export default async function AdminOverviewPage() {
   const result = await getDashboardMetrics();
 
   if (!result.success || !result.metrics) {
     return (
-      <div className="text-red-400 p-8">
+      <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-lg font-sans text-sm">
+        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
         Failed to load dashboard metrics. {result.error}
       </div>
     );
@@ -14,69 +17,138 @@ export default async function AdminOverviewPage() {
 
   const { metrics, recentActivity } = result;
 
+  const statCards = [
+    {
+      label: 'New Bookings',
+      value: metrics.newBookings,
+      href: '/admin/bookings',
+      color: 'text-amber-400',
+      glow: 'before:bg-amber-400/10',
+      border: 'border-amber-500/10',
+      icon: (
+        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      label: 'Active Services',
+      value: metrics.activeServices,
+      href: '/admin/services',
+      color: 'text-gold',
+      glow: 'before:bg-gold/10',
+      border: 'border-gold/10',
+      icon: (
+        <svg className="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      ),
+    },
+    {
+      label: 'System Status',
+      value: null,
+      statusText: 'Live',
+      href: null,
+      color: 'text-green-400',
+      glow: 'before:bg-green-400/10',
+      border: 'border-green-500/10',
+      icon: (
+        <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+  ];
+
+  const statusColors: Record<string, string> = {
+    NEW: 'border-amber-500/40 text-amber-400 bg-amber-500/[0.08]',
+    CONFIRMED: 'border-blue-500/40 text-blue-400 bg-blue-500/[0.08]',
+    COMPLETED: 'border-green-500/40 text-green-400 bg-green-500/[0.08]',
+    CANCELLED: 'border-red-500/40 text-red-400 bg-red-500/[0.08]',
+  };
+
   return (
-    <div className="space-y-12 animate-fade-in-up">
-      <SectionHeading 
-        title="Dashboard Overview"
-        subtitle="Current vital statistics and recent booking activity."
-      />
+    <div className="space-y-8 animate-fade-in-up">
 
-      {/* Top Level Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div className="bg-[#1a1a1a] border border-white/5 p-8 flex flex-col gap-4">
-          <span className="font-sans text-gray-400 text-sm tracking-wider uppercase">New Booking Requests</span>
-          <span className="font-playfair text-5xl text-gold">{metrics.newBookings}</span>
+      {/* Page Header */}
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-[11px] font-sans uppercase tracking-[0.2em] text-gold/70 mb-1">Admin Dashboard</p>
+          <h1 className="font-playfair text-3xl text-white">Overview</h1>
         </div>
-
-        <div className="bg-[#1a1a1a] border border-white/5 p-8 flex flex-col gap-4">
-          <span className="font-sans text-gray-400 text-sm tracking-wider uppercase">Active Services</span>
-          <span className="font-playfair text-5xl text-white">{metrics.activeServices}</span>
-        </div>
-
-        <div className="bg-[#1a1a1a] border border-white/5 p-8 flex flex-col gap-4">
-          <span className="font-sans text-gray-400 text-sm tracking-wider uppercase">Platform Status</span>
-          <span className="font-playfair text-xl text-green-400 mt-auto">Online & Running</span>
-        </div>
-
+        <p className="text-gray-600 font-sans text-xs">
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        </p>
       </div>
 
-      {/* Recent Activity Table View */}
-      <div className="bg-[#1a1a1a] border border-white/5 mt-12">
-        <div className="p-6 border-b border-white/5 flex justify-between items-center">
-          <h3 className="font-playfair text-xl text-white">Recent Activity</h3>
-          <span className="text-xs uppercase tracking-widest text-gold font-sans">Latest 5</span>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {statCards.map((card) => {
+          const inner = (
+            <div className={`relative bg-[#161616] border ${card.border} p-6 rounded-xl overflow-hidden group transition-all duration-300 hover:border-white/10`}>
+              {/* Subtle glow blob */}
+              <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-60 transition-opacity group-hover:opacity-100 ${card.glow.replace('before:', '')}`} />
+              
+              <div className="relative">
+                <div className={`flex items-center gap-2 mb-4`}>
+                  <div className="p-2 bg-white/[0.04] rounded-lg">{card.icon}</div>
+                  <span className="text-gray-500 text-xs font-sans uppercase tracking-widest">{card.label}</span>
+                </div>
+                {card.value !== null ? (
+                  <p className={`font-playfair text-5xl ${card.color} leading-none`}>{card.value}</p>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <p className={`font-playfair text-2xl ${card.color}`}>{card.statusText}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+
+          return card.href ? (
+            <Link key={card.label} href={card.href} className="block">
+              {inner}
+            </Link>
+          ) : (
+            <div key={card.label}>{inner}</div>
+          );
+        })}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
+          <div>
+            <h2 className="font-playfair text-lg text-white">Recent Bookings</h2>
+            <p className="text-gray-600 text-xs font-sans mt-0.5">Latest 5 requests</p>
+          </div>
+          <Link href="/admin/bookings" className="text-xs font-sans text-gold hover:text-gold/80 transition-colors tracking-wider uppercase">
+            View All →
+          </Link>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full font-sans text-sm text-left">
-            <thead className="text-xs text-gray-400 uppercase bg-[#222222]">
+            <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.04]">
               <tr>
-                <th scope="col" className="px-6 py-4">Client Name</th>
-                <th scope="col" className="px-6 py-4">Service</th>
-                <th scope="col" className="px-6 py-4">Requested Date</th>
-                <th scope="col" className="px-6 py-4">Status</th>
+                <th className="px-6 py-3">Client</th>
+                <th className="px-6 py-3">Service</th>
+                <th className="px-6 py-3">Date</th>
+                <th className="px-6 py-3">Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/[0.04]">
               {recentActivity && recentActivity.length > 0 ? (
                 recentActivity.map((booking) => (
-                  <tr key={booking.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-white">
-                      {booking.name}
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">
-                      {booking.service.name}
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">
-                      {new Date(booking.preferredDate).toLocaleDateString()} @ {booking.preferredTime}
+                  <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-6 py-4 text-white font-medium">{booking.name}</td>
+                    <td className="px-6 py-4 text-gray-400">{booking.service.name}</td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 text-xs uppercase tracking-widest rounded-full border ${
-                        booking.status === 'NEW' ? 'border-amber-500/50 text-amber-500 bg-amber-500/10' :
-                        booking.status === 'COMPLETED' ? 'border-green-500/50 text-green-500 bg-green-500/10' :
-                        'border-blue-500/50 text-blue-500 bg-blue-500/10'
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
                         {booking.status}
                       </span>
                     </td>
@@ -84,7 +156,7 @@ export default async function AdminOverviewPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-12 text-center text-gray-600 font-sans">
                     No recent booking activity found.
                   </td>
                 </tr>
@@ -93,7 +165,6 @@ export default async function AdminOverviewPage() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }

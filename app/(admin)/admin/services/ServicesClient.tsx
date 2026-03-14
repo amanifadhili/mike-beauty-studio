@@ -47,16 +47,20 @@ export function ServicesDashboardClient({ initialServices }: { initialServices: 
 
   return (
     <>
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex items-end justify-between mb-8">
         <div>
-          <h2 className="font-playfair text-3xl text-gold mb-2">Service Catalog</h2>
-          <p className="font-sans text-gray-400">Manage pricing, duration, and availability.</p>
+          <p className="text-[11px] font-sans uppercase tracking-[0.2em] text-gold/70 mb-1">Admin Dashboard</p>
+          <h1 className="font-playfair text-3xl text-white">Service Catalog</h1>
+          <p className="text-gray-600 text-sm font-sans mt-1">Manage pricing, duration, and availability of your treatments.</p>
         </div>
         <button 
           onClick={handleOpenNew}
-          className="bg-gold text-charcoal px-6 py-3 font-sans text-sm tracking-wide hover:bg-[#c9a633] transition-colors"
+          className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2.5 rounded-lg font-sans text-sm tracking-wide hover:bg-[#c9a633] transition-colors"
         >
-          + Add Service
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Service
         </button>
       </div>
 
