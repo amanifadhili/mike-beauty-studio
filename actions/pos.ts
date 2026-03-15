@@ -44,13 +44,30 @@ export async function createPOSTransaction(data: {
         }
       });
 
-      // 3b. Update Worker Balance
+      // 3c. Update Worker Balance
       await tx.worker.update({
         where: { id: worker.id },
         data: {
           balance: { increment: workerCut }
         }
       });
+
+      // 3d. Auto-generate Client Credit IOU if payment method is CREDIT
+      if (data.paymentMethod === 'CREDIT') {
+        if (!data.clientPhone && !data.clientName) {
+           throw new Error("Client name is required to extend a line of credit.");
+        }
+        await tx.clientCredit.create({
+          data: {
+            clientName: data.clientName,
+            clientPhone: data.clientPhone || null,
+            transactionId: transaction.id,
+            originalAmount: transaction.price,
+            paidAmount: 0,
+            status: 'PENDING'
+          }
+        });
+      }
 
       return transaction;
     });

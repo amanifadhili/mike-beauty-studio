@@ -62,6 +62,20 @@ export async function convertBookingToTransaction(data: {
         }
       });
 
+      // 3d. Auto-generate Client Credit IOU if payment method is CREDIT
+      if (data.paymentMethod === 'CREDIT') {
+        await tx.clientCredit.create({
+          data: {
+            clientName: booking.name,
+            clientPhone: booking.phone || null,
+            transactionId: transaction.id,
+            originalAmount: transaction.price,
+            paidAmount: 0,
+            status: 'PENDING'
+          }
+        });
+      }
+
       return transaction;
     });
 
