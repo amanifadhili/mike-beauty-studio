@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionButton } from '@/components/ui';
+import { ActionButton, DataTable } from '@/components/ui';
 import { POSModal } from '@/components/admin/POSModal';
 import { useRouter } from 'next/navigation';
 
@@ -24,46 +24,49 @@ export default function POSClient({ services, staff, recentTransactions }: { ser
         <ActionButton onClick={() => setIsModalOpen(true)}>+ New Sale</ActionButton>
       </div>
 
-      <div className="admin-card overflow-hidden">
-        {recentTransactions.length === 0 ? (
-          <div className="p-12 text-center font-sans text-sm" style={{ color: 'var(--admin-text-muted)' }}>No walk-in sales recorded today.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full font-sans text-sm text-left min-w-max">
-              <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.04]">
-                <tr>
-                  <th className="px-6 py-4">Time</th>
-                  <th className="px-6 py-4">Service</th>
-                  <th className="px-6 py-4">Assigned Staff</th>
-                  <th className="px-6 py-4">Payment</th>
-                  <th className="px-6 py-4 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {recentTransactions.map(tx => (
-                  <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                      {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
-                      {tx.service?.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-400">
-                      {tx.worker?.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="badge badge-booking">{tx.paymentMethod?.replace('_', ' ')}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-gold">
-                      RWF {tx.price.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <DataTable
+        data={recentTransactions}
+        columns={['Time', 'Service', 'Assigned Staff', 'Payment', 'Amount']}
+        emptyStateMessage="No walk-in sales recorded today."
+        renderRow={(tx) => (
+          <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
+            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+              {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
+              {tx.service?.name}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-gray-400">
+              {tx.worker?.name}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+              <span className="badge badge-booking">{tx.paymentMethod?.replace('_', ' ')}</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-gold">
+              RWF {tx.price.toLocaleString()}
+            </td>
+          </tr>
+        )}
+        renderCard={(tx) => (
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-white font-medium text-sm">{tx.service?.name}</h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              <span className="badge badge-booking shadow-sm">{tx.paymentMethod?.replace('_', ' ')}</span>
+            </div>
+            <div className="flex justify-between items-center rounded-lg px-3 py-2 bg-white/[0.02]">
+              <span className="text-xs font-sans text-gray-400">{tx.worker?.name || 'Unassigned'}</span>
+              <span className="text-sm font-semibold text-gold tracking-wide">
+                RWF {tx.price.toLocaleString()}
+              </span>
+            </div>
           </div>
         )}
-      </div>
+      />
 
       <POSModal 
         isOpen={isModalOpen}

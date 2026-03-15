@@ -1,4 +1,5 @@
 import { getDashboardMetrics } from '@/app/actions/admin';
+import { PageHeader, StatCard, StatusBadge, DataTable } from '@/components/ui';
 import Link from 'next/link';
 
 export default async function AdminOverviewPage() {
@@ -117,8 +118,8 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="admin-surface border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
+      <div className="space-y-4">
+        <div className="flex justify-between items-center px-1">
           <div>
             <h2 className="font-playfair text-lg text-white">Recent Bookings</h2>
             <p className="text-gray-600 text-xs font-sans mt-0.5">Latest 5 requests</p>
@@ -128,67 +129,39 @@ export default async function AdminOverviewPage() {
           </Link>
         </div>
 
-        {/* Desktop table (md+) */}
-        <div className="hidden md:block overflow-x-auto w-full">
-          <table className="w-full min-w-max font-sans text-sm text-left">
-            <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.04]">
-              <tr>
-                <th className="px-6 py-3">Client</th>
-                <th className="px-6 py-3">Service</th>
-                <th className="px-6 py-3">Date</th>
-                <th className="px-6 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {recentActivity && recentActivity.length > 0 ? (
-                recentActivity.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="px-6 py-4 text-white font-medium">{booking.client.name}</td>
-                    <td className="px-6 py-4 text-gray-400">{booking.service.name}</td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-600 font-sans">
-                    No recent booking activity found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile card list (below md) */}
-        <div className="md:hidden divide-y divide-white/[0.05]">
-          {recentActivity && recentActivity.length > 0 ? (
-            recentActivity.map((booking) => (
-              <div key={booking.id} className="px-4 py-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-white font-sans font-medium text-sm">{booking.client.name}</p>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
-                    {booking.status}
-                  </span>
-                </div>
-                <p className="text-gray-400 font-sans text-xs">{booking.service.name}</p>
-                <p className="text-gray-600 font-sans text-xs">
-                  {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
-                </p>
+        <DataTable
+          data={recentActivity}
+          columns={['Client', 'Service', 'Date', 'Status']}
+          emptyStateMessage="No recent booking activity found."
+          renderRow={(booking: any) => (
+            <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
+              <td className="px-6 py-4 text-white font-medium">{booking.client.name}</td>
+              <td className="px-6 py-4 text-gray-400">{booking.service.name}</td>
+              <td className="px-6 py-4 text-gray-500">
+                {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
+              </td>
+              <td className="px-6 py-4">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
+                  {booking.status}
+                </span>
+              </td>
+            </tr>
+          )}
+          renderCard={(booking: any) => (
+            <div className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-white font-sans font-medium text-sm">{booking.client.name}</p>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
+                  {booking.status}
+                </span>
               </div>
-            ))
-          ) : (
-            <div className="px-4 py-10 text-center text-gray-600 font-sans text-sm">
-              No recent booking activity found.
+              <p className="text-gray-400 font-sans text-xs">{booking.service.name}</p>
+              <p className="text-gray-600 font-sans text-xs">
+                {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
+              </p>
             </div>
           )}
-        </div>
+        />
       </div>
     </div>
   );

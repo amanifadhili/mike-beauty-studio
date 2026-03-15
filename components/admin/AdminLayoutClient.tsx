@@ -42,7 +42,7 @@ export function AdminLayoutClient({ userEmail, userName, children }: AdminLayout
       />
 
       {/* Main content — offset by sidebar width on desktop */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen min-w-0">
 
         {/* Sticky top navbar */}
         <header className="sticky top-0 z-40 h-14 backdrop-blur-sm border-b flex items-center justify-between px-4 sm:px-6" style={{ background: 'var(--admin-overlay)', borderColor: 'var(--admin-border)' }}>
@@ -89,7 +89,7 @@ export function AdminLayoutClient({ userEmail, userName, children }: AdminLayout
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {children}
         </main>
 

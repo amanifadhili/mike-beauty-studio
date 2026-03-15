@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionButton, StatusBadge } from '@/components/ui';
+import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { useRouter } from 'next/navigation';
 import { CategoryModal } from '@/components/admin/CategoryModal';
 
@@ -68,9 +68,36 @@ export function CategoryClient({ initialCategories }: { initialCategories: Categ
         <ActionButton onClick={openNew}>+ New Category</ActionButton>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {categories.map(c => (
-          <div key={c.id} className="admin-surface border border-white/5 p-5 flex flex-col justify-between group">
+      <DataTable
+        data={categories}
+        columns={['Display Order', 'Category Name', 'Contains Services', 'Actions']}
+        emptyStateMessage="No categories created yet."
+        renderRow={(c) => (
+          <tr key={c.id} className="transition-colors hover:bg-white/[0.02]">
+            <td className="px-6 py-4">
+              <span className="text-xs text-gray-500 font-sans tracking-widest font-medium">Order: {c.order}</span>
+            </td>
+            <td className="px-6 py-4">
+              <span className="text-lg font-playfair text-white font-medium">{c.name}</span>
+            </td>
+            <td className="px-6 py-4">
+              <StatusBadge status={c._count.services > 0 ? "IN_USE" : "EMPTY"} label={`${c._count.services} Services`} />
+            </td>
+            <td className="px-6 py-4 text-right">
+              <div className="flex justify-end gap-3">
+                <button onClick={() => openEdit(c)} className="text-sm font-sans text-gray-400 hover:text-white transition-colors">Edit</button>
+                <button 
+                  onClick={() => handleDelete(c.id, c._count.services)} 
+                  className={`text-sm font-sans transition-colors ${c._count.services > 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-red-400'}`}
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        )}
+        renderCard={(c) => (
+          <div className="p-5 flex flex-col justify-between group">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <span className="text-xs uppercase text-gray-500 font-sans tracking-widest block mb-1">Order: {c.order}</span>
@@ -79,18 +106,18 @@ export function CategoryClient({ initialCategories }: { initialCategories: Categ
               <StatusBadge status={c._count.services > 0 ? "IN_USE" : "EMPTY"} label={`${c._count.services} Services`} />
             </div>
             
-            <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex justify-end gap-3 mt-4">
               <button onClick={() => openEdit(c)} className="text-sm font-sans text-gray-400 hover:text-white transition-colors">Edit</button>
-              <button onClick={() => handleDelete(c.id, c._count.services)} className={`text-sm font-sans transition-colors ${c._count.services > 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-red-400'}`}>Delete</button>
+              <button 
+                onClick={() => handleDelete(c.id, c._count.services)} 
+                className={`text-sm font-sans transition-colors ${c._count.services > 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-red-400'}`}
+              >
+                Delete
+              </button>
             </div>
           </div>
-        ))}
-        {categories.length === 0 && (
-          <div className="col-span-3 admin-surface p-12 text-center text-gray-500 font-sans text-sm">
-            No categories created yet.
-          </div>
         )}
-      </div>
+      />
 
       <CategoryModal
         isOpen={isOpen}

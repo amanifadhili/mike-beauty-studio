@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionButton, StatusBadge } from '@/components/ui';
+import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { useRouter } from 'next/navigation';
 
 type ClientCredit = {
@@ -81,63 +81,81 @@ export function ClientCreditsClient({ initialCredits }: { initialCredits: Client
       </div>
 
       {/* Ledger Table */}
-      <div className="admin-card overflow-x-auto">
-        <table className="w-full font-sans text-sm text-left">
-          <thead className="text-[10px] uppercase tracking-[0.15em] text-gray-500 border-b border-white/10">
-            <tr>
-              <th className="px-6 py-3">Date</th>
-              <th className="px-6 py-3">Client</th>
-              <th className="px-6 py-3">Service</th>
-              <th className="px-6 py-3 text-right">Original Debt</th>
-              <th className="px-6 py-3 text-right">Balance Due</th>
-              <th className="px-6 py-3 text-right">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">No {filter.toLowerCase()} credits found.</td>
-              </tr>
-            ) : filtered.map(credit => {
-              const balanceDue = credit.originalAmount - credit.paidAmount;
-              const isPending = credit.status === 'PENDING';
+      {/* Ledger Table */}
+      <DataTable
+        data={filtered}
+        columns={['Date', 'Client', 'Service', 'Original Debt', 'Balance Due', 'Status']}
+        emptyStateMessage={`No ${filter.toLowerCase()} credits found.`}
+        renderRow={(credit) => {
+          const balanceDue = credit.originalAmount - credit.paidAmount;
+          const isPending = credit.status === 'PENDING';
 
-              return (
-                <tr key={credit.id} className="group hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-4 text-gray-400">
-                    {new Date(credit.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-white font-medium">{credit.client.name}</p>
-                    {credit.client.phone && /^\+?\d{8,}$/.test(credit.client.phone) && (
-                       <a href={`https://wa.me/${credit.client.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-xs text-emerald-400/70 hover:text-emerald-400 mt-1 inline-block">WhatsApp</a>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-gray-300">{credit.transaction.service.name}</td>
-                  <td className="px-6 py-4 text-right text-gray-500">RWF {credit.originalAmount.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={isPending ? 'text-red-400 font-bold' : 'text-gray-500 line-through'}>
-                      RWF {balanceDue.toLocaleString()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {isPending ? (
-                      <button 
-                        onClick={() => { setRepaying(credit); setAmount(balanceDue.toString()); }}
-                        className="text-xs font-sans bg-gold/10 text-gold border border-gold/30 px-3 py-1.5 rounded hover:bg-gold/20 transition-colors"
-                      >
-                        Repay Debt
-                      </button>
-                    ) : (
-                      <StatusBadge status="CLEARED" />
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+          return (
+            <tr key={credit.id} className="group hover:bg-white/[0.02] transition-colors">
+              <td className="px-6 py-4 text-gray-400">
+                {new Date(credit.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </td>
+              <td className="px-6 py-4">
+                <p className="text-white font-medium">{credit.client.name}</p>
+                {credit.client.phone && /^\+?\d{8,}$/.test(credit.client.phone) && (
+                    <a href={`https://wa.me/${credit.client.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-xs text-emerald-400/70 hover:text-emerald-400 mt-1 inline-block">WhatsApp</a>
+                )}
+              </td>
+              <td className="px-6 py-4 text-gray-300">{credit.transaction.service.name}</td>
+              <td className="px-6 py-4 text-gray-500">RWF {credit.originalAmount.toLocaleString()}</td>
+              <td className="px-6 py-4">
+                <span className={isPending ? 'text-red-400 font-bold' : 'text-gray-500 line-through'}>
+                  RWF {balanceDue.toLocaleString()}
+                </span>
+              </td>
+              <td className="px-6 py-4">
+                {isPending ? (
+                  <button 
+                    onClick={() => { setRepaying(credit); setAmount(balanceDue.toString()); }}
+                    className="text-xs font-sans bg-gold/10 text-gold border border-gold/30 px-3 py-1.5 rounded hover:bg-gold/20 transition-colors"
+                  >
+                    Repay Debt
+                  </button>
+                ) : (
+                  <StatusBadge status="CLEARED" />
+                )}
+              </td>
+            </tr>
+          );
+        }}
+        renderCard={(credit) => {
+          const balanceDue = credit.originalAmount - credit.paidAmount;
+          const isPending = credit.status === 'PENDING';
+          return (
+            <div className="p-4 space-y-3 hover:bg-white/[0.01] transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-white font-medium text-sm">{credit.client.name}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">{new Date(credit.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+                {isPending ? (
+                  <button 
+                    onClick={() => { setRepaying(credit); setAmount(balanceDue.toString()); }}
+                    className="text-[10px] font-sans bg-gold/10 text-gold border border-gold/30 px-2.5 py-1 rounded hover:bg-gold/20 transition-colors"
+                  >
+                    Repay
+                  </button>
+                ) : <StatusBadge status="CLEARED" />}
+              </div>
+              <div className="flex items-center justify-between rounded-lg px-3 py-2 bg-white/[0.03]">
+                <p className="text-sm text-gray-300">{credit.transaction.service.name}</p>
+                <p className="text-xs text-gray-500">Orig. RWF {credit.originalAmount.toLocaleString()}</p>
+              </div>
+              <div className="flex justify-between items-center px-1">
+                <span className="text-xs text-gray-500">Balance Due</span>
+                <span className={`text-sm ${isPending ? 'text-red-400 font-bold' : 'text-gray-500 line-through'}`}>
+                  RWF {balanceDue.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          );
+        }}
+      />
 
       {/* Repay Modal */}
       {repaying && (

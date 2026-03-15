@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { StatusBadge, ActionButton } from '@/components/ui';
+import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { WorkerModal } from '@/components/admin/WorkerModal';
 
 const EditIcon = () => (
@@ -100,77 +100,120 @@ export default function WorkersClient({ workers }: { workers: StaffUser[] }) {
       <div className="flex justify-end">
         <ActionButton variant="primary" onClick={openCreate}>+ Add New Staff</ActionButton>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {list.map(worker => {
-        const pendingAdvances = worker.advances?.reduce((s, a) => s + a.amount, 0) || 0;
-        const netPayout = Math.max(0, worker.balance - pendingAdvances);
-        const msg = messages[worker.id];
+      <DataTable
+        data={list}
+        columns={['Staff Member', 'Role / Email', 'Commission', 'Account Status', 'Payout Actions']}
+        emptyStateMessage="No staff added yet."
+        renderRow={(worker) => {
+          const pendingAdvances = worker.advances?.reduce((s, a) => s + (a.amount || 0), 0) || 0;
+          const netPayout = Math.max(0, (worker.balance || 0) - pendingAdvances);
+          const msg = messages[worker.id];
 
-        return (
-          <div key={worker.id} className="admin-card p-5 space-y-4">
-            {/* Header */}
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-semibold font-sans flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-                  {worker.name}
+          return (
+            <tr key={worker.id} className="transition-colors hover:bg-white/[0.02]">
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-white">{worker.name}</span>
                   <button onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
                     <EditIcon />
                   </button>
-                </p>
-                <p className="text-xs font-sans mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{worker.roleTitle || 'Staff'}</p>
-                <p className="text-xs font-mono" style={{ color: 'var(--admin-text-faint)' }}>{worker.email}</p>
-              </div>
-              <StatusBadge status={worker.status} />
-            </div>
-
-            {/* Commission */}
-            <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <span className="text-xs font-sans" style={{ color: 'var(--admin-text-muted)' }}>Commission</span>
-              <span className="font-semibold text-sm text-gold">
-                {worker.commissionRate}{worker.commissionType === 'PERCENTAGE' ? '%' : ' RWF Fixed'}
-              </span>
-            </div>
-
-            {/* Balance Breakdown */}
-            <div className="space-y-2 text-sm font-sans">
-              <div className="flex justify-between">
-                <span style={{ color: 'var(--admin-text-muted)' }}>Unpaid Balance</span>
-                <span className="font-semibold" style={{ color: 'var(--admin-text-primary)' }}>RWF {(worker.balance || 0).toLocaleString()}</span>
-              </div>
-              {pendingAdvances > 0 && (
-                <div className="flex justify-between" style={{ color: 'var(--status-cancelled-text)' }}>
-                  <span>Advances to Deduct</span>
-                  <span className="font-semibold">− RWF {pendingAdvances.toLocaleString()}</span>
                 </div>
-              )}
-              {worker.balance > 0 && (
-                <div className="flex justify-between pt-2" style={{ borderTop: '1px solid var(--admin-border)', color: 'var(--status-completed-text)' }}>
+              </td>
+              <td className="px-6 py-4">
+                <p className="text-xs text-gray-400">{worker.roleTitle || 'Staff'}</p>
+                <p className="text-xs font-mono text-gray-600">{worker.email}</p>
+              </td>
+              <td className="px-6 py-4">
+                <span className="text-gold font-medium">
+                  {worker.commissionRate}{worker.commissionType === 'PERCENTAGE' ? '%' : ' RWF Fixed'}
+                </span>
+              </td>
+              <td className="px-6 py-4">
+                <StatusBadge status={worker.status} />
+              </td>
+              <td className="px-6 py-4 text-right">
+                <div className="flex flex-col items-end gap-1">
+                  {msg ? (
+                    <p className="text-[10px] font-sans" style={{ color: msg.ok ? 'var(--status-completed-text)' : 'var(--status-cancelled-text)' }}>{msg.text}</p>
+                  ) : (
+                    <ActionButton
+                      variant="ghost"
+                      loading={payingId === worker.id}
+                      disabled={worker.balance <= 0}
+                      onClick={() => handlePayout(worker.id)}
+                      className="!py-1 !px-3 text-xs"
+                    >
+                      Pay RWF {netPayout.toLocaleString()}
+                    </ActionButton>
+                  )}
+                  {pendingAdvances > 0 && <span className="text-[10px] text-red-400/60">Includes {pendingAdvances.toLocaleString()} advance deduction</span>}
+                </div>
+              </td>
+            </tr>
+          );
+        }}
+        renderCard={(worker) => {
+          const pendingAdvances = worker.advances?.reduce((s, a) => s + (a.amount || 0), 0) || 0;
+          const netPayout = Math.max(0, (worker.balance || 0) - pendingAdvances);
+          const msg = messages[worker.id];
+
+          return (
+            <div className="p-5 space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold font-sans text-white">{worker.name}</p>
+                    <button onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
+                      <EditIcon />
+                    </button>
+                  </div>
+                  <p className="text-xs font-sans text-gray-500">{worker.roleTitle || 'Staff'}</p>
+                  <p className="text-xs font-mono text-gray-700">{worker.email}</p>
+                </div>
+                <StatusBadge status={worker.status} />
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg px-3 py-2 bg-white/[0.03]">
+                <span className="text-xs font-sans text-gray-500">Commission</span>
+                <span className="font-semibold text-sm text-gold">
+                  {worker.commissionRate}{worker.commissionType === 'PERCENTAGE' ? '%' : ' Fixed'}
+                </span>
+              </div>
+
+              <div className="space-y-2 text-sm font-sans">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Unpaid Balance</span>
+                  <span className="font-semibold text-white">RWF {(worker.balance || 0).toLocaleString()}</span>
+                </div>
+                {pendingAdvances > 0 && (
+                  <div className="flex justify-between text-red-400">
+                    <span>Advances to Deduct</span>
+                    <span className="font-semibold">− RWF {pendingAdvances.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 border-t border-white/5 text-emerald-400">
                   <span className="font-semibold">Net Payout</span>
                   <span className="font-bold">RWF {netPayout.toLocaleString()}</span>
                 </div>
+              </div>
+
+              {msg && (
+                <p className="text-xs font-sans" style={{ color: msg.ok ? 'var(--status-completed-text)' : 'var(--status-cancelled-text)' }}>{msg.text}</p>
               )}
+
+              <ActionButton
+                variant="ghost"
+                loading={payingId === worker.id}
+                disabled={worker.balance <= 0}
+                onClick={() => handlePayout(worker.id)}
+                className="w-full"
+              >
+                {worker.balance > 0 ? `Pay Staff (RWF ${netPayout.toLocaleString()})` : 'No Balance to Pay'}
+              </ActionButton>
             </div>
-
-            {/* Feedback */}
-            {msg && (
-              <p className="text-xs font-sans" style={{ color: msg.ok ? 'var(--status-completed-text)' : 'var(--status-cancelled-text)' }}>{msg.text}</p>
-            )}
-
-            {/* Payout Button */}
-            <ActionButton
-              variant="ghost"
-              loading={payingId === worker.id}
-              loadingText="Processing..."
-              disabled={worker.balance <= 0}
-              onClick={() => handlePayout(worker.id)}
-              style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-text-primary)' }}
-            >
-              {worker.balance > 0 ? `Pay Staff (RWF ${netPayout.toLocaleString()})` : 'No Balance to Pay'}
-            </ActionButton>
-          </div>
-        );
-      })}
-      </div>
+          );
+        }}
+      />
       <WorkerModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PaymentMethod } from '@prisma/client';
 import { updateBookingStatus } from '@/app/actions/adminBookings';
 import { convertBookingToTransaction } from '@/actions/bookings';
-import { StatusBadge, ActionButton } from '@/components/ui';
+import { StatusBadge, ActionButton, DataTable } from '@/components/ui';
 
 type BookingWithService = {
   id: string;
@@ -66,16 +66,7 @@ export function BookingTable({ initialBookings, staff = [] }: { initialBookings:
     setIsUpdating(null);
   };
 
-  if (bookings.length === 0) {
-    return (
-      <div className="admin-card p-16 text-center">
-        <svg className="w-10 h-10 mx-auto mb-4" style={{ color: 'var(--admin-text-faint)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <p className="font-sans text-sm" style={{ color: 'var(--admin-text-muted)' }}>No booking requests found.</p>
-      </div>
-    );
-  }
+
 
   const StatusSelect = ({ booking }: { booking: BookingWithService }) => (
     <select
@@ -94,76 +85,61 @@ export function BookingTable({ initialBookings, staff = [] }: { initialBookings:
 
   return (
     <>
-      {/* Desktop Table */}
-      <div className="admin-card overflow-hidden">
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full font-sans text-sm text-left whitespace-nowrap">
-            <thead className="text-[10px] uppercase tracking-[0.15em]" style={{ color: 'var(--admin-text-muted)', borderBottom: '1px solid var(--admin-border-subtle)' }}>
-              <tr>
-                {['Status', 'Client', 'Service', 'Appointment', 'Notes', 'Update / Convert'].map(col => (
-                  <th key={col} className={`px-6 py-3 ${col === 'Update / Convert' ? 'text-right' : ''}`}>{col}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ ['--tw-divide-opacity' as string]: 1 }}>
-              {bookings.map(booking => (
-                <tr key={booking.id} className="transition-colors hover:bg-white/[0.02]">
-                  <td className="px-6 py-4"><StatusBadge status={booking.status} /></td>
-                  <td className="px-6 py-4">
-                    <p className="font-medium" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
-                    <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono transition-colors mt-0.5 block hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{booking.service.price.toLocaleString()} RWF</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p style={{ color: 'var(--admin-text-secondary)' }}>{new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{booking.preferredTime}</p>
-                  </td>
-                  <td className="px-6 py-4 max-w-[180px]">
-                    {booking.notes ? (
-                      <p className="text-xs truncate" style={{ color: 'var(--admin-text-secondary)' }} title={booking.notes}>{booking.notes}</p>
-                    ) : (
-                      <span className="text-xs italic" style={{ color: 'var(--admin-text-faint)' }}>None</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right"><StatusSelect booking={booking} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Card Stack */}
-        <div className="md:hidden divide-y" style={{ borderColor: 'var(--admin-border-subtle)' }}>
-          {bookings.map(booking => (
-            <div key={booking.id} className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <StatusBadge status={booking.status} />
-                <span className="text-xs font-sans" style={{ color: 'var(--admin-text-muted)' }}>
-                  {new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · {booking.preferredTime}
-                </span>
-              </div>
-              <div>
-                <p className="font-sans font-medium text-sm" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
-                <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
-              </div>
-              <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                <p className="font-sans text-sm" style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
-                <p className="font-sans text-xs" style={{ color: 'var(--admin-text-muted)' }}>{booking.service.price.toLocaleString()} RWF</p>
-              </div>
-              {booking.notes && <p className="font-sans text-xs italic pl-3" style={{ color: 'var(--admin-text-secondary)', borderLeft: '2px solid var(--admin-border)' }}>{booking.notes}</p>}
-              <div className="pt-1"><StatusSelect booking={booking} /></div>
+      <DataTable
+        data={bookings}
+        columns={['Status', 'Client', 'Service', 'Appointment', 'Notes', 'Update / Convert']}
+        emptyStateMessage="No bookings match the current filter."
+        renderRow={(booking: any) => (
+          <tr key={booking.id} className="transition-colors hover:bg-white/[0.02]">
+            <td className="px-6 py-4"><StatusBadge status={booking.status} /></td>
+            <td className="px-6 py-4">
+              <p className="font-medium" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
+              <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono transition-colors mt-0.5 block hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
+            </td>
+            <td className="px-6 py-4">
+              <p style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{booking.service.price.toLocaleString()} RWF</p>
+            </td>
+            <td className="px-6 py-4">
+              <p style={{ color: 'var(--admin-text-secondary)' }}>{new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{booking.preferredTime}</p>
+            </td>
+            <td className="px-6 py-4 max-w-[180px]">
+              {booking.notes ? (
+                <p className="text-xs truncate" style={{ color: 'var(--admin-text-secondary)' }} title={booking.notes}>{booking.notes}</p>
+              ) : (
+                <span className="text-xs italic" style={{ color: 'var(--admin-text-faint)' }}>None</span>
+              )}
+            </td>
+            <td className="px-6 py-4 text-right"><StatusSelect booking={booking} /></td>
+          </tr>
+        )}
+        renderCard={(booking: any) => (
+          <div className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <StatusBadge status={booking.status} />
+              <span className="text-xs font-sans" style={{ color: 'var(--admin-text-muted)' }}>
+                {new Date(booking.preferredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · {booking.preferredTime}
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
+            <div>
+              <p className="font-sans font-medium text-sm" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
+              <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
+            </div>
+            <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <p className="font-sans text-sm" style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
+              <p className="font-sans text-xs" style={{ color: 'var(--admin-text-muted)' }}>{booking.service.price.toLocaleString()} RWF</p>
+            </div>
+            {booking.notes && <p className="font-sans text-xs italic pl-3" style={{ color: 'var(--admin-text-secondary)', borderLeft: '2px solid var(--admin-border)' }}>{booking.notes}</p>}
+            <div className="pt-1"><StatusSelect booking={booking} /></div>
+          </div>
+        )}
+      />
 
       {/* Convert to Transaction Modal */}
       {convertingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="admin-card p-6 w-full max-w-md animate-fade-in-up" style={{ background: 'var(--admin-elevated)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setConvertingBooking(null)} style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+          <div className="admin-card p-6 w-full max-w-md animate-fade-in-up" onClick={e => e.stopPropagation()} style={{ background: 'var(--admin-elevated)' }}>
             <h2 className="font-playfair text-xl mb-2" style={{ color: 'var(--admin-text-primary)' }}>Convert to Transaction</h2>
             <p className="text-sm mb-6 font-sans" style={{ color: 'var(--admin-text-secondary)' }}>
               Convert <strong style={{ color: 'var(--admin-text-primary)' }}>{convertingBooking.client.name}</strong>'s appointment into a finalized revenue record.
