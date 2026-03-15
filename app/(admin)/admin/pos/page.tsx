@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import POSTerminal from './POSTerminal';
-import { PageHeader } from '@/components/ui';
-import { Role } from '@prisma/client';
+import POSClient from './POSTerminal';
+import { TransactionSource, Role } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,13 +15,22 @@ export default async function POSPage() {
     select: { id: true, name: true, roleTitle: true },
   });
 
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const recentTransactions = await prisma.transaction.findMany({
+    where: {
+      source: TransactionSource.WALK_IN,
+      createdAt: { gte: startOfDay }
+    },
+    include: {
+      service: { select: { name: true } },
+      worker: { select: { name: true } }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      <PageHeader
-        title="Point of Sale (POS)"
-        subtitle="Record walk-in clients instantly and calculate staff commissions in real time."
-      />
-      <POSTerminal services={services} staff={staff} />
-    </div>
+    <POSClient services={services} staff={staff} recentTransactions={recentTransactions} />
   );
 }

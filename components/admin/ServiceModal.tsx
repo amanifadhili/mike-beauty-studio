@@ -65,8 +65,8 @@ export function ServiceModal({ initialData, categories, workers, onClose }: Serv
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="admin-surface-alt border border-white/10 p-8 max-w-lg w-full relative shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div className="admin-surface-alt border border-white/10 p-8 max-w-lg w-full relative shadow-2xl" onClick={e => e.stopPropagation()}>
         
         <button 
           onClick={onClose}

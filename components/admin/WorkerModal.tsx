@@ -123,8 +123,8 @@ export function WorkerModal({ isOpen, onClose, onSuccess, editWorker }: WorkerMo
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-      <div className="admin-card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" style={{ background: 'var(--admin-elevated)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose} style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+      <div className="admin-card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{ background: 'var(--admin-elevated)' }}>
         <h2 className="font-playfair text-2xl mb-1" style={{ color: 'var(--admin-text-primary)' }}>
           {isEditing ? 'Edit Staff Profile' : 'Add New Staff Member'}
         </h2>

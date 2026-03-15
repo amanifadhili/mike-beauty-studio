@@ -68,7 +68,7 @@ export default async function AdminOverviewPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
+    <div className="space-y-12 animate-fade-in-up">
 
       {/* Page Header */}
       <div className="flex items-end justify-between">
@@ -129,8 +129,8 @@ export default async function AdminOverviewPage() {
         </div>
 
         {/* Desktop table (md+) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full font-sans text-sm text-left">
+        <div className="hidden md:block overflow-x-auto w-full">
+          <table className="w-full min-w-max font-sans text-sm text-left">
             <thead className="text-[10px] text-gray-600 uppercase tracking-[0.15em] border-b border-white/[0.04]">
               <tr>
                 <th className="px-6 py-3">Client</th>
