@@ -8,9 +8,11 @@ const prisma = new PrismaClient();
 export async function convertBookingToTransaction(data: {
   bookingId: string;
   userId: string;
-  paymentMethod: PaymentMethod;
+  paymentMethod: string;
 }) {
   try {
+    const safePaymentMethod = data.paymentMethod.toUpperCase() as PaymentMethod;
+
     // 1. Fetch Booking and Staff details
     const booking = await prisma.booking.findUnique({ 
       where: { id: data.bookingId },
@@ -54,7 +56,7 @@ export async function convertBookingToTransaction(data: {
           price: booking.service.price,
           workerCommission: workerCut,
           salonShare: salonCut,
-          paymentMethod: data.paymentMethod,
+          paymentMethod: safePaymentMethod,
           source: TransactionSource.BOOKING,
         }
       });
@@ -69,7 +71,7 @@ export async function convertBookingToTransaction(data: {
 
       // 4d. Auto-generate Client Credit IOU if payment method is CREDIT
       // (amount is full price minus the deposit already paid)
-      if (data.paymentMethod === PaymentMethod.CREDIT) {
+      if (safePaymentMethod === PaymentMethod.CREDIT) {
         const owedAmount = booking.service.price - booking.depositPaid;
         if (owedAmount > 0) {
           await tx.clientCredit.create({

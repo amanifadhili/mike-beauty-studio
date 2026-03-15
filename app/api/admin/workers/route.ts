@@ -43,9 +43,9 @@ export async function POST(req: Request) {
         phone: phone || null,
         role: Role.WORKER,
         roleTitle,
-        commissionType: commissionType as CommissionType,
+        commissionType: commissionType.toUpperCase() as CommissionType,
         commissionRate: Math.round(Number(commissionRate)),
-        status: UserStatus.ACTIVE,
+        status: 'ACTIVE' as UserStatus,
         balance: 0,
       }
     });
@@ -90,9 +90,9 @@ export async function PUT(req: Request) {
         ...(name !== undefined ? { name } : {}),
         ...(phone !== undefined ? { phone } : {}),
         ...(roleTitle !== undefined ? { roleTitle } : {}),
-        commissionType: commissionType as CommissionType,
+        commissionType: commissionType?.toUpperCase() as CommissionType,
         commissionRate: commissionRate !== undefined ? Math.round(Number(commissionRate)) : undefined,
-        status: status as UserStatus,
+        status: status?.toUpperCase() as UserStatus,
       }
     });
 

@@ -47,8 +47,15 @@ export async function PUT(request: Request) {
   try {
     const session = await auth();
     // Allow Admins to manage debts
-    if (!session || (session.user as any)?.role !== Role.ADMIN) {
+    if (!session || !session.user?.email || (session.user as any)?.role !== Role.ADMIN) {
       return NextResponse.json({ error: 'Unauthorized. Admins only.' }, { status: 401 });
+    }
+
+    let adminUserId = (session.user as any).id;
+    if (!adminUserId) {
+      const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
+      if (!dbUser) return NextResponse.json({ success: false, error: 'Admin user not found' }, { status: 401 });
+      adminUserId = dbUser.id;
     }
 
     const body = await request.json();
@@ -83,7 +90,7 @@ export async function PUT(request: Request) {
 
       await tx.auditLog.create({
         data: {
-          userId: session.user?.id || 'unknown',
+          userId: adminUserId,
           action: 'DEBT_COLLECTION',
           targetType: 'CLIENT_CREDIT',
           targetId: credit.id,

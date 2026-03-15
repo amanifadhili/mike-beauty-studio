@@ -8,7 +8,7 @@ export async function updateBookingStatus(bookingId: string, newStatus: string) 
   try {
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
-      data: { status: newStatus as BookingStatus },
+      data: { status: newStatus.toUpperCase() as BookingStatus },
     });
 
     // Revalidate the admin dashboard so changes reflect immediately
