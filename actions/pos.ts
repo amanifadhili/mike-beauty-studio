@@ -1,70 +1,85 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PaymentMethod, TransactionSource, CreditStatus } from '@prisma/client';
 import { calculateCommission } from '@/lib/commission-engine';
 
 const prisma = new PrismaClient();
 
 export async function createPOSTransaction(data: {
   serviceId: string;
-  workerId: string;
-  paymentMethod: string;
+  userId: string;
+  paymentMethod: PaymentMethod;
   clientName: string;
   clientPhone?: string;
 }) {
   try {
-    // 1. Fetch Service and Worker details
+    // 1. Fetch Service and User details
     const service = await prisma.service.findUnique({ where: { id: data.serviceId } });
     if (!service) throw new Error("Service not found");
 
-    const worker = await prisma.worker.findUnique({ where: { id: data.workerId } });
-    if (!worker) throw new Error("Worker not found");
+    const user = await prisma.user.findUnique({ where: { id: data.userId } });
+    if (!user) throw new Error("Staff member not found");
 
-    // 2. Calculate Commissions
+    // 2. Client Management (Find or Create)
+    // We enforce a phone number for distinct client tracking if provided, 
+    // otherwise we create a generic client entry for this walk-in.
+    let client;
+    if (data.clientPhone && data.clientPhone.trim() !== '') {
+      client = await prisma.client.upsert({
+        where: { phone: data.clientPhone },
+        update: { name: data.clientName }, // Update name in case it changed
+        create: { name: data.clientName, phone: data.clientPhone }
+      });
+    } else {
+       // If no phone, create a unique client record anyway (less ideal, but handles basic walk-ins)
+       client = await prisma.client.create({
+         data: {
+           name: data.clientName || 'Anonymous Walk-in',
+           phone: `${Date.now()}-walkin` // Guarantee highly unlikely collision for phone DB constraint
+         }
+       });
+    }
+
+    // 3. Calculate Commissions
     const { workerCut, salonCut } = calculateCommission(
       service.price,
-      worker.commissionType as 'PERCENTAGE' | 'FIXED', 
-      worker.commissionRate
+      user.commissionType, 
+      user.commissionRate
     );
 
-    // 3. Execute Transaction
+    // 4. Execute Transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 3a. Log the Transaction
+      // 4a. Log the Transaction
       const transaction = await tx.transaction.create({
         data: {
-          clientName: data.clientName,
-          clientPhone: data.clientPhone || null,
+          clientId: client.id,
           serviceId: service.id,
-          workerId: worker.id,
+          userId: user.id,
           price: service.price,
           workerCommission: workerCut,
           salonShare: salonCut,
           paymentMethod: data.paymentMethod,
-          source: 'WALK_IN',
+          source: TransactionSource.WALK_IN,
         }
       });
 
-      // 3c. Update Worker Balance
-      await tx.worker.update({
-        where: { id: worker.id },
+      // 4b. Update Staff Balance
+      await tx.user.update({
+        where: { id: user.id },
         data: {
           balance: { increment: workerCut }
         }
       });
 
-      // 3d. Auto-generate Client Credit IOU if payment method is CREDIT
-      if (data.paymentMethod === 'CREDIT') {
-        if (!data.clientPhone && !data.clientName) {
-           throw new Error("Client name is required to extend a line of credit.");
-        }
+      // 4c. Auto-generate Client Credit IOU if payment method is CREDIT
+      if (data.paymentMethod === PaymentMethod.CREDIT) {
         await tx.clientCredit.create({
           data: {
-            clientName: data.clientName,
-            clientPhone: data.clientPhone || null,
+            clientId: client.id,
             transactionId: transaction.id,
             originalAmount: transaction.price,
             paidAmount: 0,
-            status: 'PENDING'
+            status: CreditStatus.PENDING
           }
         });
       }

@@ -28,7 +28,7 @@ export async function saveService(data: {
   price: number;
   duration: string;
   categoryId?: string | null;
-  workerIds?: string[];
+  userIds?: string[];
 }) {
   try {
     if (data.id) {
@@ -42,7 +42,7 @@ export async function saveService(data: {
           duration: data.duration,
           categoryId: data.categoryId || null,
           workers: {
-            set: data.workerIds ? data.workerIds.map(id => ({ id })) : []
+            set: data.userIds ? data.userIds.map(id => ({ id })) : []
           }
         }
       });
@@ -57,7 +57,7 @@ export async function saveService(data: {
           active: true, // Default to true on creation
           categoryId: data.categoryId || null,
           workers: {
-            connect: data.workerIds ? data.workerIds.map(id => ({ id })) : []
+            connect: data.userIds ? data.userIds.map(id => ({ id })) : []
           }
         }
       });

@@ -3,30 +3,31 @@
 import { useState, useEffect } from 'react';
 import { ActionButton } from '@/components/ui/ActionButton';
 
-type UserOption = { id: string; name: string; email: string };
-type Worker = { 
-  id: string; 
-  roleTitle: string; 
-  commissionType: string; 
-  commissionRate: number; 
-  status: string; 
-  user: { name: string; email: string };
+type StaffUser = {
+  id: string;
+  name: string;
+  email: string;
+  roleTitle: string | null;
+  commissionType: string;
+  commissionRate: number;
+  status: string;
 };
 
 interface WorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (worker: any, isNew: boolean) => void;
-
-  users?: UserOption[];
-  editWorker?: Worker | null;
+  editWorker?: StaffUser | null;
 }
 
-export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker }: WorkerModalProps) {
+export function WorkerModal({ isOpen, onClose, onSuccess, editWorker }: WorkerModalProps) {
   const isEditing = !!editWorker;
   
   const [formData, setFormData] = useState({
-    userId: '',
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
     roleTitle: '',
     commissionType: 'PERCENTAGE',
     commissionRate: '',
@@ -41,23 +42,24 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
       setError('');
       if (editWorker) {
         setFormData({
-          userId: '', // not needed for edit
-          roleTitle: editWorker.roleTitle,
+          name: editWorker.name,
+          email: editWorker.email,
+          password: '', // Never pre-fill password
+          phone: '',
+          roleTitle: editWorker.roleTitle || '',
           commissionType: editWorker.commissionType,
           commissionRate: editWorker.commissionRate.toString(),
           status: editWorker.status,
         });
       } else {
         setFormData({
-          userId: users.length > 0 ? users[0].id : '',
-          roleTitle: '',
-          commissionType: 'PERCENTAGE',
-          commissionRate: '',
-          status: 'ACTIVE',
+          name: '', email: '', password: '', phone: '',
+          roleTitle: '', commissionType: 'PERCENTAGE',
+          commissionRate: '', status: 'ACTIVE',
         });
       }
     }
-  }, [isOpen, editWorker, users]);
+  }, [isOpen, editWorker]);
 
   if (!isOpen) return null;
 
@@ -65,10 +67,14 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
     e.preventDefault();
     setError('');
     
-    if (!isEditing && !formData.userId) return setError('Please select a user.');
-    if (!formData.roleTitle) return setError('Role title is required.');
+    if (!isEditing) {
+      if (!formData.name.trim()) return setError('Full name is required.');
+      if (!formData.email.trim()) return setError('Email address is required.');
+      if (!formData.password || formData.password.length < 6) return setError('Password must be at least 6 characters.');
+    }
+    if (!formData.roleTitle.trim()) return setError('Role title is required (e.g. Lash Technician).');
     if (!formData.commissionRate || isNaN(Number(formData.commissionRate))) {
-      return setError('Valid commission rate is required.');
+      return setError('A valid commission rate is required.');
     }
 
     setLoading(true);
@@ -88,9 +94,9 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
       const data = await res.json();
       
       if (data.success) {
-        onSuccess(data.worker, !isEditing);
+        onSuccess(data.staff, !isEditing);
       } else {
-        setError(data.error || 'Failed to save worker.');
+        setError(data.error || 'Failed to save staff profile.');
       }
     } catch (err) {
       setError('A network error occurred.');
@@ -99,57 +105,51 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
     }
   };
 
+  const field = (label: string, key: keyof typeof formData, type = 'text', placeholder = '', required = true) => (
+    <div>
+      <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+        {label}{required ? ' *' : ''}
+      </label>
+      <input
+        type={type}
+        value={formData[key]}
+        onChange={e => setFormData({ ...formData, [key]: e.target.value })}
+        placeholder={placeholder}
+        className="admin-input w-full"
+        disabled={loading}
+        required={required}
+      />
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
       <div className="admin-card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" style={{ background: 'var(--admin-elevated)' }}>
         <h2 className="font-playfair text-2xl mb-1" style={{ color: 'var(--admin-text-primary)' }}>
-          {isEditing ? 'Edit Worker Profile' : 'Add New Staff'}
+          {isEditing ? 'Edit Staff Profile' : 'Add New Staff Member'}
         </h2>
         <p className="text-sm font-sans mb-6" style={{ color: 'var(--admin-text-secondary)' }}>
           {isEditing 
-            ? `Update settings for ${editWorker.user.name}.` 
-            : 'Promote an existing user to a staff role.'}
+            ? `Update settings for ${editWorker.name}.`
+            : 'Create a new staff account with full commission and role settings.'}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* User Select (Only on Create) */}
+          {/* Full Name & Email — only shown on create */}
           {!isEditing && (
-            <div>
-              <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Select User *</label>
-              <select 
-                value={formData.userId} 
-                onChange={e => setFormData({ ...formData, userId: e.target.value })} 
-                className="admin-select w-full"
-                disabled={loading || users.length === 0}
-              >
-                {users.length === 0 && <option value="">No eligible users found</option>}
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                ))}
-              </select>
-              {users.length === 0 && (
-                <p className="text-xs mt-1 text-red-400">Please create a user with the WORKER role first.</p>
-              )}
-            </div>
+            <>
+              {field('Full Name', 'name', 'text', 'e.g. Sarah Uwase')}
+              {field('Email Address', 'email', 'email', 'sarah@studio.com')}
+              {field('Phone Number', 'phone', 'tel', '+250788000000', false)}
+              {field('Temporary Password', 'password', 'password', 'Min. 6 characters')}
+            </>
           )}
 
-          {/* Role Title */}
-          <div>
-            <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Role Title *</label>
-            <input 
-              type="text" 
-              value={formData.roleTitle} 
-              onChange={e => setFormData({ ...formData, roleTitle: e.target.value })} 
-              placeholder="e.g. Senior Nail Tech" 
-              className="admin-input w-full"
-              disabled={loading}
-              required
-            />
-          </div>
+          {/* Editable on both create and edit */}
+          {field('Role Title', 'roleTitle', 'text', 'e.g. Lash Technician')}
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Commission Type */}
             <div>
               <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Commission Type *</label>
               <select 
@@ -163,7 +163,6 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
               </select>
             </div>
 
-            {/* Rate */}
             <div>
               <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Rate *</label>
               <input 
@@ -175,12 +174,12 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
                 disabled={loading}
                 required
                 min="0"
-                step={formData.commissionType === 'PERCENTAGE' ? "0.1" : "1"}
+                step={formData.commissionType === 'PERCENTAGE' ? '0.1' : '1'}
               />
             </div>
           </div>
 
-          {/* Status Toggle (Only on Edit) */}
+          {/* Status — only on edit */}
           {isEditing && (
             <div>
               <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Account Status</label>
@@ -202,7 +201,7 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-white/10" style={{ borderColor: 'var(--admin-border)' }}>
+          <div className="flex gap-3 pt-4" style={{ borderTop: '1px solid var(--admin-border)' }}>
             <button 
               type="button" 
               onClick={onClose} 
@@ -215,11 +214,10 @@ export function WorkerModal({ isOpen, onClose, onSuccess, users = [], editWorker
             <ActionButton 
               type="submit" 
               variant="gold" 
-              loading={loading} 
-              disabled={(!isEditing && users.length === 0)}
+              loading={loading}
               className="flex-1"
             >
-              Save Profile
+              {isEditing ? 'Save Changes' : 'Create Staff Account'}
             </ActionButton>
           </div>
         </form>

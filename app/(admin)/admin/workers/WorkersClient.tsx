@@ -5,46 +5,47 @@ import { StatusBadge, ActionButton } from '@/components/ui';
 import { WorkerModal } from '@/components/admin/WorkerModal';
 
 const EditIcon = () => (
-  <svg xmlns="http://www.w3.org/20event" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
   </svg>
 );
 
-type Worker = {
+// Unified Staff User Type
+type StaffUser = {
   id: string;
+  name: string;
+  email: string;
   phone: string | null;
-  roleTitle: string;
+  roleTitle: string | null;
   commissionType: string;
   commissionRate: number;
   status: string;
   balance: number;
-  user: { name: string; email: string };
   advances: { id: string; amount: number }[];
   payments: { amount: number; date: Date }[];
 };
 
-export default function WorkersClient({ workers, users: initialUsers = [] }: { workers: Worker[]; users?: any[] }) {
+export default function WorkersClient({ workers }: { workers: StaffUser[] }) {
   const [list, setList] = useState(workers);
-  const [users, setUsers] = useState(initialUsers);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, { text: string; ok: boolean }>>({});
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editWorker, setEditWorker] = useState<Worker | null>(null);
+  const [editWorker, setEditWorker] = useState<StaffUser | null>(null);
 
-  const handleModalSuccess = (savedWorker: Worker, isNew: boolean) => {
+  const handleModalSuccess = (savedWorker: StaffUser, isNew: boolean) => {
     setIsModalOpen(false);
     if (isNew) {
-      setList(prev => [savedWorker, ...prev]);
-      setUsers(prev => prev.filter(u => u.id !== savedWorker.id)); // Remove from available users
+      // Adding empty arrays to mimic relations on instant UI insert
+      setList(prev => [{ ...savedWorker, advances: [], payments: [], balance: 0 }, ...prev]);
     } else {
       setList(prev => prev.map(w => w.id === savedWorker.id ? { ...savedWorker, advances: w.advances, payments: w.payments, balance: w.balance } : w));
     }
   };
 
-  const openEdit = (w: Worker) => {
+  const openEdit = (w: StaffUser) => {
     setEditWorker(w);
     setIsModalOpen(true);
   };
@@ -59,7 +60,7 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
     try {
       const res = await fetch('/api/admin/workers/payout', {
         method: 'POST',
-        body: JSON.stringify({ workerId }),
+        body: JSON.stringify({ workerId }), // Passing userId
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
@@ -82,13 +83,12 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
           <ActionButton variant="primary" onClick={openCreate}>+ Add New Staff</ActionButton>
         </div>
         <div className="admin-card p-16 text-center">
-          <p className="font-sans text-sm" style={{ color: 'var(--admin-text-muted)' }}>No workers added yet. Add a WORKER-role user in User Management.</p>
+          <p className="font-sans text-sm" style={{ color: 'var(--admin-text-muted)' }}>No staff added yet.</p>
         </div>
         <WorkerModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSuccess={handleModalSuccess} 
-          users={users} 
           editWorker={editWorker} 
         />
       </div>
@@ -102,7 +102,7 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {list.map(worker => {
-        const pendingAdvances = worker.advances.reduce((s, a) => s + a.amount, 0);
+        const pendingAdvances = worker.advances?.reduce((s, a) => s + a.amount, 0) || 0;
         const netPayout = Math.max(0, worker.balance - pendingAdvances);
         const msg = messages[worker.id];
 
@@ -112,13 +112,13 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-semibold font-sans flex items-center gap-2" style={{ color: 'var(--admin-text-primary)' }}>
-                  {worker.user.name}
+                  {worker.name}
                   <button onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
                     <EditIcon />
                   </button>
                 </p>
-                <p className="text-xs font-sans mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{worker.roleTitle}</p>
-                <p className="text-xs font-mono" style={{ color: 'var(--admin-text-faint)' }}>{worker.user.email}</p>
+                <p className="text-xs font-sans mt-0.5" style={{ color: 'var(--admin-text-muted)' }}>{worker.roleTitle || 'Staff'}</p>
+                <p className="text-xs font-mono" style={{ color: 'var(--admin-text-faint)' }}>{worker.email}</p>
               </div>
               <StatusBadge status={worker.status} />
             </div>
@@ -135,7 +135,7 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
             <div className="space-y-2 text-sm font-sans">
               <div className="flex justify-between">
                 <span style={{ color: 'var(--admin-text-muted)' }}>Unpaid Balance</span>
-                <span className="font-semibold" style={{ color: 'var(--admin-text-primary)' }}>RWF {worker.balance.toLocaleString()}</span>
+                <span className="font-semibold" style={{ color: 'var(--admin-text-primary)' }}>RWF {(worker.balance || 0).toLocaleString()}</span>
               </div>
               {pendingAdvances > 0 && (
                 <div className="flex justify-between" style={{ color: 'var(--status-cancelled-text)' }}>
@@ -165,7 +165,7 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
               onClick={() => handlePayout(worker.id)}
               style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-text-primary)' }}
             >
-              {worker.balance > 0 ? `Pay Worker (RWF ${netPayout.toLocaleString()})` : 'No Balance to Pay'}
+              {worker.balance > 0 ? `Pay Staff (RWF ${netPayout.toLocaleString()})` : 'No Balance to Pay'}
             </ActionButton>
           </div>
         );
@@ -175,7 +175,6 @@ export default function WorkersClient({ workers, users: initialUsers = [] }: { w
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={handleModalSuccess} 
-        users={users} 
         editWorker={editWorker} 
       />
     </div>

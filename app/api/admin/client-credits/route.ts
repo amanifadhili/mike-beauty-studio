@@ -1,22 +1,31 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { CreditStatus, Role } from '@prisma/client';
 
 // GET all Client Credits (Ledger)
 export async function GET(request: Request) {
   try {
     const session = await auth();
-    if (!session || (session.user as any)?.role !== 'MANAGER') {
+    // Allow either the Admin or Staff to view the ledger
+    if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    // @ts-ignore - Prisma types lagging compiler
+    let whereClause = {};
+    if (status && (status === CreditStatus.PENDING || status === CreditStatus.CLEARED)) {
+      whereClause = { status: status as CreditStatus };
+    }
+
     const credits = await prisma.clientCredit.findMany({
-      where: status ? { status } : undefined,
+      where: whereClause,
       include: {
+        client: {
+          select: { name: true, phone: true } // Fetching the normalized Client Table native relation
+        },
         transaction: {
           include: {
             service: { select: { name: true } }
@@ -28,6 +37,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, credits });
   } catch (error: any) {
+    console.error("Client Credit GET Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -36,8 +46,9 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await auth();
-    if (!session || (session.user as any)?.role !== 'MANAGER') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Allow Admins to manage debts
+    if (!session || (session.user as any)?.role !== Role.ADMIN) {
+      return NextResponse.json({ error: 'Unauthorized. Admins only.' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -47,23 +58,21 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Invalid repayment payload' }, { status: 400 });
     }
 
-    // 1. Fetch the credit
-    // @ts-ignore
+    // 1. Fetch the credit and its explicit Client identity
     const credit = await prisma.clientCredit.findUnique({
       where: { id },
-      include: { transaction: true },
+      include: { transaction: true, client: true },
     });
 
     if (!credit) return NextResponse.json({ error: 'Credit record not found' }, { status: 404 });
-    if (credit.status === 'CLEARED') return NextResponse.json({ error: 'This credit is already cleared' }, { status: 400 });
+    if (credit.status === CreditStatus.CLEARED) return NextResponse.json({ error: 'This credit is already cleared' }, { status: 400 });
 
     // 2. Calculate new totals
     const newPaidAmount = credit.paidAmount + amount;
-    const newStatus = newPaidAmount >= credit.originalAmount ? 'CLEARED' : 'PENDING';
+    const newStatus = newPaidAmount >= credit.originalAmount ? CreditStatus.CLEARED : CreditStatus.PENDING;
 
     // 3. Perform the update and log the audit
     const updated = await prisma.$transaction(async (tx) => {
-      // @ts-ignore
       const updatedCredit = await tx.clientCredit.update({
         where: { id },
         data: {
@@ -72,14 +81,13 @@ export async function PUT(request: Request) {
         }
       });
 
-      // @ts-ignore
       await tx.auditLog.create({
         data: {
+          userId: session.user?.id || 'unknown',
           action: 'DEBT_COLLECTION',
           targetType: 'CLIENT_CREDIT',
           targetId: credit.id,
-          details: `Client ${credit.clientName} repaid RWF ${amount}. Total paid: ${newPaidAmount}/${credit.originalAmount}. Status: ${newStatus}`,
-          userId: session.user?.id || 'unknown',
+          details: `Client ${credit.client.name} repaid RWF ${amount}. Total paid: ${newPaidAmount}/${credit.originalAmount}. Status: ${newStatus}`,
         }
       });
 

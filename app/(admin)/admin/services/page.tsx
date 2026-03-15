@@ -14,11 +14,11 @@ export default async function AdminServicesPage() {
     orderBy: { order: 'asc' }
   });
 
-  // Fetch active workers for the assignment checklist
-  const workers = await prisma.worker.findMany({
-    where: { status: 'ACTIVE' },
-    select: { id: true, user: { select: { name: true } } },
-    orderBy: { user: { name: 'asc' } }
+  // Fetch active Staff Users for the assignment checklist
+  const staff = await prisma.user.findMany({
+    where: { role: 'WORKER' },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' }
   });
 
   // Fetch all services, displaying active ones first, then alphabetical
@@ -37,7 +37,7 @@ export default async function AdminServicesPage() {
       <ServicesDashboardClient 
         initialServices={services} 
         categories={categories}
-        workers={workers as any} // Force type match for the client
+        users={staff} // Pass down the mapped User array
       />
     </div>
   );

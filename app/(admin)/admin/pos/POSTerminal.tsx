@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { PaymentMethod } from '@prisma/client';
 import { createPOSTransaction } from '@/actions/pos';
 import { ActionButton, StatusBadge } from '@/components/ui';
 
 const PAYMENT_METHODS = ['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'CREDIT'] as const;
 
-export default function POSTerminal({ services, workers }: { services: any[]; workers: any[] }) {
+export default function POSTerminal({ services, staff }: { services: any[]; staff: { id: string, name: string, roleTitle: string | null }[] }) {
   const [selectedService, setSelectedService] = useState('');
-  const [selectedWorker, setSelectedWorker] = useState('');
+  const [selectedStaff, setSelectedStaff] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<string>('CASH');
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
@@ -17,7 +18,7 @@ export default function POSTerminal({ services, workers }: { services: any[]; wo
   const [isSuccess, setIsSuccess] = useState(false);
 
   const service = services.find(s => s.id === selectedService);
-  const isFormValid = !!(selectedService && selectedWorker && clientName);
+  const isFormValid = !!(selectedService && selectedStaff && clientName);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ export default function POSTerminal({ services, workers }: { services: any[]; wo
     setLoading(true);
     setMessage('');
 
-    const result = await createPOSTransaction({ serviceId: selectedService, workerId: selectedWorker, paymentMethod, clientName, clientPhone });
+    const result = await createPOSTransaction({ serviceId: selectedService, userId: selectedStaff, paymentMethod: paymentMethod as PaymentMethod, clientName, clientPhone });
 
     if (result.success) {
       setIsSuccess(true);
@@ -55,13 +56,13 @@ export default function POSTerminal({ services, workers }: { services: any[]; wo
           </select>
         </div>
 
-        {/* Worker */}
+        {/* Staff */}
         <div>
-          <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Assigned Worker *</label>
-          <select value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)} disabled={loading} className="admin-select w-full">
-            <option value="">-- Select Worker --</option>
-            {workers.map(w => (
-              <option key={w.id} value={w.id}>{w.user.name} ({w.roleTitle})</option>
+          <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Assigned Staff *</label>
+          <select value={selectedStaff} onChange={e => setSelectedStaff(e.target.value)} disabled={loading} className="admin-select w-full">
+            <option value="">-- Select Staff --</option>
+            {staff.map(s => (
+              <option key={s.id} value={s.id}>{s.name} ({s.roleTitle || 'STAFF'})</option>
             ))}
           </select>
         </div>

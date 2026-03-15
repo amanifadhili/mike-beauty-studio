@@ -9,6 +9,7 @@ export default async function ClientCreditsPage() {
   const credits = await prisma.clientCredit.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
+      client: { select: { name: true, phone: true } },
       transaction: {
         select: { service: { select: { name: true } } }
       }

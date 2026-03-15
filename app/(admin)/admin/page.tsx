@@ -143,7 +143,7 @@ export default async function AdminOverviewPage() {
               {recentActivity && recentActivity.length > 0 ? (
                 recentActivity.map((booking) => (
                   <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="px-6 py-4 text-white font-medium">{booking.name}</td>
+                    <td className="px-6 py-4 text-white font-medium">{booking.client.name}</td>
                     <td className="px-6 py-4 text-gray-400">{booking.service.name}</td>
                     <td className="px-6 py-4 text-gray-500">
                       {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
@@ -172,7 +172,7 @@ export default async function AdminOverviewPage() {
             recentActivity.map((booking) => (
               <div key={booking.id} className="px-4 py-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-white font-sans font-medium text-sm">{booking.name}</p>
+                  <p className="text-white font-sans font-medium text-sm">{booking.client.name}</p>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
                     {booking.status}
                   </span>

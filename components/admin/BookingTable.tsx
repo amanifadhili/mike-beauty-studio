@@ -1,19 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { PaymentMethod } from '@prisma/client';
 import { updateBookingStatus } from '@/app/actions/adminBookings';
 import { convertBookingToTransaction } from '@/actions/bookings';
 import { StatusBadge, ActionButton } from '@/components/ui';
 
 type BookingWithService = {
   id: string;
-  name: string;
-  phone: string;
+  client: { name: string; phone: string };
   preferredDate: Date;
   preferredTime: string;
   notes: string | null;
   status: string;
   createdAt: Date;
+  depositPaid: number;
   service: {
     id?: string;
     name: string;
@@ -21,7 +22,7 @@ type BookingWithService = {
   };
 };
 
-export function BookingTable({ initialBookings, workers = [] }: { initialBookings: BookingWithService[]; workers?: any[] }) {
+export function BookingTable({ initialBookings, staff = [] }: { initialBookings: BookingWithService[]; staff?: any[] }) {
   const [bookings, setBookings] = useState<BookingWithService[]>(initialBookings);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [convertingBooking, setConvertingBooking] = useState<BookingWithService | null>(null);
@@ -55,7 +56,7 @@ export function BookingTable({ initialBookings, workers = [] }: { initialBooking
     setConverting(true);
     setConvertingBooking(null);
 
-    const result = await convertBookingToTransaction({ bookingId: target.id, workerId: selectedWorker, paymentMethod });
+    const result = await convertBookingToTransaction({ bookingId: target.id, userId: selectedWorker, paymentMethod: paymentMethod as PaymentMethod });
     if (result.success) {
       setBookings(prev => prev.map(b => b.id === target.id ? { ...b, status: 'CONVERTED' } : b));
     } else {
@@ -109,8 +110,8 @@ export function BookingTable({ initialBookings, workers = [] }: { initialBooking
                 <tr key={booking.id} className="transition-colors" style={{ ['--tw-bg-opacity' as string]: 0 }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')} onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-6 py-4"><StatusBadge status={booking.status} /></td>
                   <td className="px-6 py-4">
-                    <p className="font-medium" style={{ color: 'var(--admin-text-primary)' }}>{booking.name}</p>
-                    <a href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono transition-colors mt-0.5 block hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.phone}</a>
+                    <p className="font-medium" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
+                    <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono transition-colors mt-0.5 block hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
                   </td>
                   <td className="px-6 py-4">
                     <p style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
@@ -145,8 +146,8 @@ export function BookingTable({ initialBookings, workers = [] }: { initialBooking
                 </span>
               </div>
               <div>
-                <p className="font-sans font-medium text-sm" style={{ color: 'var(--admin-text-primary)' }}>{booking.name}</p>
-                <a href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.phone}</a>
+                <p className="font-sans font-medium text-sm" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>
+                <a href={`https://wa.me/${booking.client.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-xs font-mono hover:text-emerald-400" style={{ color: 'var(--admin-text-muted)' }}>{booking.client.phone}</a>
               </div>
               <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 <p className="font-sans text-sm" style={{ color: 'var(--admin-text-secondary)' }}>{booking.service.name}</p>
@@ -165,14 +166,14 @@ export function BookingTable({ initialBookings, workers = [] }: { initialBooking
           <div className="admin-card p-6 w-full max-w-md animate-fade-in-up" style={{ background: 'var(--admin-elevated)' }}>
             <h2 className="font-playfair text-xl mb-2" style={{ color: 'var(--admin-text-primary)' }}>Convert to Transaction</h2>
             <p className="text-sm mb-6 font-sans" style={{ color: 'var(--admin-text-secondary)' }}>
-              Convert <strong style={{ color: 'var(--admin-text-primary)' }}>{convertingBooking.name}</strong>'s appointment into a finalized revenue record.
+              Convert <strong style={{ color: 'var(--admin-text-primary)' }}>{convertingBooking.client.name}</strong>'s appointment into a finalized revenue record.
             </p>
             <form onSubmit={handleConvertSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Assign Worker</label>
                 <select value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)} className="admin-select w-full" required>
                   <option value="">-- Choose Staff --</option>
-                  {workers.map(w => <option key={w.id} value={w.id}>{w.user.name}</option>)}
+                  {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
@@ -186,7 +187,12 @@ export function BookingTable({ initialBookings, workers = [] }: { initialBooking
               </div>
               <div className="flex justify-between items-center p-4 rounded-lg" style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)' }}>
                 <p className="text-xs font-sans" style={{ color: 'var(--admin-text-secondary)' }}>Revenue to Log</p>
-                <p className="font-playfair text-2xl text-gold">{convertingBooking.service.price.toLocaleString()} RWF</p>
+                <div className="text-right">
+                  <p className="font-playfair text-2xl text-gold">{(convertingBooking.service.price - convertingBooking.depositPaid).toLocaleString()} RWF</p>
+                  {convertingBooking.depositPaid > 0 && (
+                     <p className="text-xs text-gray-400 font-sans">(-{convertingBooking.depositPaid} Deposit)</p>
+                  )}
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setConvertingBooking(null)} className="px-4 py-2 text-sm font-sans transition-colors" style={{ color: 'var(--admin-text-secondary)' }}>Cancel</button>

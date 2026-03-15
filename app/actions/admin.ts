@@ -1,13 +1,14 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { BookingStatus } from '@prisma/client';
 
 export async function getDashboardMetrics() {
   try {
     // 1. Get total number of incoming (NEW) bookings
     const newBookingsCount = await prisma.booking.count({
       where: {
-        status: 'NEW',
+        status: BookingStatus.NEW,
       },
     });
 
@@ -28,6 +29,7 @@ export async function getDashboardMetrics() {
         createdAt: 'desc',
       },
       include: {
+        client: { select: { name: true } },
         service: true,
       },
     });

@@ -14,12 +14,12 @@ type ServiceData = {
 };
 
 type CategoryOption = { id: string; name: string };
-type WorkerOption = { id: string; user: { name: string } };
+type UserOption = { id: string; name: string };
 
 interface ServiceModalProps {
   initialData?: ServiceData | null;
   categories: CategoryOption[];
-  workers: WorkerOption[];
+  workers: UserOption[];
   onClose: () => void;
 }
 
@@ -28,13 +28,13 @@ export function ServiceModal({ initialData, categories, workers, onClose }: Serv
   const [errorPayload, setErrorPayload] = useState<string | null>(null);
   
   const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
-  const [selectedWorkers, setSelectedWorkers] = useState<string[]>(
-    initialData?.workers?.map(w => w.id) || []
+  const [selectedUsers, setSelectedUsers] = useState<string[]>(
+    initialData?.workers?.map(u => u.id) || []
   );
 
-  const toggleWorker = (id: string) => {
-    setSelectedWorkers(prev => 
-      prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]
+  const toggleUser = (id: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(id) ? prev.filter(uId => uId !== id) : [...prev, id]
     );
   };
 
@@ -51,7 +51,7 @@ export function ServiceModal({ initialData, categories, workers, onClose }: Serv
       price: parseInt(formData.get('price') as string, 10),
       duration: formData.get('duration') as string,
       categoryId: categoryId || null,
-      workerIds: selectedWorkers,
+      userIds: selectedUsers,
     };
 
     const result = await saveService(data);
@@ -124,20 +124,20 @@ export function ServiceModal({ initialData, categories, workers, onClose }: Serv
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-gray-400 uppercase tracking-wider text-xs">Qualified Workers</label>
+              <label className="text-gray-400 uppercase tracking-wider text-xs">Qualified Staff</label>
               <div className="w-full admin-input border border-white/10 px-4 py-2 flex flex-col gap-2 max-h-32 overflow-y-auto">
-                {workers.map(w => (
-                  <label key={w.id} className="flex items-center gap-2 cursor-pointer">
+                {workers.map(u => (
+                  <label key={u.id} className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      checked={selectedWorkers.includes(w.id)}
-                      onChange={() => toggleWorker(w.id)}
+                      checked={selectedUsers.includes(u.id)}
+                      onChange={() => toggleUser(u.id)}
                       className="accent-gold"
                     />
-                    <span className="text-white text-sm">{w.user.name}</span>
+                    <span className="text-white text-sm">{u.name}</span>
                   </label>
                 ))}
-                {workers.length === 0 && <span className="text-gray-500 text-sm">No workers available</span>}
+                {workers.length === 0 && <span className="text-gray-500 text-sm">No staff available</span>}
               </div>
             </div>
           </div>

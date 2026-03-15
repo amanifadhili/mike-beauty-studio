@@ -11,12 +11,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminBookingsPage() {
   
-  // Fetch all bookings, newest first
+  // Fetch all bookings, newest first — include client and service
   const bookings = await prisma.booking.findMany({
     orderBy: {
       createdAt: 'desc',
     },
     include: {
+      client: {
+        select: { name: true, phone: true }
+      },
       service: {
         select: {
           name: true,
@@ -26,10 +29,10 @@ export default async function AdminBookingsPage() {
     }
   });
 
-  // Fetch active workers for the conversion modal
-  const workers = await prisma.worker.findMany({
-    where: { status: 'ACTIVE' },
-    include: { user: { select: { name: true } } }
+  // Fetch active Staff Users for the booking conversion modal
+  const staff = await prisma.user.findMany({
+    where: { role: 'WORKER' },
+    select: { id: true, name: true }
   });
 
   return (
@@ -45,7 +48,7 @@ export default async function AdminBookingsPage() {
         }
       />
 
-      <BookingTable initialBookings={bookings} workers={workers} />
+      <BookingTable initialBookings={bookings} staff={staff} />
       
     </div>
   );

@@ -1,13 +1,13 @@
 /**
- * Mike Beauty Studio — Full Test Seed
+ * Mike Beauty Studio — Full Test Seed (Rev 2 - Normalized)
  * ====================================
  * Populates ALL tables with realistic data for pre-deployment testing.
- * Images use Pexels CDN (free, consistent, beauty-focused, no 404s).
+ * Updated to match the unified User/Worker model and strict Enums.
  * Run with: npx prisma db seed
  */
 
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import { PrismaClient, Role, CommissionType, UserStatus, BookingStatus, TransactionSource, PaymentMethod, ExpenseCategory, AdvanceStatus } from '@prisma/client';
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -63,22 +63,74 @@ async function main() {
   await prisma.booking.deleteMany();
   await prisma.media.deleteMany();
   await prisma.service.deleteMany();
-  await prisma.worker.deleteMany();
+  await prisma.serviceCategory.deleteMany();
+  await prisma.client.deleteMany();
   await prisma.user.deleteMany();
 
-  // ── 1. Admin User ──────────────────────────────────────────────────────────
+  // ── 1. Unified Users (Admin & Workers) ─────────────────────────────────────
+  console.log('  ↳ Creating unified users...');
   const adminEmail    = process.env.ADMIN_EMAIL    || 'admin@mikebeautystudio.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'Password123!';
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-  const admin = await prisma.user.upsert({
-    where:  { email: adminEmail },
-    update: { password: hashedPassword },
-    create: { email: adminEmail, name: 'Studio Admin', password: hashedPassword, role: 'ADMIN' },
+  const admin = await prisma.user.create({
+    data: { 
+      email: adminEmail, 
+      name: 'Studio Admin', 
+      password: hashedPassword, 
+      role: Role.ADMIN,
+      phone: '+250788999000',
+      roleTitle: 'Owner / Manager',
+      commissionType: CommissionType.PERCENTAGE,
+      commissionRate: 100, // Owner takes 100% of their own services
+      status: UserStatus.ACTIVE,
+      balance: 0
+    },
   });
-  console.log(`  ✔ Admin user: ${admin.email} (password: ${adminPassword})`);
+  console.log(`    ✔ Admin user: ${admin.email}`);
 
-  // ── 2. Services ──────────────────────────────────────────────────────────
+  const worker1 = await prisma.user.create({
+    data: { 
+      email: 'sarah@mikebeautystudio.com', 
+      name: 'Sarah', 
+      password: hashedPassword, 
+      role: Role.WORKER,
+      phone: '+250788111222', 
+      roleTitle: 'Lash Technician', 
+      commissionType: CommissionType.PERCENTAGE, 
+      commissionRate: 40, 
+      balance: 120000 
+    }
+  });
+
+  const worker2 = await prisma.user.create({
+    data: { 
+      email: 'anna@mikebeautystudio.com', 
+      name: 'Anna', 
+      password: hashedPassword, 
+      role: Role.WORKER,
+      phone: '+250788333444', 
+      roleTitle: 'Lash Technician', 
+      commissionType: CommissionType.FIXED, 
+      commissionRate: 15000, 
+      balance: 50000 
+    }
+  });
+  console.log(`    ✔ 2 Workers created (Sarah, Anna)`);
+
+
+  // ── 2. Clients ─────────────────────────────────────────────────────────────
+  console.log('  ↳ Creating clients...');
+  const client1 = await prisma.client.create({ data: { name: 'Aisha Niyonkuru', phone: '+250788123456' } });
+  const client2 = await prisma.client.create({ data: { name: 'Grace Uwase', phone: '+250722987654' } });
+  const client3 = await prisma.client.create({ data: { name: 'Diane Kaneza', phone: '+250722111222' } });
+  const client4 = await prisma.client.create({ data: { name: 'Jacqueline Nzeyimana', phone: '+250784777888' } });
+  const client5 = await prisma.client.create({ data: { name: 'Annette Rutagengwa', phone: '+250789300400' } });
+  const walkin1 = await prisma.client.create({ data: { name: 'Walk-In Client 1', phone: '+250780000001' } });
+  const walkin2 = await prisma.client.create({ data: { name: 'Walk-In Client 2', phone: '+250780000002' } });
+  console.log(`    ✔ 7 Clients created`);
+
+  // ── 3. Services ──────────────────────────────────────────────────────────
   console.log('  ↳ Creating services + service media...');
   const servicesData = [
     {
@@ -170,29 +222,25 @@ async function main() {
     console.log(`    ✔ Service: "${svc.name}"`);
   }
 
-  // ── 3. Standalone Gallery Media ──────────────────────────────────────────
+  // ── 4. Standalone Gallery Media ──────────────────────────────────────────
   console.log('  ↳ Creating standalone gallery media...');
-  const classicService   = createdServices.find(s => s.name === 'Classic Full Set')!;
-  const hybridService    = createdServices.find(s => s.name === 'Hybrid Full Set')!;
-  const volumeService    = createdServices.find(s => s.name === 'Light Volume Set')!;
-  const megaService      = createdServices.find(s => s.name === 'Mega Volume Set')!;
-  const browService      = createdServices.find(s => s.name === 'Eyebrow Design & Tinting')!;
-  const makeupService    = createdServices.find(s => s.name === 'Bridal Glam Makeup')!;
+  const classicId  = createdServices.find(s => s.name === 'Classic Full Set')!.id;
+  const hybridId   = createdServices.find(s => s.name === 'Hybrid Full Set')!.id;
+  const volumeId   = createdServices.find(s => s.name === 'Light Volume Set')!.id;
+  const megaId     = createdServices.find(s => s.name === 'Mega Volume Set')!.id;
+  const browId     = createdServices.find(s => s.name === 'Eyebrow Design & Tinting')!.id;
+  const makeupId   = createdServices.find(s => s.name === 'Bridal Glam Makeup')!.id;
+  const removalId  = createdServices.find(s => s.name === 'Lash Removal')!.id;
+  const refillId   = createdServices.find(s => s.name === 'Lash Refill (2–3 Weeks)')!.id;
 
   const galleryMedia = [
-    // Classic gallery shots
-    { url: IMAGES.portrait_1,      type: 'image', category: 'Classic',     serviceId: classicService.id },
-    { url: IMAGES.portrait_2,      type: 'image', category: 'Classic',     serviceId: classicService.id },
-    // Hybrid shots
-    { url: IMAGES.makeup_2,        type: 'image', category: 'Hybrid',      serviceId: hybridService.id },
-    // Volume
-    { url: IMAGES.skincare_1,      type: 'image', category: 'Volume',      serviceId: volumeService.id },
-    // Mega
-    { url: IMAGES.tools_1,         type: 'image', category: 'Mega Volume', serviceId: megaService.id },
-    // Brows
-    { url: IMAGES.beauty_salon_1,  type: 'image', category: 'Brows',       serviceId: browService.id },
-    // Makeup
-    { url: IMAGES.beauty_salon_2,  type: 'image', category: 'Makeup',      serviceId: makeupService.id },
+    { url: IMAGES.portrait_1,      type: 'image', category: 'Classic',     serviceId: classicId },
+    { url: IMAGES.portrait_2,      type: 'image', category: 'Classic',     serviceId: classicId },
+    { url: IMAGES.makeup_2,        type: 'image', category: 'Hybrid',      serviceId: hybridId },
+    { url: IMAGES.skincare_1,      type: 'image', category: 'Volume',      serviceId: volumeId },
+    { url: IMAGES.tools_1,         type: 'image', category: 'Mega Volume', serviceId: megaId },
+    { url: IMAGES.beauty_salon_1,  type: 'image', category: 'Brows',       serviceId: browId },
+    { url: IMAGES.beauty_salon_2,  type: 'image', category: 'Makeup',      serviceId: makeupId },
     { url: IMAGES.nail_1,          type: 'image', category: 'Nails',        serviceId: null },
     { url: IMAGES.nail_2,          type: 'image', category: 'Nails',        serviceId: null },
     { url: IMAGES.studio_1,        type: 'image', category: 'Studio',       serviceId: null },
@@ -201,69 +249,38 @@ async function main() {
   await prisma.media.createMany({ data: galleryMedia });
   console.log(`    ✔ ${galleryMedia.length} gallery items created`);
 
-  // ── 7. Workers ─────────────────────────────────────────────────────────────
-  console.log('  ↳ Creating workers...');
-  
-  const worker1User = await prisma.user.create({
-    data: { email: 'sarah@mikebeautystudio.com', name: 'Sarah', password: hashedPassword, role: 'WORKER' }
-  });
-  const worker1 = await prisma.worker.create({
-    data: { userId: worker1User.id, phone: '+250788111222', roleTitle: 'Lash Technician', commissionType: 'PERCENTAGE', commissionRate: 40, balance: 120000 }
-  });
-
-  const worker2User = await prisma.user.create({
-    data: { email: 'anna@mikebeautystudio.com', name: 'Anna', password: hashedPassword, role: 'WORKER' }
-  });
-  const worker2 = await prisma.worker.create({
-    data: { userId: worker2User.id, phone: '+250788333444', roleTitle: 'Lash Technician', commissionType: 'FIXED', commissionRate: 15000, balance: 50000 }
-  });
-  
-  console.log(`    ✔ 2 Workers created (Sarah, Anna)`);
-
-  // ── 4. Bookings & Transactions ──────────────────────────────────────────
+  // ── 5. Bookings & Transactions ──────────────────────────────────────────
   console.log('  ↳ Creating booking requests and transactions...');
-  const classicId  = classicService.id;
-  const hybridId   = hybridService.id;
-  const volumeId   = volumeService.id;
-  const megaId     = megaService.id;
-  const browId     = browService.id;
-  const makeupId   = makeupService.id;
-  const removalId  = createdServices.find(s => s.name === 'Lash Removal')!.id;
-  const refillId   = createdServices.find(s => s.name === 'Lash Refill (2–3 Weeks)')!.id;
 
   const bookings = [
-    // Pending / new requests
     {
-      name: 'Aisha Niyonkuru', phone: '+250788123456',
+      clientId: client1.id,
       preferredDate: daysFromNow(3),  preferredTime: '10:00 AM',
-      serviceId: classicId, status: 'NEW',
+      serviceId: classicId, status: BookingStatus.NEW, depositPaid: 5000,
       notes: 'First time getting lashes. Would prefer a natural look.',
     },
     {
-      name: 'Grace Uwase', phone: '+250722987654',
+      clientId: client2.id,
       preferredDate: daysFromNow(5),  preferredTime: '02:00 PM',
-      serviceId: hybridId, status: 'NEW',
+      serviceId: hybridId, status: BookingStatus.NEW, depositPaid: 5000,
       notes: null,
     },
-    // Confirmed appointments
     {
-      name: 'Diane Kaneza', phone: '+250722111222',
+      clientId: client3.id,
       preferredDate: daysFromNow(1),  preferredTime: '03:00 PM',
-      serviceId: volumeId, status: 'CONFIRMED',
+      serviceId: volumeId, status: BookingStatus.SCHEDULED, depositPaid: 5000,
       notes: 'Confirmed via WhatsApp. She is bridal party prep.',
     },
-    // Completed/Converted booking
     {
-      name: 'Jacqueline Nzeyimana', phone: '+250784777888',
+      clientId: client4.id,
       preferredDate: daysFromNow(-3), preferredTime: '11:00 AM',
-      serviceId: classicId, status: 'CONVERTED',
+      serviceId: classicId, status: BookingStatus.CONVERTED, depositPaid: 5000,
       notes: null,
     },
-    // Cancelled booking
     {
-      name: 'Annette Rutagengwa', phone: '+250789300400',
+      clientId: client5.id,
       preferredDate: daysFromNow(-2), preferredTime: '12:00 PM',
-      serviceId: removalId, status: 'CANCELLED',
+      serviceId: removalId, status: BookingStatus.CANCELLED, depositPaid: 0,
       notes: 'Client cancelled 2 hours before appointment.',
     },
   ];
@@ -272,19 +289,18 @@ async function main() {
     const b = await prisma.booking.create({ data: booking });
     
     // If it's converted, create a historical transaction for it.
-    if (b.status === 'CONVERTED') {
+    if (b.status === BookingStatus.CONVERTED) {
        await prisma.transaction.create({
          data: {
-           clientName: b.name,
-           clientPhone: b.phone,
+           clientId: b.clientId,
            serviceId: b.serviceId,
-           workerId: worker1.id,
+           userId: worker1.id,
            bookingId: b.id,
-           price: 35000,
+           price: 35000, // Total price
            workerCommission: 14000,
            salonShare: 21000,
-           paymentMethod: 'CASH',
-           source: 'BOOKING',
+           paymentMethod: PaymentMethod.CASH,
+           source: TransactionSource.BOOKING,
            date: b.preferredDate
          }
        })
@@ -294,98 +310,70 @@ async function main() {
   // Add some walk-in transactions
   await prisma.transaction.create({
      data: {
-       clientName: 'Walk-In Client 1',
+       clientId: walkin1.id,
        serviceId: hybridId,
-       workerId: worker2.id,
+       userId: worker2.id,
        price: 47000,
        workerCommission: 15000, // Fixed
        salonShare: 32000,
-       paymentMethod: 'MOBILE_MONEY',
-       source: 'WALK_IN',
+       paymentMethod: PaymentMethod.MOBILE_MONEY,
+       source: TransactionSource.WALK_IN,
        date: daysFromNow(-1)
      }
   });
 
   await prisma.transaction.create({
      data: {
-       clientName: 'Walk-In Client 2',
+       clientId: walkin2.id,
        serviceId: megaId,
-       workerId: worker1.id,
+       userId: worker1.id,
        price: 68000,
        workerCommission: 27200, // 40%
        salonShare: 40800,
-       paymentMethod: 'BANK_TRANSFER',
-       source: 'WALK_IN',
+       paymentMethod: PaymentMethod.BANK_TRANSFER,
+       source: TransactionSource.WALK_IN,
        date: daysFromNow(-2)
      }
   });
 
   console.log(`    ✔ Bookings and Transactions generated.`);
 
-  // ── 8. Financials (Expenses, Advances, etc.) ──────────────────────────────────────────
+  // ── 6. Financials (Expenses, Advances, etc.) ──────────────────────────────────────────
   console.log('  ↳ Creating financials (Expenses, Advances)...');
   
-  await prisma.expense.createMany({
-    data: [
-      { title: 'Lash Supplies (Glue, Tape)', amount: 45000, category: 'SUPPLIES', date: daysFromNow(-4) },
-      { title: 'Internet Bill', amount: 30000, category: 'UTILITIES', date: daysFromNow(-10) },
-      { title: 'Rent (Partial)', amount: 200000, category: 'RENT', date: daysFromNow(-15) }
-    ]
-  });
+  // Create expenses first so we can link them to payouts
+  const exp1 = await prisma.expense.create({ data: { title: 'Lash Supplies (Glue, Tape)', amount: 45000, category: ExpenseCategory.SUPPLIES, date: daysFromNow(-4) } });
+  const exp2 = await prisma.expense.create({ data: { title: 'Internet Bill', amount: 30000, category: ExpenseCategory.UTILITIES, date: daysFromNow(-10) } });
+  const exp3 = await prisma.expense.create({ data: { title: 'Rent (Partial)', amount: 200000, category: ExpenseCategory.RENT, date: daysFromNow(-15) } });
+  const payoutExp = await prisma.expense.create({ data: { title: 'Worker Payout: Anna', amount: 100000, category: ExpenseCategory.WORKER_PAYOUT, date: daysFromNow(-7) } });
 
   await prisma.workerAdvance.create({
-    data: { workerId: worker1.id, amount: 20000, status: 'PENDING', date: daysFromNow(-2) }
+    data: { userId: worker1.id, amount: 20000, status: AdvanceStatus.PENDING, date: daysFromNow(-2) }
   });
 
   await prisma.workerPayment.create({
-    data: { workerId: worker2.id, amount: 100000, date: daysFromNow(-7) }
+    data: { userId: worker2.id, expenseId: payoutExp.id, amount: 100000, date: daysFromNow(-7) }
   });
 
   console.log(`    ✔ Financials generated.`);
 
-  // ── 5. Reviews ──────────────────────────────────────────────────────────
+  // ── 7. Reviews ──────────────────────────────────────────────────────────
   console.log('  ↳ Creating reviews...');
   const reviews = [
-    {
-      name: 'Diane K.', rating: 5,
-      comment: 'Absolutely stunning work! My lashes have never looked this good. The attention to detail and the care taken throughout the appointment made me feel so pampered. Will definitely be back for my refill!',
-      approved: true,
-    },
-    {
-      name: 'Grace U.', rating: 5,
-      comment: 'Mike Beauty Studio is hands down the best lash studio in Kigali. The hybrid set I got lasted over 5 weeks with minimal shedding. Professional, clean, and luxurious environment.',
-      approved: true,
-    },
-    {
-      name: 'Sandrine I.', rating: 5,
-      comment: 'The eyebrow tinting was exactly what I needed. My brows look so defined and natural at the same time. Quick, painless, and affordable!',
-      approved: true,
-    },
-    {
-      name: 'Flavia U.', rating: 4,
-      comment: 'Mega volume is no joke — these lashes made me feel like a celebrity! Would have given 5 stars but had to wait 10 minutes past my appointment time. The result made up for it though.',
-      approved: true,
-    },
-    {
-      name: 'Jacqueline N.', rating: 5,
-      comment: 'I was nervous getting lashes for the first time but the team made me feel so comfortable. The classic set is perfect for work — natural and polished. 100% recommend!',
-      approved: true,
-    },
-    // Pending approval review (good for testing the approval flow if you build one)
-    {
-      name: 'Anonymous Client', rating: 3,
-      comment: 'Good work overall, but I wish there were more time slots available on weekends.',
-      approved: false,
-    },
+    { name: 'Diane K.', rating: 5, comment: 'Absolutely stunning work! My lashes have never looked this good. The attention to detail and the care taken throughout the appointment made me feel so pampered. Will definitely be back for my refill!', approved: true },
+    { name: 'Grace U.', rating: 5, comment: 'Mike Beauty Studio is hands down the best lash studio in Kigali. The hybrid set I got lasted over 5 weeks with minimal shedding. Professional, clean, and luxurious environment.', approved: true },
+    { name: 'Sandrine I.', rating: 5, comment: 'The eyebrow tinting was exactly what I needed. My brows look so defined and natural at the same time. Quick, painless, and affordable!', approved: true },
+    { name: 'Flavia U.', rating: 4, comment: 'Mega volume is no joke — these lashes made me feel like a celebrity! Would have given 5 stars but had to wait 10 minutes past my appointment time. The result made up for it though.', approved: true },
+    { name: 'Jacqueline N.', rating: 5, comment: 'I was nervous getting lashes for the first time but the team made me feel so comfortable. The classic set is perfect for work — natural and polished. 100% recommend!', approved: true },
+    { name: 'Anonymous Client', rating: 3, comment: 'Good work overall, but I wish there were more time slots available on weekends.', approved: false },
   ];
 
   await prisma.review.createMany({ data: reviews });
   console.log(`    ✔ ${reviews.length} reviews created (5 approved, 1 pending)`);
 
-  // ── 6. App Settings ─────────────────────────────────────────────────────
+  // ── 8. App Settings ─────────────────────────────────────────────────────
   console.log('  ↳ Creating app settings...');
   const settings = [
-    // ── GENERAL ──
     { key: 'STUDIO_NAME',        value: 'Mike Beauty Studio',                                    category: 'GENERAL' },
     { key: 'STUDIO_ADDRESS',     value: 'KG 11 Ave, Kacyiru, Kigali, Rwanda',                    category: 'GENERAL' },
     { key: 'STUDIO_PHONE',       value: '+250 788 123 456',                                      category: 'GENERAL' },
@@ -393,15 +381,11 @@ async function main() {
     { key: 'STUDIO_HOURS',       value: 'Mon – Sat: 8:00 AM – 7:00 PM  |  Sun: 10:00 AM – 4:00 PM', category: 'GENERAL' },
     { key: 'WHATSAPP_NUMBER',    value: '250788123456',                                          category: 'GENERAL' },
     { key: 'WHATSAPP_MESSAGE',   value: 'Hello! I would like to book an appointment at Mike Beauty Studio. Please advise on availability.', category: 'GENERAL' },
-
-    // ── BOOKING ──
     { key: 'DEPOSIT_REQUIRED',   value: 'true',                                                  category: 'BOOKING' },
     { key: 'DEPOSIT_AMOUNT',     value: '5000',                                                  category: 'BOOKING' },
     { key: 'CANCELLATION_HOURS', value: '24',                                                    category: 'BOOKING' },
     { key: 'MAX_BOOKING_DAYS',   value: '30',                                                    category: 'BOOKING' },
     { key: 'BOOKING_NOTE',       value: 'Please arrive 5 minutes before your appointment. Patch tests may be required for new clients.', category: 'BOOKING' },
-
-    // ── SOCIAL / SEO ──
     { key: 'INSTAGRAM_URL',      value: 'https://instagram.com/mikebeautystudio',                category: 'SOCIAL' },
     { key: 'FACEBOOK_URL',       value: 'https://facebook.com/mikebeautystudio',                 category: 'SOCIAL' },
     { key: 'TIKTOK_URL',         value: 'https://tiktok.com/@mikebeautystudio',                  category: 'SOCIAL' },
@@ -422,11 +406,11 @@ async function main() {
      Password: ${adminPassword}
 
   Data Created:
+     Clients:   7 
+     Workers:   2 + Admin mapped as Worker
      Services:  ${createdServices.length}
-     Gallery:   ${galleryMedia.length + servicesData.flatMap(s => (s as any).medias?.create || []).length} items
-     Bookings:  ${bookings.length} (4 NEW · 3 CONFIRMED · 3 COMPLETED · 1 CANCELLED)
-     Reviews:   ${reviews.length} (5 approved · 1 pending)
-     Settings:  ${settings.length} keys
+     Bookings:  ${bookings.length} (2 NEW · 1 CONFIRMED · 1 COMPLETED · 1 CANCELLED)
+     Financials Tracker Active.
   ─────────────────────────────────────────
   `);
 }

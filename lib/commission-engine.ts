@@ -4,7 +4,7 @@
  */
 export function calculateCommission(
   servicePrice: number,
-  commissionType: 'PERCENTAGE' | 'FIXED',
+  commissionType: 'PERCENTAGE' | 'FIXED' | string,
   commissionRate: number
 ): { workerCut: number; salonCut: number } {
   let workerCut = 0;

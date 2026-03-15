@@ -17,16 +17,16 @@ type ServiceData = {
 };
 
 type CategoryData = { id: string; name: string; order: number };
-type WorkerData = { id: string; user: { name: string } };
+type UserData = { id: string; name: string };
 
 export function ServicesDashboardClient({ 
   initialServices,
   categories,
-  workers 
+  users 
 }: { 
   initialServices: ServiceData[];
   categories: CategoryData[];
-  workers: WorkerData[];
+  users: UserData[];
 }) {
   const [services] = useState<ServiceData[]>(initialServices);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,7 +115,7 @@ export function ServicesDashboardClient({
         <ServiceModal 
           initialData={editingService} 
           categories={categories}
-          workers={workers}
+          workers={users}
           onClose={() => setIsModalOpen(false)} 
         />
       )}

@@ -1,5 +1,6 @@
 'use server';
 
+import { BookingStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
@@ -7,7 +8,7 @@ export async function updateBookingStatus(bookingId: string, newStatus: string) 
   try {
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
-      data: { status: newStatus },
+      data: { status: newStatus as BookingStatus },
     });
 
     // Revalidate the admin dashboard so changes reflect immediately

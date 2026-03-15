@@ -1,29 +1,29 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AdvanceStatus, ExpenseCategory } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 /**
  * Executes a worker payout.
  * Automatically clears their balance, deducts pending advances,
- * creates a WorkerPayment record, and logs an Expense for the salon.
+ * logs an Expense for the salon FIRST, and creates a WorkerPayment record tied strictly to that Expense.
  */
 export async function executeWorkerPayout(
-  workerId: string,
+  userId: string,
   adminUserId: string
 ) {
   return await prisma.$transaction(async (tx) => {
-    // 1. Fetch worker and their pending advances
-    const worker = await tx.worker.findUnique({
-      where: { id: workerId },
+    // 1. Fetch user (worker) and their pending advances
+    const worker = await tx.user.findUnique({
+      where: { id: userId },
       include: {
         advances: {
-          where: { status: 'PENDING' }
+          where: { status: AdvanceStatus.PENDING }
         }
       }
     });
 
     if (!worker) {
-      throw new Error(`Worker with ID ${workerId} not found.`);
+      throw new Error(`Worker with ID ${userId} not found.`);
     }
 
     if (worker.balance <= 0) {
@@ -41,38 +41,35 @@ export async function executeWorkerPayout(
 
     const netPayout = worker.balance - deductionAmount;
 
-    // 3. Update worker balance to 0 (since we are paying out whatever they have)
-    // If they owed more in advances than they earned, technically the balance is zeroed,
-    // and the remaining advance amount should ideally stay 'PENDING' if partially paid, 
-    // but for simplicity in v1, we assume advances are smaller than entire balance.
-    await tx.worker.update({
-      where: { id: workerId },
+    // 3. Update worker balance to 0
+    await tx.user.update({
+      where: { id: userId },
       data: { balance: 0 }
     });
 
     // 4. Mark all fully paid advances as DEDUCTED
-    // Simple logic: if netPayout >= 0, all pending advances were covered
     if (totalAdvances <= worker.balance) {
       await tx.workerAdvance.updateMany({
-        where: { workerId: workerId, status: 'PENDING' },
-        data: { status: 'DEDUCTED' }
+        where: { userId: userId, status: AdvanceStatus.PENDING },
+        data: { status: AdvanceStatus.DEDUCTED }
       });
     }
 
-    // 5. Create WorkerPayment record
-    const payment = await tx.workerPayment.create({
+    // 5. Log as a business Expense FIRST to gather ID (Orphan Prevention)
+    const expense = await tx.expense.create({
       data: {
-        workerId: workerId,
+        title: `Payout: ${worker.roleTitle || 'Staff'} ${userId.slice(0, 5)}`, 
         amount: netPayout,
+        category: ExpenseCategory.WORKER_PAYOUT,
       }
     });
 
-    // 6. Log as a business Expense
-    await tx.expense.create({
+    // 6. Create WorkerPayment record strictly tied to Expense
+    const payment = await tx.workerPayment.create({
       data: {
-        title: `Payout: ${worker.roleTitle} ${workerId.slice(0, 5)}`, 
+        userId: userId,
+        expenseId: expense.id,
         amount: netPayout,
-        category: 'WORKER_PAYOUT',
       }
     });
 
@@ -86,7 +83,8 @@ export async function executeWorkerPayout(
         details: JSON.stringify({
           gross_balance: worker.balance,
           advances_deducted: deductionAmount,
-          net_paid: netPayout
+          net_paid: netPayout,
+          expense_id: expense.id
         })
       }
     });
@@ -96,6 +94,7 @@ export async function executeWorkerPayout(
       grossBalance: worker.balance,
       advancesDeducted: deductionAmount,
       netPayout: netPayout,
+      expenseId: expense.id
     };
   });
 }

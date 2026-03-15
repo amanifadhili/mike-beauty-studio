@@ -15,7 +15,8 @@ export default async function TransactionsPage() {
   const transactions = await prisma.transaction.findMany({
     include: {
       service: { select: { name: true } },
-      worker: { include: { user: { select: { name: true } } } },
+      client: { select: { name: true } },
+      worker: { select: { name: true, roleTitle: true } },
     },
     orderBy: { date: 'desc' },
   });
@@ -60,9 +61,9 @@ export default async function TransactionsPage() {
                     style={{ borderBottom: '1px solid var(--admin-border-subtle)' }}
                   >
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td className="px-5 py-4 font-medium" style={{ color: 'var(--admin-text-primary)' }}>{t.clientName}</td>
+                    <td className="px-5 py-4 font-medium" style={{ color: 'var(--admin-text-primary)' }}>{t.client.name}</td>
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{t.service.name}</td>
-                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{t.worker.user.name}</td>
+                    <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{t.worker.name} {t.worker.roleTitle ? `(${t.worker.roleTitle})` : ''}</td>
                     <td className="px-5 py-4"><StatusBadge status={t.source} /></td>
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{PAYMENT_LABELS[t.paymentMethod] ?? t.paymentMethod}</td>
                     <td className="px-5 py-4 text-right font-medium text-gold">{t.price.toLocaleString()}</td>

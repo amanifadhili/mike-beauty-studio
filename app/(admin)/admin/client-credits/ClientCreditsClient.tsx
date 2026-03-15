@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 
 type ClientCredit = {
   id: string;
-  clientName: string;
-  clientPhone: string | null;
+  client: {
+    name: string;
+    phone: string | null;
+  };
   originalAmount: number;
   paidAmount: number;
   status: 'PENDING' | 'CLEARED';
@@ -106,9 +108,9 @@ export function ClientCreditsClient({ initialCredits }: { initialCredits: Client
                     {new Date(credit.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-white font-medium">{credit.clientName}</p>
-                    {credit.clientPhone && /^\+?\d{8,}$/.test(credit.clientPhone) && (
-                       <a href={`https://wa.me/${credit.clientPhone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-xs text-emerald-400/70 hover:text-emerald-400 mt-1 inline-block">WhatsApp</a>
+                    <p className="text-white font-medium">{credit.client.name}</p>
+                    {credit.client.phone && /^\+?\d{8,}$/.test(credit.client.phone) && (
+                       <a href={`https://wa.me/${credit.client.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-xs text-emerald-400/70 hover:text-emerald-400 mt-1 inline-block">WhatsApp</a>
                     )}
                   </td>
                   <td className="px-6 py-4 text-gray-300">{credit.transaction.service.name}</td>
@@ -143,7 +145,7 @@ export function ClientCreditsClient({ initialCredits }: { initialCredits: Client
           <div className="admin-surface-alt border border-white/10 p-8 max-w-sm w-full relative shadow-2xl">
             <h3 className="font-playfair text-2xl text-gold mb-2">Process Repayment</h3>
             <p className="text-gray-400 text-sm font-sans mb-6">
-              Client <strong className="text-white">{repaying.clientName}</strong> currently owes <strong className="text-red-400">RWF {(repaying.originalAmount - repaying.paidAmount).toLocaleString()}</strong>.
+              Client <strong className="text-white">{repaying.client.name}</strong> currently owes <strong className="text-red-400">RWF {(repaying.originalAmount - repaying.paidAmount).toLocaleString()}</strong>.
             </p>
 
             <form onSubmit={handleRepay} className="space-y-4 font-sans text-sm">

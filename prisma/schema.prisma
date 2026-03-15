@@ -10,37 +10,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ── NATIVE ENUMS ───────────────────────────────────────────────────────────
+enum Role {
+  ADMIN
+  WORKER
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CREDIT
+}
+
+enum TransactionSource {
+  BOOKING
+  WALK_IN
+}
+
+enum BookingStatus {
+  NEW
+  CONTACTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  CONVERTED
+}
+
+enum ExpenseCategory {
+  RENT
+  SUPPLIES
+  MAINTENANCE
+  UTILITIES
+  WORKER_PAYOUT
+  OTHER
+}
+
+enum CreditStatus {
+  PENDING
+  CLEARED
+}
+
+enum AdvanceStatus {
+  PENDING
+  DEDUCTED
+}
+
+// ── CORE MODELS ────────────────────────────────────────────────────────────
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("ADMIN") // For future RBAC: ADMIN, WORKER
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  name     String
+  role     Role   @default(ADMIN)
+
+  // Formerly "Worker" properties ported natively for 1:1 deduplication
+  phone          String?
+  roleTitle      String? // e.g., "Lash Technician", "Receptionist"
+  commissionType CommissionType @default(PERCENTAGE)
+  commissionRate Int            @default(0) // Percentage (e.g., 40 for 40%) or Fixed amount
+  status         UserStatus     @default(ACTIVE)
+  balance        Int            @default(0) // Unpaid earnings balance
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  workerProfile Worker?
-  auditLogs     AuditLog[]
-}
-
-model Worker {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  phone          String?
-  roleTitle      String // e.g., "Lash Technician", "Receptionist"
-  commissionType String   @default("PERCENTAGE") // "PERCENTAGE" or "FIXED"
-  commissionRate Int      @default(0) // Percentage (e.g., 40 for 40%) or Fixed amount in lowest currency unit
-  status         String   @default("ACTIVE") // "ACTIVE", "INACTIVE"
-  balance        Int      @default(0) // Unpaid earnings balance in lowest currency unit
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relationships
   transactions Transaction[]
   payments     WorkerPayment[]
   advances     WorkerAdvance[]
-  services     Service[]       // Many-to-many: Workers qualified to perform specific services
+  services     Service[] // Many-to-many: Users qualified to perform specific services
+  auditLogs    AuditLog[]
 }
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  email     String? // Useful for future marketing additions
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings     Booking[]
+  transactions Transaction[]
+  credits      ClientCredit[]
+}
+
+// ── SERVICES & BOOKINGS ────────────────────────────────────────────────────
 
 model ServiceCategory {
   id        String   @id @default(uuid())
@@ -49,7 +116,7 @@ model ServiceCategory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  services  Service[]
+  services Service[]
 }
 
 model Service {
@@ -59,12 +126,12 @@ model Service {
   description String
   duration    String // e.g. "2 hours"
   active      Boolean  @default(true)
-  categoryId  String?  // Optional relation to a category
+  categoryId  String? // Optional relation to a category
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   category     ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  workers      Worker[]         // Many-to-many: Workers qualified to perform this service
+  workers      User[] // Many-to-many: Staff qualified to perform this service
   medias       Media[]
   bookings     Booking[]
   transactions Transaction[]
@@ -82,87 +149,98 @@ model Media {
 }
 
 model Booking {
-  id            String   @id @default(uuid())
-  name          String
-  phone         String
+  id            String        @id @default(uuid())
+  clientId      String
   preferredDate DateTime
   preferredTime String
+  depositPaid   Int           @default(0) // Tracks prepaid booking fees
   notes         String?
-  status        String   @default("NEW") // "NEW", "CONTACTED", "SCHEDULED", "COMPLETED", "CANCELLED", "CONVERTED"
+  status        BookingStatus @default(NEW)
   serviceId     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   transactions Transaction[] // A booking can result in a transaction
 }
 
+// ── FINANCIAL LEDGERS ──────────────────────────────────────────────────────
+
 model Transaction {
-  id               String   @id @default(uuid())
-  clientName       String
-  clientPhone      String?
-  serviceId        String
-  workerId         String
-  bookingId        String? // Optional: Null if it's a walk-in
+  id        String  @id @default(uuid())
+  clientId  String
+  serviceId String
+  userId    String // The staff member who performed the service
+  bookingId String? // Optional: Null if it's a walk-in
+
   price            Int // Actual price charged
   workerCommission Int // Calculated block for the worker
   salonShare       Int // Calculated block for the salon
-  paymentMethod    String // "CASH", "MOBILE_MONEY", "BANK_TRANSFER", "CREDIT"
-  source           String // "BOOKING", "WALK_IN"
-  date             DateTime @default(now())
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
 
+  paymentMethod PaymentMethod
+  source        TransactionSource
+  date          DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  client  Client         @relation(fields: [clientId], references: [id], onDelete: Restrict)
   service Service        @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  worker  Worker         @relation(fields: [workerId], references: [id], onDelete: Restrict)
+  worker  User           @relation(fields: [userId], references: [id], onDelete: Restrict)
   booking Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   credits ClientCredit[]
 }
 
 model Expense {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   title     String
   amount    Int
-  category  String // "RENT", "SUPPLIES", "MAINTENANCE", "UTILITIES", "WORKER_PAYOUT", "OTHER"
-  date      DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  category  ExpenseCategory
+  date      DateTime        @default(now())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  payments WorkerPayment[] // Establishing the explicit ledger tie
 }
 
 model WorkerPayment {
   id        String   @id @default(uuid())
-  workerId  String
+  userId    String
+  expenseId String // Orphan prevention reference
   amount    Int // Total amount paid out
   date      DateTime @default(now())
   createdAt DateTime @default(now())
 
-  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  worker  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
 }
 
 model WorkerAdvance {
-  id        String   @id @default(uuid())
-  workerId  String
+  id        String        @id @default(uuid())
+  userId    String
   amount    Int
-  date      DateTime @default(now())
-  status    String   @default("PENDING") // "PENDING", "DEDUCTED"
-  createdAt DateTime @default(now())
+  date      DateTime      @default(now())
+  status    AdvanceStatus @default(PENDING)
+  createdAt DateTime      @default(now())
 
-  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  worker User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ClientCredit {
-  id             String   @id @default(uuid())
-  transactionId  String
-  clientName     String
-  clientPhone    String?
+  id             String       @id @default(uuid())
+  transactionId  String       @unique // 1-to-1 relation with Transaction
+  clientId       String
   originalAmount Int
-  paidAmount     Int      @default(0)
-  status         String   @default("PENDING") // "PENDING", "CLEARED"
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  paidAmount     Int          @default(0)
+  status         CreditStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 }
+
+// ── SYSTEM & AUDIT ─────────────────────────────────────────────────────────
 
 model AuditLog {
   id         String   @id @default(uuid())

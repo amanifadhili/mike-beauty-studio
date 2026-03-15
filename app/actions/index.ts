@@ -38,10 +38,17 @@ export async function createBooking(data: {
   serviceId: string;
 }) {
   try {
+    // 1. Find or create the Client record (phone is the unique identifier)
+    const client = await prisma.client.upsert({
+      where: { phone: data.phone },
+      update: { name: data.name }, // Update name if they rebook
+      create: { name: data.name, phone: data.phone },
+    });
+
+    // 2. Create the Booking linked to the Client record
     const booking = await prisma.booking.create({
       data: {
-        name: data.name,
-        phone: data.phone,
+        clientId: client.id,
         preferredDate: data.preferredDate,
         preferredTime: data.preferredTime,
         notes: data.notes,

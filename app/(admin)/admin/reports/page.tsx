@@ -14,15 +14,15 @@ async function getReportData() {
     prisma.expense.aggregate(     { where: { date: { gte: today } },    _sum: { amount: true } }),
     prisma.expense.aggregate(     { where: { date: { gte: monthAgo } }, _sum: { amount: true } }),
     prisma.transaction.groupBy({ by: ['paymentMethod'], _sum: { price: true }, orderBy: { _sum: { price: 'desc' } } }),
-    prisma.transaction.groupBy({ by: ['workerId'], _sum: { price: true, workerCommission: true }, orderBy: { _sum: { price: 'desc' } }, take: 5 }),
+    prisma.transaction.groupBy({ by: ['userId'], _sum: { price: true, workerCommission: true }, orderBy: { _sum: { price: 'desc' } }, take: 5 }),
   ]);
 
-  const workerIds = topWorkers.map(w => w.workerId);
-  const workerUsers = await prisma.worker.findMany({ where: { id: { in: workerIds } }, include: { user: { select: { name: true } } } });
+  const userIds = topWorkers.map(w => w.userId);
+  const topUsers = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } });
 
   const enrichedWorkers = topWorkers.map(tw => ({
     ...tw,
-    name: workerUsers.find(w => w.id === tw.workerId)?.user.name ?? 'Unknown',
+    name: topUsers.find(u => u.id === tw.userId)?.name ?? 'Unknown',
   }));
 
   return { todayTx, monthTx, todayExp, monthExp, paymentMethods, topWorkers: enrichedWorkers };
@@ -82,7 +82,7 @@ export default async function ReportsPage() {
           {topWorkers.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: 'var(--admin-text-muted)' }}>No data yet.</p>
           ) : topWorkers.map((w, i) => (
-            <div key={w.workerId} className="flex justify-between items-center">
+            <div key={w.userId} className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <span className="w-4 text-xs font-mono" style={{ color: 'var(--admin-text-muted)' }}>#{i + 1}</span>
                 <span className="text-sm" style={{ color: 'var(--admin-text-primary)' }}>{w.name}</span>
