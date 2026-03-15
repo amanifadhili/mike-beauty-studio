@@ -2,14 +2,21 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { Role, CommissionType, UserStatus } from '@prisma/client';
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
 // POST: Create a brand-new Staff User directly (WORKER role)
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    let adminUserId = (session.user as any).id;
+    if (!adminUserId) {
+      const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
+      if (!dbUser) return NextResponse.json({ success: false, error: 'Admin user not found in DB' }, { status: 401 });
+      adminUserId = dbUser.id;
     }
 
     const body = await req.json();
@@ -37,7 +44,7 @@ export async function POST(req: Request) {
         role: Role.WORKER,
         roleTitle,
         commissionType: commissionType as CommissionType,
-        commissionRate: parseFloat(commissionRate.toString()),
+        commissionRate: Math.round(Number(commissionRate)),
         status: UserStatus.ACTIVE,
         balance: 0,
       }
@@ -46,7 +53,7 @@ export async function POST(req: Request) {
     // Audit log
     await prisma.auditLog.create({
       data: {
-        userId: (session.user as any).id || 'system',
+        userId: adminUserId,
         action: 'CREATE_STAFF',
         targetId: newStaff.id,
         targetType: 'User',
@@ -84,7 +91,7 @@ export async function PUT(req: Request) {
         ...(phone !== undefined ? { phone } : {}),
         ...(roleTitle !== undefined ? { roleTitle } : {}),
         commissionType: commissionType as CommissionType,
-        commissionRate: commissionRate !== undefined ? parseFloat(commissionRate.toString()) : undefined,
+        commissionRate: commissionRate !== undefined ? Math.round(Number(commissionRate)) : undefined,
         status: status as UserStatus,
       }
     });

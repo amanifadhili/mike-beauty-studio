@@ -107,7 +107,7 @@ export function BookingTable({ initialBookings, staff = [] }: { initialBookings:
             </thead>
             <tbody className="divide-y" style={{ ['--tw-divide-opacity' as string]: 1 }}>
               {bookings.map(booking => (
-                <tr key={booking.id} className="transition-colors" style={{ ['--tw-bg-opacity' as string]: 0 }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')} onMouseLeave={e => (e.currentTarget.style.background = '')}>
+                <tr key={booking.id} className="transition-colors hover:bg-white/[0.02]">
                   <td className="px-6 py-4"><StatusBadge status={booking.status} /></td>
                   <td className="px-6 py-4">
                     <p className="font-medium" style={{ color: 'var(--admin-text-primary)' }}>{booking.client.name}</p>

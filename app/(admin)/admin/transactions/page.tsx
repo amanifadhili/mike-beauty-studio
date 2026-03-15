@@ -55,9 +55,7 @@ export default async function TransactionsPage() {
                 {transactions.map(t => (
                   <tr
                     key={t.id}
-                    className="transition-colors"
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={e => e.currentTarget.style.background = ''}
+                    className="transition-colors hover:bg-white/[0.02]"
                     style={{ borderBottom: '1px solid var(--admin-border-subtle)' }}
                   >
                     <td className="px-5 py-4" style={{ color: 'var(--admin-text-secondary)' }}>{new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>

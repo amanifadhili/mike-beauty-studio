@@ -46,7 +46,7 @@ export function WorkerModal({ isOpen, onClose, onSuccess, editWorker }: WorkerMo
           email: editWorker.email,
           password: '', // Never pre-fill password
           phone: '',
-          roleTitle: editWorker.roleTitle || '',
+          roleTitle: editWorker.roleTitle || 'Lash Technician',
           commissionType: editWorker.commissionType,
           commissionRate: editWorker.commissionRate.toString(),
           status: editWorker.status,
@@ -54,7 +54,7 @@ export function WorkerModal({ isOpen, onClose, onSuccess, editWorker }: WorkerMo
       } else {
         setFormData({
           name: '', email: '', password: '', phone: '',
-          roleTitle: '', commissionType: 'PERCENTAGE',
+          roleTitle: 'Lash Technician', commissionType: 'PERCENTAGE',
           commissionRate: '', status: 'ACTIVE',
         });
       }
@@ -146,8 +146,7 @@ export function WorkerModal({ isOpen, onClose, onSuccess, editWorker }: WorkerMo
             </>
           )}
 
-          {/* Editable on both create and edit */}
-          {field('Role Title', 'roleTitle', 'text', 'e.g. Lash Technician')}
+          {/* Role is defaulted to 'Lash Technician' backend/state, no need for input here */}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
