@@ -47,11 +47,11 @@ export async function PUT(request: Request) {
   try {
     const session = await auth();
     // Allow Admins to manage debts
-    if (!session || !session.user?.email || (session.user as any)?.role !== Role.ADMIN) {
+    if (!session || !session.user?.email || session.user?.role !== Role.ADMIN) {
       return NextResponse.json({ error: 'Unauthorized. Admins only.' }, { status: 401 });
     }
 
-    let adminUserId = (session.user as any).id;
+    let adminUserId = session.user.id;
     if (!adminUserId) {
       const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
       if (!dbUser) return NextResponse.json({ success: false, error: 'Admin user not found' }, { status: 401 });

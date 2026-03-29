@@ -5,15 +5,8 @@ import Link from 'next/link';
 export default async function AdminOverviewPage() {
   const result = await getDashboardMetrics();
 
-  if (!result.success || !result.metrics) {
-    return (
-      <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-lg font-sans text-sm">
-        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Failed to load dashboard metrics. {result.error}
-      </div>
-    );
+  if (!result.success || !('metrics' in result) || !('recentActivity' in result) || !result.metrics || !result.recentActivity) {
+    throw new Error(`Metrics Failure: ${'error' in result ? result.error : 'Unable to aggregate booking statistics.'}`);
   }
 
   const { metrics, recentActivity } = result;
@@ -61,13 +54,6 @@ export default async function AdminOverviewPage() {
     },
   ];
 
-  const statusColors: Record<string, string> = {
-    NEW: 'border-amber-500/40 text-amber-400 bg-amber-500/[0.08]',
-    CONFIRMED: 'border-blue-500/40 text-blue-400 bg-blue-500/[0.08]',
-    COMPLETED: 'border-green-500/40 text-green-400 bg-green-500/[0.08]',
-    CANCELLED: 'border-red-500/40 text-red-400 bg-red-500/[0.08]',
-  };
-
   return (
     <div className="space-y-12 animate-fade-in-up">
 
@@ -108,7 +94,7 @@ export default async function AdminOverviewPage() {
           );
 
           return card.href ? (
-            <Link key={card.label} href={card.href} className="block">
+            <Link key={card.label} href={card.href} aria-label={`View ${card.label}`} className="block">
               {inner}
             </Link>
           ) : (
@@ -141,9 +127,7 @@ export default async function AdminOverviewPage() {
                 {new Date(booking.preferredDate).toLocaleDateString()} · {booking.preferredTime}
               </td>
               <td className="px-6 py-4">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
-                  {booking.status}
-                </span>
+                <StatusBadge status={booking.status} />
               </td>
             </tr>
           )}
@@ -151,9 +135,7 @@ export default async function AdminOverviewPage() {
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-white font-sans font-medium text-sm">{booking.client.name}</p>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${statusColors[booking.status] || 'border-gray-600/40 text-gray-400 bg-gray-600/10'}`}>
-                  {booking.status}
-                </span>
+                <StatusBadge status={booking.status} />
               </div>
               <p className="text-gray-400 font-sans text-xs">{booking.service.name}</p>
               <p className="text-gray-600 font-sans text-xs">

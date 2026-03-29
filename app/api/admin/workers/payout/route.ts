@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    let adminUserId = (session.user as any).id;
+    let adminUserId = session.user.id;
     if (!adminUserId) {
       // Import prisma just for this fallback
       const { prisma } = await import('@/lib/prisma');

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    let adminUserId = (session.user as any).id;
+    let adminUserId = session.user.id;
     if (!adminUserId) {
       const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
       if (!dbUser) return NextResponse.json({ success: false, error: 'Admin user not found in DB' }, { status: 401 });

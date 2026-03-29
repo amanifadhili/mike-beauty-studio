@@ -33,32 +33,32 @@
   --admin-text-muted:     #4b5563; /* gray-600 */
   --admin-text-faint:     #374151; /* gray-700 */
 
-  /* Status colours — Revenue / Finance */
-  --status-new-text:       #fbbf24; /* amber-400  */
+  /* Status colours — Revenue / Finance (lightened text for guaranteed WCAG AA contrast) */
+  --status-new-text:       #fcd34d; /* amber-300 */
   --status-new-bg:         rgba(251,191,36,0.08);
   --status-new-border:     rgba(245,158,11,0.40);
 
-  --status-confirmed-text:   #60a5fa; /* blue-400 */
+  --status-confirmed-text:   #93c5fd; /* blue-300 */
   --status-confirmed-bg:     rgba(96,165,250,0.08);
   --status-confirmed-border: rgba(59,130,246,0.40);
 
-  --status-completed-text:   #4ade80; /* green-400 */
+  --status-completed-text:   #86efac; /* green-300 */
   --status-completed-bg:     rgba(74,222,128,0.08);
   --status-completed-border: rgba(34,197,94,0.40);
 
-  --status-cancelled-text:   #f87171; /* red-400   */
+  --status-cancelled-text:   #fca5a5; /* red-300 */
   --status-cancelled-bg:     rgba(248,113,113,0.08);
   --status-cancelled-border: rgba(239,68,68,0.40);
 
-  --status-converted-text:   #c084fc; /* purple-400 */
+  --status-converted-text:   #d8b4fe; /* purple-300 */
   --status-converted-bg:     rgba(192,132,252,0.08);
   --status-converted-border: rgba(168,85,247,0.40);
 
-  --status-active-text:      #4ade80;
+  --status-active-text:      #86efac; /* green-300 */
   --status-active-bg:        rgba(74,222,128,0.08);
   --status-active-border:    rgba(34,197,94,0.40);
 
-  --status-inactive-text:    #9ca3af;
+  --status-inactive-text:    #d1d5db; /* gray-300 */
   --status-inactive-bg:      rgba(156,163,175,0.08);
   --status-inactive-border:  rgba(107,114,128,0.40);
 
@@ -104,9 +104,10 @@ body {
 
 .admin-page       { background-color: var(--admin-base); min-height: 100vh; }
 .admin-card       { background-color: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 0.75rem; }
-.admin-input      { background-color: var(--admin-elevated); border: 1px solid var(--admin-border); color: var(--admin-text-primary); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; outline: none; transition: border-color 0.15s; }
+.admin-input      { background-color: var(--admin-elevated); border: 1px solid var(--admin-border); color: var(--admin-text-primary); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; outline: none; transition: border-color 0.15s, outline 0.15s; }
 .admin-input:focus { border-color: var(--admin-border-focus); }
-.admin-select     { background-color: var(--admin-elevated); border: 1px solid var(--admin-border); color: var(--admin-text-primary); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; outline: none; }
+.admin-input:focus-visible, .admin-select:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; border-color: transparent; }
+.admin-select     { background-color: var(--admin-elevated); border: 1px solid var(--admin-border); color: var(--admin-text-primary); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; outline: none; transition: border-color 0.15s, outline 0.15s; }
 
 /* Status badge base — apply with variant class */
 .badge            { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; border-width: 1px; border-style: solid; }
@@ -119,3 +120,7 @@ body {
 .badge-inactive   { color: var(--status-inactive-text);  background-color: var(--status-inactive-bg);  border-color: var(--status-inactive-border); }
 .badge-walkin     { color: var(--source-walkin-text);    background-color: var(--source-walkin-bg);    border-color: var(--source-walkin-border); }
 .badge-booking    { color: var(--source-booking-text);   background-color: var(--source-booking-bg);   border-color: var(--source-booking-border); }
+
+/* Toggle utilities */
+.toggle-active    { background-color: var(--status-active-text); box-shadow: 0 0 8px var(--status-active-border); }
+.toggle-inactive  { background-color: var(--status-cancelled-text); box-shadow: 0 0 8px var(--status-cancelled-border); }

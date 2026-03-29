@@ -1,10 +1,23 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { requireAdmin } from '@/lib/auth/requireRole';
+import { z } from 'zod';
+
+const SaveServiceSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  price: z.number().int().min(0, 'Price must be positive'),
+  duration: z.string().min(1, 'Duration is required'),
+  categoryId: z.string().nullable().optional(),
+  userIds: z.array(z.string()).optional()
+});
 
 export async function toggleServiceStatus(serviceId: string, currentStatus: boolean) {
   try {
+    await requireAdmin();
     await prisma.service.update({
       where: { id: serviceId },
       data: { active: !currentStatus },
@@ -13,6 +26,8 @@ export async function toggleServiceStatus(serviceId: string, currentStatus: bool
     revalidatePath('/admin/services');
     revalidatePath('/services'); // Revalidate public page
     revalidatePath('/booking');  // Revalidate public booking dropdown
+    // @ts-expect-error - Next 16 typing requires a second param profile
+    revalidateTag('dashboard-metrics');
     
     return { success: true };
   } catch (error) {
@@ -21,7 +36,7 @@ export async function toggleServiceStatus(serviceId: string, currentStatus: bool
   }
 }
 
-export async function saveService(data: {
+export async function saveService(rawPayload: {
   id?: string;
   name: string;
   description: string;
@@ -31,6 +46,13 @@ export async function saveService(data: {
   userIds?: string[];
 }) {
   try {
+    await requireAdmin();
+    const parsed = SaveServiceSchema.safeParse(rawPayload);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+    const data = parsed.data;
+
     if (data.id) {
       // Update existing
       await prisma.service.update({
@@ -66,6 +88,8 @@ export async function saveService(data: {
     revalidatePath('/admin/services');
     revalidatePath('/services');
     revalidatePath('/booking');
+    // @ts-expect-error - Next 16 typing requires a second param profile
+    revalidateTag('dashboard-metrics');
     
     return { success: true };
   } catch (error) {
@@ -76,6 +100,7 @@ export async function saveService(data: {
 
 export async function deleteService(serviceId: string) {
   try {
+    await requireAdmin();
     // Note: Due to foreign key constraints, you can only delete a service 
     // if it has no associated Bookings or Media, OR if you configured cascading deletes in Prisma.
     // Assuming cascading isn't blindly on for bookings (we want to keep history), 
@@ -86,6 +111,8 @@ export async function deleteService(serviceId: string) {
     
     revalidatePath('/admin/services');
     revalidatePath('/services');
+    // @ts-expect-error - Next 16 typing requires a second param profile
+    revalidateTag('dashboard-metrics');
     
     return { success: true };
   } catch (error: any) {

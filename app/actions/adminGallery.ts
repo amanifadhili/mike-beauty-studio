@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { requireAdmin } from '@/lib/auth/requireRole';
 
 export async function addGalleryMedia(data: {
   url: string;
@@ -13,6 +14,7 @@ export async function addGalleryMedia(data: {
   serviceId?: string;
 }) {
   try {
+    await requireAdmin();
     const newMedia = await prisma.media.create({
       data: {
         url: data.url,
@@ -33,6 +35,7 @@ export async function addGalleryMedia(data: {
 
 export async function deleteGalleryMedia(mediaId: string) {
   try {
+    await requireAdmin();
     const media = await prisma.media.findUnique({ where: { id: mediaId } });
     
     await prisma.media.delete({ where: { id: mediaId } });

@@ -101,9 +101,10 @@ export function ServicesDashboardClient({
                       <tr key={service.id} className={`transition-colors hover:bg-white/[0.02] ${!service.active ? 'opacity-50' : ''}`}>
                         <td className="px-6 py-4">
                           <button 
+                            aria-label={service.active ? 'Disable service' : 'Enable service'}
                             onClick={() => handleToggleActive(service.id, service.active)}
                             className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 ${
-                              service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                              service.active ? 'toggle-active' : 'toggle-inactive'
                             }`}
                           />
                         </td>
@@ -142,9 +143,10 @@ export function ServicesDashboardClient({
                             <h3 className="font-playfair text-xl text-white">{service.name}</h3>
                           </div>
                           <button 
+                            aria-label={service.active ? 'Disable service' : 'Enable service'}
                             onClick={() => handleToggleActive(service.id, service.active)}
                             className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
-                              service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                              service.active ? 'toggle-active' : 'toggle-inactive'
                             }`}
                           />
                         </div>
@@ -181,9 +183,10 @@ export function ServicesDashboardClient({
                       <tr key={service.id} className={`hover:bg-white/[0.02] ${!service.active ? 'opacity-50' : ''}`}>
                         <td className="px-6 py-4">
                             <button 
+                                aria-label={service.active ? 'Disable service' : 'Enable service'}
                                 onClick={() => handleToggleActive(service.id, service.active)}
                                 className={`w-3 h-3 rounded-full transition-colors ${
-                                    service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                                    service.active ? 'toggle-active' : 'toggle-inactive'
                                 }`}
                             />
                         </td>
@@ -203,8 +206,9 @@ export function ServicesDashboardClient({
                         <div className="flex justify-between">
                             <h3 className="text-white font-medium">{service.name}</h3>
                             <button 
+                                aria-label={service.active ? 'Disable service' : 'Enable service'}
                                 onClick={() => handleToggleActive(service.id, service.active)}
-                                className={`w-3 h-3 rounded-full ${service.active ? 'bg-green-500' : 'bg-red-500'}`}
+                                className={`w-3 h-3 rounded-full ${service.active ? 'toggle-active' : 'toggle-inactive'}`}
                             />
                         </div>
                         <p className="text-xs text-gray-500 my-2">{service.description}</p>
@@ -248,9 +252,10 @@ export function ServicesDashboardClient({
           </div>
           
           <button 
+            aria-label={service.active ? 'Disable service' : 'Enable service'}
             onClick={() => handleToggleActive(service.id, service.active)}
             className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
-              service.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+              service.active ? 'toggle-active' : 'toggle-inactive'
             }`}
             title={service.active ? "Click to Disable" : "Click to Enable"}
           />

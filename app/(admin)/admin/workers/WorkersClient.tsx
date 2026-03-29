@@ -114,7 +114,7 @@ export default function WorkersClient({ workers }: { workers: StaffUser[] }) {
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <span className="font-semibold text-white">{worker.name}</span>
-                  <button onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
+                  <button aria-label="Edit worker" onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
                     <EditIcon />
                   </button>
                 </div>
@@ -163,7 +163,7 @@ export default function WorkersClient({ workers }: { workers: StaffUser[] }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-semibold font-sans text-white">{worker.name}</p>
-                    <button onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
+                    <button aria-label="Edit worker" onClick={() => openEdit(worker)} className="p-1 rounded opacity-50 hover:opacity-100 hover:bg-white/5 transition-all">
                       <EditIcon />
                     </button>
                   </div>

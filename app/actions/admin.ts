@@ -2,27 +2,23 @@
 
 import { prisma } from '@/lib/prisma';
 import { BookingStatus } from '@prisma/client';
+import { requireAdmin } from '@/lib/auth/requireRole';
+import { unstable_cache } from 'next/cache';
 
-export async function getDashboardMetrics() {
-  try {
-    // 1. Get total number of incoming (NEW) bookings
+const getCachedMetrics = unstable_cache(
+  async () => {
     const newBookingsCount = await prisma.booking.count({
       where: {
         status: BookingStatus.NEW,
       },
     });
 
-    // 2. Get total number of active services
     const activeServicesCount = await prisma.service.count({
       where: {
         active: true,
       },
     });
 
-    // 3. Get total revenue (mocking this as a simple sum of completed prices, though in real life it might be more complex)
-    // For now we'll just track total total services booked to calculate potential value
-    
-    // 4. Fetch the 5 most recent bookings of any status
     const recentActivity = await prisma.booking.findMany({
       take: 5,
       orderBy: {
@@ -35,12 +31,28 @@ export async function getDashboardMetrics() {
     });
 
     return {
-      success: true,
       metrics: {
         newBookings: newBookingsCount,
         activeServices: activeServicesCount,
       },
       recentActivity,
+    };
+  },
+  ['dashboard-metrics-key'],
+  {
+    revalidate: 60,
+    tags: ['dashboard-metrics'],
+  }
+);
+
+export async function getDashboardMetrics() {
+  try {
+    await requireAdmin();
+    const data = await getCachedMetrics();
+
+    return {
+      success: true,
+      ...data,
     };
   } catch (error) {
     console.error('Failed to fetch dashboard metrics:', error);
