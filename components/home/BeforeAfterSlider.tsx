@@ -1,108 +1,139 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { SectionHeading } from '../ui/SectionHeading';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export function BeforeAfterSlider() {
-  const [sliderPosition, setSliderPosition] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleMove = (clientX: number) => {
-    if (!containerRef.current) return;
-    const { left, width } = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(clientX - left, width));
-    const percent = (x / width) * 100;
-    setSliderPosition(percent);
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    handleMove(e.clientX);
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    if (!isDragging) return;
-    handleMove(e.touches[0].clientX);
-  };
+  const beforeWrapperRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const beforeLabelRef = useRef<HTMLDivElement>(null);
+  const afterLabelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', () => setIsDragging(false));
-      window.addEventListener('touchmove', handleTouchMove);
-      window.addEventListener('touchend', () => setIsDragging(false));
-    }
+    if (!sectionRef.current || !beforeWrapperRef.current || !handleRef.current || !beforeLabelRef.current || !afterLabelRef.current) return;
+
+    // Reset initial states for GSAP
+    gsap.set(beforeWrapperRef.current, { clipPath: 'inset(0% 0% 0% 0%)' });
+    gsap.set(handleRef.current, { left: '100%' });
+    // Text labels start states
+    gsap.set(beforeLabelRef.current, { opacity: 1 });
+    gsap.set(afterLabelRef.current, { opacity: 0 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'center center',
+        end: '+=800', // Pins the section for 800px of scrolling
+        pin: true,
+        scrub: 1, // Appends a 1-second momentum smoothing effect
+        anticipatePin: 1, // Prevents layout jumping when pin kicks in
+      }
+    });
+
+    // 1. Core Slider Reveal Animation (Duration 1 for easy percentage math)
+    tl.to(beforeWrapperRef.current, {
+      clipPath: 'inset(0% 100% 0% 0%)',
+      duration: 1,
+      ease: 'none',
+    }, 0)
+    .to(handleRef.current, {
+      left: '0%',
+      duration: 1,
+      ease: 'none',
+    }, 0)
+    
+    // 2. Cinematic Label Crossfades
+    // As the slider moves leftwards:
+    // The After label on the right is uncovered by the handle at ~15% progress. So we fade it in gracefully slightly after.
+    .to(afterLabelRef.current, {
+      opacity: 1,
+      duration: 0.2, // Takes 20% of the total scroll
+      ease: 'power1.inOut',
+    }, 0.2)
+    // The Before label on the left is sliced by the handle at ~85% progress. So we gently fade it out right before the blade hits it.
+    .to(beforeLabelRef.current, {
+      opacity: 0,
+      duration: 0.2, // Takes 20% of the total scroll
+      ease: 'power1.inOut',
+    }, 0.6);
+
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', () => setIsDragging(false));
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', () => setIsDragging(false));
+      // Clean up ScrollTriggers
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
-  }, [isDragging]);
+  }, []);
 
   return (
-    <section className="py-12 md:py-20 bg-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-12 md:py-20 bg-white relative overflow-hidden min-h-screen flex flex-col justify-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         
         <SectionHeading 
           title="The Transformation"
-          subtitle="Drag the slider to see the dramatic difference a professional volume set can make."
+          subtitle="Watch the dramatic difference a professional volume set makes as you scroll down."
           alignment="center"
         />
 
-        <div className="mt-10 md:mt-16 flex justify-center">
+        <div className="mt-10 md:mt-16 flex justify-center w-full">
           <div 
             ref={containerRef}
-            className="relative w-full max-w-4xl aspect-[3/2] md:aspect-[16/9] overflow-hidden bg-gray-100 select-none cursor-ew-resize border border-[#eaeaea]"
-            onMouseDown={(e) => {
-              setIsDragging(true);
-              handleMove(e.clientX);
-            }}
-            onTouchStart={(e) => {
-              setIsDragging(true);
-              handleMove(e.touches[0].clientX);
-            }}
+            className="relative w-full max-w-4xl aspect-[3/2] md:aspect-[16/9] overflow-hidden bg-gray-100 shadow-2xl border border-[#eaeaea] group"
           >
-            {/* After Image (Background) */}
+            {/* After Image (Background - always visible) */}
             <div className="absolute inset-0 w-full h-full">
-              {/* Note: Replacing with actual asset later. Using a solid color placeholder for now if NO asset exists */}
-              <div className="w-full h-full bg-soft-pink flex items-center justify-center">
-                <span className="text-xl font-playfair text-charcoal opacity-50 block md:hidden">After</span>
+              <Image 
+                src="https://images.pexels.com/photos/3997384/pexels-photo-3997384.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                alt="After volume lash extensions"
+                fill
+                priority
+                className="object-cover pointer-events-none"
+                sizes="(max-width: 768px) 100vw, 1000px"
+              />
+              {/* After Label (Fades In) */}
+              <div ref={afterLabelRef} className="absolute top-6 right-6 hidden md:block z-20">
+                <span className="bg-white/90 backdrop-blur px-5 py-2.5 font-sans text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">After (Volume Set)</span>
               </div>
             </div>
 
-            {/* Before Image (Foreground overlay) */}
+            {/* Before Image (Foreground overlay - clipped dynamically by GSAP) */}
             <div 
-              className="absolute inset-0 w-full h-full overflow-hidden"
-              style={{ width: `${sliderPosition}%` }}
+              ref={beforeWrapperRef}
+              className="absolute inset-0 w-full h-full z-10"
+              style={{ clipPath: 'inset(0% 0% 0% 0%)' }}
             >
-              <div className="absolute inset-0 w-[100vw] h-full" style={{ width: containerRef.current?.offsetWidth || '100%' }}>
-                  <div className="w-full h-full bg-cream flex items-center justify-center border-r-[3px] border-white">
-                    <span className="text-xl font-playfair text-charcoal opacity-50 block md:hidden">Before</span>
-                  </div>
+              <Image 
+                src="https://images.pexels.com/photos/3986970/pexels-photo-3986970.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                alt="Before volume lash extensions"
+                fill
+                priority
+                className="object-cover pointer-events-none"
+                sizes="(max-width: 768px) 100vw, 1000px"
+              />
+              {/* Before Label (Fades Out) */}
+              <div ref={beforeLabelRef} className="absolute top-6 left-6 hidden md:block z-20">
+                <span className="bg-white/90 backdrop-blur px-5 py-2.5 font-sans text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">Before</span>
               </div>
             </div>
 
-            {/* Labels (Desktop) */}
-            <div className="absolute top-6 left-6 hidden md:block z-20">
-              <span className="bg-white/80 backdrop-blur px-4 py-2 font-sans text-sm tracking-wider uppercase text-charcoal">Before</span>
-            </div>
-            <div className="absolute top-6 right-6 hidden md:block z-10">
-              <span className="bg-white/80 backdrop-blur px-4 py-2 font-sans text-sm tracking-wider uppercase text-charcoal">After (Volume Set)</span>
-            </div>
-
-            {/* The Handle */}
+            {/* The Handle / Divider Line */}
             <div 
-              className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-30"
-              style={{ left: `calc(${sliderPosition}% - 2px)` }}
+              ref={handleRef}
+              className="absolute top-0 bottom-0 w-[3px] bg-white shadow-[0_0_20px_rgba(0,0,0,0.5)] z-30 pointer-events-none"
+              style={{ left: '100%', transform: 'translateX(-50%)' }}
             >
-              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-[0_0_15px_rgba(0,0,0,0.15)] flex items-center justify-center flex-col gap-1 border border-[#eaeaea]">
+              <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex items-center justify-center flex-col gap-1.5 border border-[#eaeaea]">
                 {/* Grip Lines */}
-                <div className="w-px h-3 bg-gold"></div>
-                <div className="w-px h-4 bg-gold"></div>
-                <div className="w-px h-3 bg-gold"></div>
+                <div className="w-[2px] h-3 bg-gold"></div>
+                <div className="w-[2px] h-5 bg-gold"></div>
+                <div className="w-[2px] h-3 bg-gold"></div>
               </div>
             </div>
 
