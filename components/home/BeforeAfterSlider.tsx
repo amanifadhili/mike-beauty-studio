@@ -21,59 +21,58 @@ export function BeforeAfterSlider() {
   useEffect(() => {
     if (!sectionRef.current || !beforeWrapperRef.current || !handleRef.current || !beforeLabelRef.current || !afterLabelRef.current) return;
 
-    // Reset initial states for GSAP
-    gsap.set(beforeWrapperRef.current, { clipPath: 'inset(0% 0% 0% 0%)' });
-    gsap.set(handleRef.current, { left: '100%' });
-    // Text labels start states
-    gsap.set(beforeLabelRef.current, { opacity: 1 });
-    gsap.set(afterLabelRef.current, { opacity: 0 });
+    let ctx = gsap.context(() => {
+      // Reset initial states for GSAP
+      gsap.set(beforeWrapperRef.current, { clipPath: 'inset(0% 0% 0% 0%)' });
+      gsap.set(handleRef.current, { left: '100%' });
+      // Text labels start states
+      gsap.set(beforeLabelRef.current, { opacity: 1 });
+      gsap.set(afterLabelRef.current, { opacity: 0 });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: 'center center',
-        end: '+=800', // Pins the section for 800px of scrolling
-        pin: true,
-        scrub: 1, // Appends a 1-second momentum smoothing effect
-        anticipatePin: 1, // Prevents layout jumping when pin kicks in
-      }
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'center center',
+          end: '+=800', // Pins the section for 800px of scrolling
+          pin: true,
+          scrub: 1, // Appends a 1-second momentum smoothing effect
+          anticipatePin: 1, // Prevents layout jumping when pin kicks in
+        }
+      });
 
-    // 1. Core Slider Reveal Animation (Duration 1 for easy percentage math)
-    tl.to(beforeWrapperRef.current, {
-      clipPath: 'inset(0% 100% 0% 0%)',
-      duration: 1,
-      ease: 'none',
-    }, 0)
-    .to(handleRef.current, {
-      left: '0%',
-      duration: 1,
-      ease: 'none',
-    }, 0)
-    
-    // 2. Cinematic Label Crossfades
-    // As the slider moves leftwards:
-    // The After label on the right is uncovered by the handle at ~15% progress. So we fade it in gracefully slightly after.
-    .to(afterLabelRef.current, {
-      opacity: 1,
-      duration: 0.2, // Takes 20% of the total scroll
-      ease: 'power1.inOut',
-    }, 0.2)
-    // The Before label on the left is sliced by the handle at ~85% progress. So we gently fade it out right before the blade hits it.
-    .to(beforeLabelRef.current, {
-      opacity: 0,
-      duration: 0.2, // Takes 20% of the total scroll
-      ease: 'power1.inOut',
-    }, 0.6);
+      // 1. Core Slider Reveal Animation (Duration 1 for easy percentage math)
+      tl.to(beforeWrapperRef.current, {
+        clipPath: 'inset(0% 100% 0% 0%)',
+        duration: 1,
+        ease: 'none',
+      }, 0)
+      .to(handleRef.current, {
+        left: '0%',
+        duration: 1,
+        ease: 'none',
+      }, 0)
+      
+      // 2. Cinematic Label Crossfades
+      // As the slider moves leftwards:
+      // The After label on the right is uncovered by the handle at ~15% progress. So we fade it in gracefully slightly after.
+      .to(afterLabelRef.current, {
+        opacity: 1,
+        duration: 0.2, // Takes 20% of the total scroll
+        ease: 'power1.inOut',
+      }, 0.2)
+      // The Before label on the left is sliced by the handle at ~85% progress. So we gently fade it out right before the blade hits it.
+      .to(beforeLabelRef.current, {
+        opacity: 0,
+        duration: 0.2, // Takes 20% of the total scroll
+        ease: 'power1.inOut',
+      }, 0.6);
+    }, sectionRef);
 
-    return () => {
-      // Clean up ScrollTriggers
-      ScrollTrigger.getAll().forEach(t => t.kill());
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-12 md:py-20 bg-white relative overflow-hidden min-h-screen flex flex-col justify-center">
+    <section ref={sectionRef} className="py-12 md:py-20 bg-white relative overflow-hidden h-[100svh] min-h-[100svh] flex flex-col justify-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         
         <SectionHeading 
@@ -98,8 +97,11 @@ export function BeforeAfterSlider() {
                 sizes="(max-width: 768px) 100vw, 1000px"
               />
               {/* After Label (Fades In) */}
-              <div ref={afterLabelRef} className="absolute top-6 right-6 hidden md:block z-20">
-                <span className="bg-white/90 backdrop-blur px-5 py-2.5 font-sans text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">After (Volume Set)</span>
+              <div ref={afterLabelRef} className="absolute top-3 right-3 md:top-6 md:right-6 z-20">
+                <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">
+                  <span className="md:hidden">After</span>
+                  <span className="hidden md:inline">After (Volume Set)</span>
+                </span>
               </div>
             </div>
 
@@ -118,8 +120,8 @@ export function BeforeAfterSlider() {
                 sizes="(max-width: 768px) 100vw, 1000px"
               />
               {/* Before Label (Fades Out) */}
-              <div ref={beforeLabelRef} className="absolute top-6 left-6 hidden md:block z-20">
-                <span className="bg-white/90 backdrop-blur px-5 py-2.5 font-sans text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">Before</span>
+              <div ref={beforeLabelRef} className="absolute top-3 left-3 md:top-6 md:left-6 z-20">
+                <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">Before</span>
               </div>
             </div>
 

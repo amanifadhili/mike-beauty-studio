@@ -26,30 +26,30 @@ export function ServicesGrid({ services }: ServicesGridProps) {
   useEffect(() => {
     if (!gridRef.current) return;
 
-    const cards = gridRef.current.children;
+    let ctx = gsap.context(() => {
+      const cards = gridRef.current!.children;
 
-    // Set initial state
-    gsap.set(cards, { y: 100, opacity: 0 });
+      // Set initial state
+      gsap.set(cards, { y: 100, opacity: 0 });
 
-    // Staggered reveal animation triggered by scroll
-    ScrollTrigger.create({
-      trigger: gridRef.current,
-      start: 'top 80%', // Trigger when the top of the grid hits 80% down the viewport
-      onEnter: () => {
-        gsap.to(cards, {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-        });
-      },
-      once: true, // Only run the animation once
-    });
+      // Staggered reveal animation triggered by scroll
+      ScrollTrigger.create({
+        trigger: gridRef.current,
+        start: 'top 80%', // Trigger when the top of the grid hits 80% down the viewport
+        onEnter: () => {
+          gsap.to(cards, {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: 'power3.out',
+          });
+        },
+        once: true, // Only run the animation once
+      });
+    }, gridRef);
 
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
-    };
+    return () => ctx.revert();
   }, []);
 
   return (

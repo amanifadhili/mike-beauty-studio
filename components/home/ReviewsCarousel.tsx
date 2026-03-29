@@ -49,27 +49,30 @@ export function ReviewsCarousel() {
   useEffect(() => {
     if (!carouselRef.current) return;
 
-    // We clone the reviews for an infinite seamless CSS/GSAP marquee effect
-    const carousel = carouselRef.current;
-    
-    // Simple infinite horizontal scroll using GSAP
-    gsap.to(carousel, {
-      xPercent: -50,
-      ease: "none",
-      duration: 30,
-      repeat: -1,
-    });
+    let ctx = gsap.context(() => {
+      // We clone the reviews for an infinite seamless CSS/GSAP marquee effect
+      const carousel = carouselRef.current;
+      
+      // Simple infinite horizontal scroll using GSAP
+      gsap.to(carousel, {
+        xPercent: -50,
+        ease: "none",
+        duration: 30,
+        repeat: -1,
+      });
+    }, carouselRef);
 
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section className="py-16 md:py-32 bg-charcoal overflow-hidden text-cream-white relative pl-4 md:pl-8">
+    <section className="py-16 md:py-32 bg-background overflow-hidden text-charcoal relative pl-4 md:pl-8">
       <div className="max-w-7xl mx-auto mb-16 px-4">
         <SectionHeading 
           title="Client Experiences"
           subtitle="Don't just take our word for it. Read what Kigali's most discerning clients have to say about their transformations."
           alignment="left"
-          className="text-white [&>h2]:text-white [&>p]:text-gray-400"
+          className="text-charcoal [&>h2]:text-charcoal [&>p]:text-gray-600"
         />
       </div>
 
@@ -79,7 +82,7 @@ export function ReviewsCarousel() {
         {[...REVIEWS, ...REVIEWS].map((review, index) => (
           <div 
             key={`${review.id}-${index}`}
-            className="w-[260px] sm:w-[300px] md:w-[400px] shrink-0 mr-8 bg-[#2a2a2a] p-8 border border-white/10"
+            className="w-[260px] sm:w-[300px] md:w-[400px] shrink-0 mr-8 bg-white p-8 border border-charcoal/10 shadow-sm"
           >
             <div className="flex gap-1 mb-6">
               {[...Array(review.rating)].map((_, i) => (
@@ -89,12 +92,12 @@ export function ReviewsCarousel() {
               ))}
             </div>
             
-            <p className="font-playfair text-lg md:text-xl text-gray-300 leading-relaxed mb-8 italic">
+            <p className="font-playfair text-lg md:text-xl text-gray-700 leading-relaxed mb-8 italic">
               "{review.text}"
             </p>
             
             <div>
-              <p className="font-sans font-medium text-white tracking-wide uppercase text-sm">{review.name}</p>
+              <p className="font-sans font-medium text-charcoal tracking-wide uppercase text-sm">{review.name}</p>
               <p className="font-sans text-xs text-gray-500 mt-1">{review.role}</p>
             </div>
           </div>
