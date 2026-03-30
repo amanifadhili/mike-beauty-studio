@@ -90,7 +90,7 @@ export function BeforeAfterSlider() {
               {/* After Image (Background - always visible) */}
               <div className="absolute inset-0 w-full h-full">
                 <Image 
-                  src="https://images.pexels.com/photos/3997384/pexels-photo-3997384.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                  src="/hero/hero_image_four.png"
                   alt="After volume lash extensions"
                   fill
                   priority
@@ -113,7 +113,7 @@ export function BeforeAfterSlider() {
                 style={{ clipPath: 'inset(0% 0% 0% 0%)' }}
               >
                 <Image 
-                  src="https://images.pexels.com/photos/3986970/pexels-photo-3986970.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                  src="/hero/hero_image_three.png"
                   alt="Before volume lash extensions"
                   fill
                   priority

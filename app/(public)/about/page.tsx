@@ -16,7 +16,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-16 lg:mb-32">
           <div className="relative aspect-[4/5] w-full">
             <Image
-              src="https://images.unsplash.com/photo-1512496015851-a1c84277b102?q=80&w=1000&auto=format&fit=crop"
+              src="/hero/hero_image_one.png"
               alt="Mike Beauty Studio Artist"
               fill
               className="object-cover"

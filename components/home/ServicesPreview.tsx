@@ -11,21 +11,21 @@ export async function ServicesPreview() {
     return null; 
   }
 
-  // We only want to preview the first 3 services on the home page
-  const previewServices = services.slice(0, 3);
+  // Display all services on the home page as requested
+  const displayServices = services;
 
   return (
     <section id="services" className="py-32 bg-cream-white relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading 
           title="Signature Treatments"
-          subtitle="Explore our most requested luxury lash extensions, customized specifically for your eye shape and lifestyle."
+          subtitle="Explore our luxury lash extensions, customized specifically for your eye shape and lifestyle."
           alignment="center"
         />
         
         {/* The Grid itself needs to be a Client Component to run GSAP animations */}
         <div className="mt-20">
-          <ServicesGrid services={previewServices} />
+          <ServicesGrid services={displayServices} />
         </div>
       </div>
     </section>

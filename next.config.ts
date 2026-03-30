@@ -47,6 +47,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/hero/**',
       },
+      {
+        pathname: '/portfolio/**',
+      },
     ],
   },
 };
