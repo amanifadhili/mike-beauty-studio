@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 
 const HERO_IMAGES = [
   '/hero/hero_image_one.png',
-  '/hero/hero_image_two.png',
+  '/hero/lash_mega_1.png',
   '/hero/hero_image_three.png',
   '/hero/hero_image_four.png',
 ];
