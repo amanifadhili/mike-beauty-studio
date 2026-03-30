@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import Link from 'next/link';
+import { BookingTrigger } from '@/components/booking/BookingTrigger';
 
 export const metadata = {
   title: 'About Mike | Luxury Lash Artist in Kigali',
@@ -67,12 +68,11 @@ export default function AboutPage() {
               When you step into our studio, you are stepping away from the rush of the city and into a space designed for absolute relaxation. Enjoy complimentary refreshments, a plush treatment bed, and a meticulous, pain-free application process.
             </p>
           </div>
-          <Link 
-            href="/booking"
+          <BookingTrigger 
             className="inline-flex h-12 items-center justify-center gap-2 bg-gold text-charcoal transition-colors hover:bg-[#c9a633] px-12 py-6 text-lg tracking-wide rounded-none"
           >
             Experience It Yourself
-          </Link>
+          </BookingTrigger>
         </div>
 
       </div>

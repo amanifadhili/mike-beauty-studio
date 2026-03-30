@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/Button';
+import { useBooking } from '@/components/booking/BookingContext';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -18,6 +19,7 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { openBooking } = useBooking();
 
   // Scroll detection
   useEffect(() => {
@@ -98,7 +100,7 @@ export function Navbar() {
             <Button 
               variant={isScrolled ? 'primary' : 'outline'} 
               size="sm"
-              onClick={() => router.push('/booking')}
+              onClick={() => openBooking()}
             >
               Book Appointment
             </Button>
@@ -164,7 +166,7 @@ export function Navbar() {
               fullWidth
               onClick={() => {
                 setIsMenuOpen(false);
-                router.push('/booking');
+                openBooking();
               }}
             >
               Book Appointment

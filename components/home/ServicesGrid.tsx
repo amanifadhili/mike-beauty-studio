@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { ServiceCard } from '@/components/ui/ServiceCard';
+import { useBooking } from '@/components/booking/BookingContext';
 import { Prisma } from '@prisma/client';
 
 // Register ScrollTrigger plugin
@@ -21,6 +22,7 @@ interface ServicesGridProps {
 }
 
 export function ServicesGrid({ services }: ServicesGridProps) {
+  const { openBooking } = useBooking();
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
               price={`RWF ${service.price.toLocaleString()}`}
               duration={service.duration}
               imageUrl={imageMedia?.url} // We will handle actual image loading in the gallery phase
-              onBookClick={() => window.location.href = `/booking?service=${service.id}`}
+              onBookClick={() => openBooking(service.id)}
             />
           </div>
         );

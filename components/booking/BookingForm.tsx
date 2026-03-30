@@ -14,38 +14,54 @@ interface ServiceOption {
 interface BookingFormProps {
   services: ServiceOption[];
   preSelectedServiceId: string;
+  onClose?: () => void;
 }
 
-export function BookingForm({ services, preSelectedServiceId }: BookingFormProps) {
+export function BookingForm({ services, preSelectedServiceId, onClose }: BookingFormProps) {
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorPayload, setErrorPayload] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  // Form State
+  const [selectedService, setSelectedService] = useState(preSelectedServiceId || '');
+  const [preferredDate, setPreferredDate] = useState('');
+  const [preferredTime, setPreferredTime] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [notes, setNotes] = useState('');
+
+  const timeSlots = ["09:00", "11:00", "13:30", "15:30", "17:30"];
+  
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${ampm}`;
+  };
+
+  const handleNext = () => setStep((prev) => prev + 1);
+  const handleBack = () => setStep((prev) => prev - 1);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorPayload(null);
 
-    const formData = new FormData(e.currentTarget);
-    
-    // Format the date explicitly from the HTML5 input
-    const dateValue = formData.get('preferredDate') as string;
-    
     const data = {
-      name: formData.get('name') as string,
-      phone: formData.get('phone') as string,
-      serviceId: formData.get('serviceId') as string,
-      preferredDate: new Date(dateValue),
-      preferredTime: formData.get('preferredTime') as string,
-      notes: formData.get('notes') as string,
+      name,
+      phone,
+      serviceId: selectedService,
+      preferredDate: new Date(preferredDate),
+      preferredTime,
+      notes,
     };
 
     try {
       const response = await createBooking(data);
       if (response.success) {
         setIsSuccess(true);
-        // Usually, here you might redirect to a thank-you page or trigger an email.
-        // But throwing a local success state is much faster UX.
       } else {
         setErrorPayload(response.error || 'Something went wrong.');
       }
@@ -59,19 +75,19 @@ export function BookingForm({ services, preSelectedServiceId }: BookingFormProps
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center text-center h-full py-12 space-y-6 animate-fade-in-up">
-        <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mb-4">
+      <div className="flex flex-col items-center justify-center text-center h-full sm:py-12 space-y-6 animate-fade-in-up w-full">
+        <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mb-4">
           <svg className="w-8 h-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="font-playfair text-3xl text-gold">Request Received</h2>
-        <p className="font-sans text-gray-300 max-w-md mx-auto leading-relaxed">
+        <h2 className="font-playfair text-2xl sm:text-3xl text-charcoal">Request Received</h2>
+        <p className="font-sans text-gray-600 max-w-sm sm:max-w-md mx-auto leading-relaxed text-sm lg:text-base px-4">
           Thank you for choosing Mike Beauty Studio. Our team is reviewing your requested time slot. 
-          We will contact you via WhatsApp shortly to confirm your booking and arrange the 20% deposit.
+          We will contact you via WhatsApp shortly.
         </p>
-        <div className="pt-8">
-          <Button variant="outline" onClick={() => window.location.href = '/'}>
+        <div className="pt-8 w-full sm:w-auto px-4">
+          <Button variant="outline" fullWidth onClick={() => onClose ? onClose() : window.location.href = '/'}>
             Return Home
           </Button>
         </div>
@@ -80,124 +96,207 @@ export function BookingForm({ services, preSelectedServiceId }: BookingFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      
-      {errorPayload && (
-        <div className="p-4 bg-red-900/40 border border-red-500/50 text-red-200 text-sm font-sans mb-6">
-          {errorPayload}
-        </div>
-      )}
-
-      <div className="space-y-6">
-        <Input 
-          id="name"
-          name="name"
-          label="Full Name *"
-          required
-          placeholder="e.g. Amani Fadhili"
-        />
-        
-        <Input 
-          id="phone"
-          name="phone"
-          type="tel"
-          label="WhatsApp Phone Number *"
-          required
-          placeholder="+250 7..."
-        />
-
-        {/* Custom Select styling to match Input component style */}
-        <div className="flex flex-col gap-2 font-sans relative">
-          <label htmlFor="serviceId" className="text-sm tracking-wider text-gray-300 uppercase">
-            Desired Service *
-          </label>
-          <select 
-            id="serviceId"
-            name="serviceId"
-            required
-            defaultValue={preSelectedServiceId}
-            className="w-full bg-transparent border-b border-gray-600 px-0 py-3 text-cream-white focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300 appearance-none rounded-none"
+    <div className="w-full">
+      {/* Step Indicator */}
+      <div className="flex items-center justify-between mb-6 sm:mb-8 relative">
+        <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-[#eaeaea] -z-10"></div>
+        {[1, 2, 3].map((s) => (
+          <div 
+            key={s} 
+            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-sans text-xs sm:text-sm transition-colors duration-300 ${
+              step >= s ? 'bg-gold text-charcoal shadow-md' : 'bg-cream text-gray-400 border border-[#eaeaea]'
+            }`}
           >
-            <option value="" disabled className="bg-charcoal text-gray-500">Select a treatment...</option>
-            {services.map(service => (
-              <option key={service.id} value={service.id} className="bg-[#2a2a2a] text-white">
-                {service.name} ({service.price.toLocaleString()} RWF)
-              </option>
-            ))}
-          </select>
-          {/* Custom dropdown arrow */}
-          <div className="pointer-events-none absolute right-2 bottom-4 text-gray-400">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            {s}
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input 
-            id="preferredDate"
-            name="preferredDate"
-            type="date"
-            label="Preferred Date *"
-            required
-            // Prevent booking in the past
-            min={new Date().toISOString().split('T')[0]}
-            className="w-full"
-            style={{ colorScheme: 'dark' }}
-          />
+      <form onSubmit={(e) => step === 3 ? handleSubmit(e) : e.preventDefault()}>
+        
+        {errorPayload && (
+          <div className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-sans mb-6">
+            {errorPayload}
+          </div>
+        )}
 
-          <div className="flex flex-col gap-2 font-sans relative">
-            <label htmlFor="preferredTime" className="text-sm tracking-wider text-gray-300 uppercase">
-              Preferred Time *
-            </label>
-            <select 
-              id="preferredTime"
-              name="preferredTime"
-              required
-              className="w-full bg-transparent border-b border-gray-600 px-0 py-3 text-cream-white focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300 appearance-none rounded-none"
-            >
-              <option value="" disabled className="bg-charcoal text-gray-500">Pick a slot</option>
-              <option value="09:00" className="bg-[#2a2a2a] text-white">09:00 AM</option>
-              <option value="11:00" className="bg-[#2a2a2a] text-white">11:00 AM</option>
-              <option value="13:30" className="bg-[#2a2a2a] text-white">01:30 PM</option>
-              <option value="15:30" className="bg-[#2a2a2a] text-white">03:30 PM</option>
-              <option value="17:30" className="bg-[#2a2a2a] text-white">05:30 PM</option>
-            </select>
-             {/* Custom dropdown arrow */}
-            <div className="pointer-events-none absolute right-2 bottom-4 text-gray-400">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+        {/* Step 1: Select Treatment */}
+        {step === 1 && (
+          <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
+            <div className="text-center sm:text-left mb-4">
+              <h3 className="font-playfair text-lg sm:text-xl text-charcoal">Select Treatment</h3>
+              <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Choose the service you would like to book today.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-[60vh] overflow-y-auto pr-2 pb-2 custom-scrollbar">
+              {services.map(service => (
+                <div 
+                  key={service.id}
+                  onClick={() => setSelectedService(service.id)}
+                  className={`cursor-pointer p-4 sm:p-5 border flex flex-col justify-between items-start transition-all duration-300 group ${
+                    selectedService === service.id 
+                      ? 'border-gold bg-gold/5 shadow-sm' 
+                      : 'border-[#eaeaea] hover:border-gold hover:bg-gray-50 bg-white'
+                  }`}
+                >
+                  <p className={`font-sans tracking-wide mb-2 sm:mb-3 text-sm sm:text-base leading-snug transition-colors ${
+                    selectedService === service.id ? 'text-charcoal font-medium' : 'text-gray-600'
+                  }`}>
+                    {service.name}
+                  </p>
+                  <p className="font-playfair text-gold text-sm sm:text-lg">
+                    {service.price.toLocaleString()} RWF
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6">
+              <Button 
+                type="button" 
+                variant="primary" 
+                fullWidth
+                disabled={!selectedService}
+                onClick={handleNext}
+              >
+                Continue to Dates
+              </Button>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex flex-col gap-2 font-sans">
-          <label htmlFor="notes" className="text-sm tracking-wider text-gray-300 uppercase">
-            Special Requests (Optional)
-          </label>
-          <textarea 
-            id="notes"
-            name="notes"
-            rows={3}
-            className="w-full bg-transparent border-b border-gray-600 px-0 py-3 text-cream-white focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300 resize-none rounded-none placeholder-gray-600"
-            placeholder="E.g., I have sensitive eyes, or this is for a wedding..."
-          />
-        </div>
+        {/* Step 2: Date and Time */}
+        {step === 2 && (
+          <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
+            <div className="text-center sm:text-left mb-4">
+              <h3 className="font-playfair text-lg sm:text-xl text-charcoal">Date & Time</h3>
+              <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Please select your preferred arrival slot.</p>
+            </div>
 
-      </div>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2 font-sans relative">
+                 <label htmlFor="preferredDate" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                  Select Date
+                </label>
+                <input 
+                  id="preferredDate"
+                  type="date"
+                  value={preferredDate}
+                  onChange={(e) => setPreferredDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
+                />
+              </div>
 
-      <div className="pt-6">
-        <Button 
-          type="submit" 
-          variant="primary" 
-          disabled={isSubmitting}
-          className="w-full py-5 text-lg"
-        >
-          {isSubmitting ? 'Processing Request...' : 'Submit Booking Request'}
-        </Button>
-      </div>
+              <div className="flex flex-col gap-3 font-sans relative pt-4">
+                <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase mb-2">
+                  Select Arrival Time
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {timeSlots.map(time => (
+                    <div
+                      key={time}
+                      onClick={() => setPreferredTime(time)}
+                      className={`cursor-pointer border py-3 sm:py-4 px-2 text-center text-sm sm:text-base transition-all duration-300 ${
+                        preferredTime === time 
+                          ? 'border-gold bg-gold text-charcoal font-medium shadow-sm' 
+                          : 'border-[#eaeaea] text-gray-600 hover:border-gold/50 hover:text-charcoal bg-white'
+                      }`}
+                    >
+                      {formatTime(time)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-    </form>
+            <div className="pt-6 grid grid-cols-2 gap-4">
+              <Button type="button" variant="outline" onClick={handleBack} fullWidth>
+                Back
+              </Button>
+              <Button 
+                type="button" 
+                variant="primary" 
+                disabled={!preferredDate || !preferredTime}
+                onClick={handleNext} 
+                fullWidth
+              >
+                Final Details
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Client Details */}
+        {step === 3 && (
+          <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
+            <div className="text-center sm:text-left mb-4">
+              <h3 className="font-playfair text-lg sm:text-xl text-charcoal">Your Details</h3>
+              <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Almost done. We just need your contact information to confirm your slot.</p>
+            </div>
+
+            <div className="space-y-4 sm:space-y-6">
+               <div className="flex flex-col gap-2 font-sans relative">
+                <label htmlFor="name" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                  Full Name
+                </label>
+                <input 
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="E.g. Amani Fadhili"
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
+                  required
+                />
+              </div>
+
+               <div className="flex flex-col gap-2 font-sans relative">
+                <label htmlFor="phone" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                  WhatsApp Number
+                </label>
+                <input 
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+250 7..."
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
+                  required
+                />
+              </div>
+
+               <div className="flex flex-col gap-2 font-sans relative pb-4">
+                <label htmlFor="notes" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                  Special Notes (Optional)
+                </label>
+                <textarea 
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="E.g., It's my first time..."
+                  rows={2}
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300 resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 grid grid-cols-2 gap-4">
+              <Button type="button" variant="outline" onClick={handleBack} fullWidth>
+                Back
+              </Button>
+              <Button 
+                type="submit" 
+                variant="primary" 
+                disabled={!name || !phone || isSubmitting}
+                fullWidth
+              >
+                {isSubmitting ? 'Sending...' : 'Confirm Book'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </form>
+    </div>
   );
 }

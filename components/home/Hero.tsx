@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { useBooking } from '@/components/booking/BookingContext';
 
 const HERO_IMAGES = [
   '/hero/hero_image_one.png',
@@ -13,6 +14,7 @@ const HERO_IMAGES = [
 ];
 
 export function Hero() {
+  const { openBooking } = useBooking();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const textRef = useRef<HTMLDivElement>(null);
 
@@ -110,8 +112,8 @@ export function Hero() {
             variant="outline" 
             size="lg"
             className="w-full sm:w-auto text-lg px-8 py-6 rounded-none tracking-wide border-white/50 text-white hover:bg-white/10 transition-colors"
-            // Intentionally doing a hard redirect for the appointment book flow
-            onClick={() => window.location.href = '/booking'} 
+            // Hooking into the global booking modal context instead of a hard redirect
+            onClick={() => openBooking()} 
           >
             Book Appointment
           </Button>
