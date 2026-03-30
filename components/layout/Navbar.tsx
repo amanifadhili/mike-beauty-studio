@@ -7,7 +7,7 @@ import { Button } from '../ui/Button';
 
 const navLinks = [
   { name: 'Home', path: '/' },
-  { name: 'Services', path: '/services' },
+  { name: 'Services', path: '/#services' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'About', path: '/about' },
   { name: 'Contact', path: '/contact' },
@@ -28,9 +28,17 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close menu on route change
+  // Close menu on route change & handle robust cross-page hash scroll
   useEffect(() => {
     setIsMenuOpen(false);
+    
+    // Explicitly handle Next.js hash scrolling when jumping between distinct pages
+    if (window.location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(window.location.hash);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100); // Slight delay allows Next.js the time to fully render the DOM of the new page
+    }
   }, [pathname]);
 
   // Lock body scroll when menu is open

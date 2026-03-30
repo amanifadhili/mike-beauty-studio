@@ -23,13 +23,18 @@ export async function Footer() {
         <div className="col-span-1 md:col-span-2 lg:col-span-2 order-2">
           <h4 className="font-sans tracking-widest text-gold text-sm uppercase mb-6">Explore</h4>
           <ul className="space-y-4">
-            {['Home', 'Services', 'Gallery', 'About'].map((item) => (
-              <li key={item}>
+            {[
+              { label: 'Home', href: '/' },
+              { label: 'Services', href: '/#services' },
+              { label: 'Gallery', href: '/gallery' },
+              { label: 'About', href: '/about' },
+            ].map((item) => (
+              <li key={item.label}>
                 <Link
-                  href={`/${item.toLowerCase() === 'home' ? '' : item.toLowerCase()}`}
+                  href={item.href}
                   className="font-sans text-sm text-gray-400 hover:text-white transition-colors"
                 >
-                  {item}
+                  {item.label}
                 </Link>
               </li>
             ))}

@@ -9,7 +9,6 @@ interface ServiceCardProps {
   duration?: string;
   imageUrl?: string;
   onBookClick?: () => void;
-  onDetailsClick?: () => void;
 }
 
 export function ServiceCard({
@@ -19,7 +18,6 @@ export function ServiceCard({
   duration,
   imageUrl,
   onBookClick,
-  onDetailsClick,
 }: ServiceCardProps) {
   return (
     <div className="group relative flex flex-col pt-6 pb-6 px-6 bg-cream border border-[#eaeaea] hover:border-soft-pink transition-colors duration-300">
@@ -52,9 +50,6 @@ export function ServiceCard({
       <div className="flex flex-col gap-2 mt-auto">
         <Button variant="primary" fullWidth onClick={onBookClick}>
           Book Now
-        </Button>
-        <Button variant="ghost" fullWidth onClick={onDetailsClick}>
-          View Details
         </Button>
       </div>
     </div>

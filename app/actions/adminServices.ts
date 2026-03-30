@@ -24,7 +24,7 @@ export async function toggleServiceStatus(serviceId: string, currentStatus: bool
     });
     
     revalidatePath('/admin/services');
-    revalidatePath('/services'); // Revalidate public page
+    revalidatePath('/'); // Revalidate public homepage
     revalidatePath('/booking');  // Revalidate public booking dropdown
     // @ts-expect-error - Next 16 typing requires a second param profile
     revalidateTag('dashboard-metrics');
@@ -86,7 +86,7 @@ export async function saveService(rawPayload: {
     }
 
     revalidatePath('/admin/services');
-    revalidatePath('/services');
+    revalidatePath('/');
     revalidatePath('/booking');
     // @ts-expect-error - Next 16 typing requires a second param profile
     revalidateTag('dashboard-metrics');
@@ -110,7 +110,7 @@ export async function deleteService(serviceId: string) {
     });
     
     revalidatePath('/admin/services');
-    revalidatePath('/services');
+    revalidatePath('/');
     // @ts-expect-error - Next 16 typing requires a second param profile
     revalidateTag('dashboard-metrics');
     

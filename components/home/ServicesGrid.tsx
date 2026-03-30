@@ -70,7 +70,6 @@ export function ServicesGrid({ services }: ServicesGridProps) {
               duration={service.duration}
               imageUrl={imageMedia?.url} // We will handle actual image loading in the gallery phase
               onBookClick={() => window.location.href = `/booking?service=${service.id}`}
-              onDetailsClick={() => window.location.href = `/services/${service.id}`}
             />
           </div>
         );
