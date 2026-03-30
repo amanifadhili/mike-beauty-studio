@@ -22,7 +22,7 @@ export default async function GalleryPage() {
   });
 
   return (
-    <div className="bg-charcoal min-h-screen pt-32 pb-24 text-cream-white relative z-10">
+    <div className="bg-cream-white min-h-screen pt-32 pb-24 text-charcoal relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-16">
@@ -30,15 +30,15 @@ export default async function GalleryPage() {
             title="Studio Portfolio"
             subtitle="Browse our recent transformations. Filter by style to find the exact look you desire for your next appointment."
             alignment="center"
-            className="text-white [&>h2]:text-white [&>span]:text-gold"
+            className="[&>span]:text-gold"
           />
         </div>
 
         {mediaItems.length > 0 ? (
           <GalleryClient items={mediaItems} />
         ) : (
-          <div className="text-center py-32 border border-white/10">
-            <p className="font-playfair text-xl text-gray-400">Our gallery is currently being curated. Please check back soon.</p>
+          <div className="text-center py-32 border border-[#eaeaea]">
+            <p className="font-playfair text-xl text-gray-600">Our gallery is currently being curated. Please check back soon.</p>
           </div>
         )}
 

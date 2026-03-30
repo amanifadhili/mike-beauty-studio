@@ -19,7 +19,7 @@ export default async function BookingPage({
   const preSelectedServiceId = searchParams.service || '';
 
   return (
-    <div className="bg-charcoal min-h-screen pt-24 md:pt-32 pb-24 text-cream-white relative z-10">
+    <div className="bg-cream-white min-h-screen pt-24 md:pt-32 pb-24 text-charcoal relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-16">
@@ -27,14 +27,14 @@ export default async function BookingPage({
             title="Secure Your Appointment"
             subtitle="Please provide your details below. We require a 20% non-refundable deposit to secure all bookings. Our team will contact you via WhatsApp for payment details."
             alignment="center"
-            className="text-white [&>h2]:text-white [&>span]:text-gold"
+            className="[&>span]:text-gold"
           />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12 max-w-5xl mx-auto">
           
           {/* Form Column */}
-          <div className="flex-1 bg-[#222222] p-5 sm:p-8 md:p-12 border border-white/5">
+          <div className="flex-1 bg-white p-5 sm:p-8 md:p-12 border border-[#eaeaea] shadow-sm">
             <BookingForm 
               services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))} 
               preSelectedServiceId={preSelectedServiceId}
@@ -43,9 +43,9 @@ export default async function BookingPage({
 
           {/* Info Card Column */}
           <div className="w-full lg:w-96 space-y-8 order-last lg:order-none">
-            <div className="bg-[#1a1a1a] p-8 border border-white/5">
+            <div className="bg-cream p-8 border border-[#eaeaea]">
               <h3 className="font-playfair text-2xl text-gold mb-4">Studio Policies</h3>
-              <ul className="space-y-4 font-sans text-sm text-gray-300">
+              <ul className="space-y-4 font-sans text-sm text-gray-600">
                 <li className="flex gap-3">
                   <span className="text-gold mt-1">•</span>
                   <span><strong>Deposits:</strong> A 20% deposit is required within 24 hours of booking to secure your slot.</span>
@@ -65,9 +65,9 @@ export default async function BookingPage({
               </ul>
             </div>
 
-            <div className="bg-[#1a1a1a] p-8 border border-white/5 text-center">
-              <h3 className="font-playfair text-xl text-white mb-2">Need Help?</h3>
-              <p className="font-sans text-sm text-gray-400 mb-6">Contact our team directly for special requests or group bookings.</p>
+            <div className="bg-cream p-8 border border-[#eaeaea] text-center">
+              <h3 className="font-playfair text-xl text-charcoal mb-2">Need Help?</h3>
+              <p className="font-sans text-sm text-gray-500 mb-6">Contact our team directly for special requests or group bookings.</p>
               <a href="https://wa.me/250700000000" className="inline-block border border-gold text-gold hover:bg-gold hover:text-charcoal px-6 py-3 font-sans text-sm tracking-wider transition-colors duration-300">
                 Chat on WhatsApp
               </a>

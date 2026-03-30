@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="bg-charcoal min-h-screen pt-32 pb-24 text-cream-white relative z-10 overflow-hidden">
+    <div className="bg-cream-white min-h-screen pt-32 pb-24 text-charcoal relative z-10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Hero Section */}
@@ -33,7 +33,7 @@ export default function AboutPage() {
               subtitle="Lash extensions should never be 'one size fits all'. We believe in bespoke artistry that respects the health of your natural lashes while delivering undeniable drama."
             />
             
-            <div className="space-y-6 font-sans text-gray-300 leading-relaxed text-lg">
+            <div className="space-y-6 font-sans text-gray-600 leading-relaxed text-lg">
               <p>
                 Founded in Kigali, Mike Beauty Studio was born from a singular obsession: elevating lash extensions from a simple beauty service into an absolute art form.
               </p>
@@ -48,24 +48,24 @@ export default function AboutPage() {
             <div className="pt-8 flex flex-wrap gap-4">
               <div className="border-l-2 border-gold pl-6">
                 <span className="block font-playfair text-3xl text-gold mb-1">5+</span>
-                <span className="font-sans text-xs uppercase tracking-widest text-gray-400">Years Mastery</span>
+                <span className="font-sans text-xs uppercase tracking-widest text-gray-500">Years Mastery</span>
               </div>
               <div className="border-l-2 border-gold pl-6">
                 <span className="block font-playfair text-3xl text-gold mb-1">1k+</span>
-                <span className="font-sans text-xs uppercase tracking-widest text-gray-400">Happy Clients</span>
+                <span className="font-sans text-xs uppercase tracking-widest text-gray-500">Happy Clients</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Global Standard Section */}
-        <div className="bg-[#1a1a1a] p-8 sm:p-12 md:p-24 text-center border top border-white/5 relative">
+        <div className="bg-cream p-8 sm:p-12 md:p-24 text-center border-t border-[#eaeaea] relative">
           <SectionHeading 
             title="A Global Standard in Kigali"
             subtitle="We bring international luxury standards to the heart of Rwanda."
             alignment="center"
           />
-          <div className="max-w-2xl mx-auto mt-12 mb-12 font-sans text-gray-300 leading-relaxed">
+          <div className="max-w-2xl mx-auto mt-12 mb-12 font-sans text-gray-600 leading-relaxed">
             <p>
               When you step into our studio, you are stepping away from the rush of the city and into a space designed for absolute relaxation. Enjoy complimentary refreshments, a plush treatment bed, and a meticulous, pain-free application process.
             </p>
