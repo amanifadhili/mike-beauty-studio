@@ -48,7 +48,7 @@ export function GalleryClient({ items }: GalleryClientProps) {
             className={`px-6 py-2 rounded-full font-sans text-sm tracking-wide transition-all duration-300 ${
               activeFilter === category 
                 ? 'bg-gold text-charcoal' 
-                : 'bg-transparent border border-white/20 text-gray-300 hover:border-gold hover:text-white'
+                : 'bg-transparent border border-gray-300 text-gray-600 hover:border-gold hover:text-charcoal'
             }`}
           >
             {category}

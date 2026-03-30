@@ -14,7 +14,7 @@ export default function AboutPage() {
         
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-16 lg:mb-32">
-          <div className="relative aspect-[4/5] w-full">
+          <div className="relative aspect-square w-4/5 mx-auto lg:ml-0 lg:mr-auto">
             <Image
               src="/hero/hero_image_one.png"
               alt="Mike Beauty Studio Artist"
@@ -30,29 +30,26 @@ export default function AboutPage() {
           <div className="space-y-8">
             <SectionHeading 
               title="The Philosophy"
-              subtitle="Lash extensions should never be 'one size fits all'. We believe in bespoke artistry that respects the health of your natural lashes while delivering undeniable drama."
+              subtitle="Bespoke luxury lash artistry Kigali."
             />
             
-            <div className="space-y-6 font-sans text-gray-600 leading-relaxed text-lg">
+            <div className="space-y-6 font-sans text-gray-600 leading-relaxed text-sm">
               <p>
-                Founded in Kigali, Mike Beauty Studio was born from a singular obsession: elevating lash extensions from a simple beauty service into an absolute art form.
+                At Mike Beauty Studio, we elevate lash extensions into an absolute art form. We don't do "one size fits all"—every set begins with a meticulous consultation to ensure stunning, undeniable drama that never compromises the health of your natural lashes.
               </p>
               <p>
-                Every face is a unique canvas. Our approach involves a meticulous consultation to analyze your eye shape, natural lash health, and daily lifestyle before a single extension is applied.
-              </p>
-              <p>
-                We source only the highest-grade, ultra-lightweight faux mink materials and utilize modern, safe adhesive techniques to ensure your set lasts beautifully without compromising your natural lash integrity.
+                Experience the perfect blend of ultra-lightweight luxury materials and advanced styling techniques, tailored precisely to frame your natural beauty. Let your eyes do the talking.
               </p>
             </div>
             
-            <div className="pt-8 flex flex-wrap gap-4">
+            <div className="pt-8 flex flex-wrap gap-6">
               <div className="border-l-2 border-gold pl-6">
-                <span className="block font-playfair text-3xl text-gold mb-1">5+</span>
-                <span className="font-sans text-xs uppercase tracking-widest text-gray-500">Years Mastery</span>
+                <span className="block font-playfair text-xl text-gold mb-1">5+</span>
+                <span className="font-sans text-[10px] uppercase tracking-widest text-gray-500">Years Mastery</span>
               </div>
               <div className="border-l-2 border-gold pl-6">
-                <span className="block font-playfair text-3xl text-gold mb-1">1k+</span>
-                <span className="font-sans text-xs uppercase tracking-widest text-gray-500">Happy Clients</span>
+                <span className="block font-playfair text-xl text-gold mb-1">1k+</span>
+                <span className="font-sans text-[10px] uppercase tracking-widest text-gray-500">Happy Clients</span>
               </div>
             </div>
           </div>
