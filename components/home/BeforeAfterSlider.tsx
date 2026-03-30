@@ -72,76 +72,78 @@ export function BeforeAfterSlider() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-12 md:py-20 bg-white relative overflow-hidden h-[100svh] min-h-[100svh] flex flex-col justify-center">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        
-        <SectionHeading 
-          title="The Transformation"
-          subtitle="Watch the dramatic difference a professional volume set makes as you scroll down."
-          alignment="center"
-        />
+    <div className="w-full relative">
+      <section ref={sectionRef} className="py-12 md:py-20 bg-white relative overflow-hidden h-[100svh] min-h-[100svh] flex flex-col justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          
+          <SectionHeading 
+            title="The Transformation"
+            subtitle="Watch the dramatic difference a professional volume set makes as you scroll down."
+            alignment="center"
+          />
 
-        <div className="mt-10 md:mt-16 flex justify-center w-full">
-          <div 
-            ref={containerRef}
-            className="relative w-full max-w-4xl aspect-[3/2] md:aspect-[16/9] overflow-hidden bg-gray-100 shadow-2xl border border-[#eaeaea] group"
-          >
-            {/* After Image (Background - always visible) */}
-            <div className="absolute inset-0 w-full h-full">
-              <Image 
-                src="https://images.pexels.com/photos/3997384/pexels-photo-3997384.jpeg?auto=compress&cs=tinysrgb&w=2000"
-                alt="After volume lash extensions"
-                fill
-                priority
-                className="object-cover pointer-events-none"
-                sizes="(max-width: 768px) 100vw, 1000px"
-              />
-              {/* After Label (Fades In) */}
-              <div ref={afterLabelRef} className="absolute top-3 right-3 md:top-6 md:right-6 z-20">
-                <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">
-                  <span className="md:hidden">After</span>
-                  <span className="hidden md:inline">After (Volume Set)</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Before Image (Foreground overlay - clipped dynamically by GSAP) */}
+          <div className="mt-10 md:mt-16 flex justify-center w-full">
             <div 
-              ref={beforeWrapperRef}
-              className="absolute inset-0 w-full h-full z-10"
-              style={{ clipPath: 'inset(0% 0% 0% 0%)' }}
+              ref={containerRef}
+              className="relative w-full max-w-4xl aspect-[3/2] md:aspect-[16/9] overflow-hidden bg-gray-100 shadow-2xl border border-[#eaeaea] group"
             >
-              <Image 
-                src="https://images.pexels.com/photos/3986970/pexels-photo-3986970.jpeg?auto=compress&cs=tinysrgb&w=2000"
-                alt="Before volume lash extensions"
-                fill
-                priority
-                className="object-cover pointer-events-none"
-                sizes="(max-width: 768px) 100vw, 1000px"
-              />
-              {/* Before Label (Fades Out) */}
-              <div ref={beforeLabelRef} className="absolute top-3 left-3 md:top-6 md:left-6 z-20">
-                <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">Before</span>
+              {/* After Image (Background - always visible) */}
+              <div className="absolute inset-0 w-full h-full">
+                <Image 
+                  src="https://images.pexels.com/photos/3997384/pexels-photo-3997384.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                  alt="After volume lash extensions"
+                  fill
+                  priority
+                  className="object-cover pointer-events-none"
+                  sizes="(max-width: 768px) 100vw, 1000px"
+                />
+                {/* After Label (Fades In) */}
+                <div ref={afterLabelRef} className="absolute top-3 right-3 md:top-6 md:right-6 z-20">
+                  <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">
+                    <span className="md:hidden">After</span>
+                    <span className="hidden md:inline">After (Volume Set)</span>
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* The Handle / Divider Line */}
-            <div 
-              ref={handleRef}
-              className="absolute top-0 bottom-0 w-[3px] bg-white shadow-[0_0_20px_rgba(0,0,0,0.5)] z-30 pointer-events-none"
-              style={{ left: '100%', transform: 'translateX(-50%)' }}
-            >
-              <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex items-center justify-center flex-col gap-1.5 border border-[#eaeaea]">
-                {/* Grip Lines */}
-                <div className="w-[2px] h-3 bg-gold"></div>
-                <div className="w-[2px] h-5 bg-gold"></div>
-                <div className="w-[2px] h-3 bg-gold"></div>
+              {/* Before Image (Foreground overlay - clipped dynamically by GSAP) */}
+              <div 
+                ref={beforeWrapperRef}
+                className="absolute inset-0 w-full h-full z-10"
+                style={{ clipPath: 'inset(0% 0% 0% 0%)' }}
+              >
+                <Image 
+                  src="https://images.pexels.com/photos/3986970/pexels-photo-3986970.jpeg?auto=compress&cs=tinysrgb&w=2000"
+                  alt="Before volume lash extensions"
+                  fill
+                  priority
+                  className="object-cover pointer-events-none"
+                  sizes="(max-width: 768px) 100vw, 1000px"
+                />
+                {/* Before Label (Fades Out) */}
+                <div ref={beforeLabelRef} className="absolute top-3 left-3 md:top-6 md:left-6 z-20">
+                  <span className="bg-white/90 backdrop-blur px-3 py-1.5 md:px-5 md:py-2.5 font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-charcoal shadow-sm rounded-sm">Before</span>
+                </div>
               </div>
-            </div>
 
+              {/* The Handle / Divider Line */}
+              <div 
+                ref={handleRef}
+                className="absolute top-0 bottom-0 w-[3px] bg-white shadow-[0_0_20px_rgba(0,0,0,0.5)] z-30 pointer-events-none"
+                style={{ left: '100%', transform: 'translateX(-50%)' }}
+              >
+                <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex items-center justify-center flex-col gap-1.5 border border-[#eaeaea]">
+                  {/* Grip Lines */}
+                  <div className="w-[2px] h-3 bg-gold"></div>
+                  <div className="w-[2px] h-5 bg-gold"></div>
+                  <div className="w-[2px] h-3 bg-gold"></div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

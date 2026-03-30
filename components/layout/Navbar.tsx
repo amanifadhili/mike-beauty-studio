@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/Button';
 
 const navLinks = [
@@ -17,6 +17,7 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Scroll detection
   useEffect(() => {
@@ -86,11 +87,13 @@ export function Navbar() {
           </nav>
 
           <div className="hidden md:block shrink-0">
-            <Link href="/booking">
-              <Button variant={isScrolled ? 'primary' : 'outline'} size="sm">
-                Book Appointment
-              </Button>
-            </Link>
+            <Button 
+              variant={isScrolled ? 'primary' : 'outline'} 
+              size="sm"
+              onClick={() => router.push('/booking')}
+            >
+              Book Appointment
+            </Button>
           </div>
 
           {/* ─── Mobile Hamburger / Close Button ─── */}
@@ -147,11 +150,17 @@ export function Navbar() {
 
           {/* CTA Book Button */}
           <div className="mt-8 w-full">
-            <Link href="/booking" className="block">
-              <Button variant="primary" size="lg" fullWidth>
-                Book Appointment
-              </Button>
-            </Link>
+            <Button 
+              variant="primary" 
+              size="lg" 
+              fullWidth
+              onClick={() => {
+                setIsMenuOpen(false);
+                router.push('/booking');
+              }}
+            >
+              Book Appointment
+            </Button>
           </div>
         </nav>
 
