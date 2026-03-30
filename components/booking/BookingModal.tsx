@@ -35,7 +35,7 @@ export function BookingModal() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden rounded-sm"
+            className="relative w-full max-w-4xl bg-white shadow-2xl flex flex-col max-h-[95vh] overflow-hidden rounded-sm"
           >
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-3 sm:px-6 sm:py-4 border-b border-[#eaeaea] shrink-0 bg-white">

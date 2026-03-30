@@ -128,25 +128,23 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
               <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Choose the service you would like to book today.</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-[60vh] overflow-y-auto pr-2 pb-2 custom-scrollbar">
+            <div className="flex flex-wrap gap-2 sm:gap-3 max-h-[50vh] sm:max-h-none overflow-y-auto pr-1 pb-1 custom-scrollbar">
               {services.map(service => (
                 <div 
                   key={service.id}
                   onClick={() => setSelectedService(service.id)}
-                  className={`cursor-pointer p-4 sm:p-5 border flex flex-col justify-between items-start transition-all duration-300 group ${
+                  className={`cursor-pointer py-2 px-3 border rounded-none flex items-center gap-2 transition-all duration-300 group ${
                     selectedService === service.id 
-                      ? 'border-gold bg-gold/5 shadow-sm' 
-                      : 'border-[#eaeaea] hover:border-gold hover:bg-gray-50 bg-white'
+                      ? 'border-gold bg-gold text-charcoal shadow-sm' 
+                      : 'border-[#eaeaea] hover:border-gold hover:bg-gray-50 bg-white text-gray-600'
                   }`}
                 >
-                  <p className={`font-sans tracking-wide mb-2 sm:mb-3 text-sm sm:text-base leading-snug transition-colors ${
-                    selectedService === service.id ? 'text-charcoal font-medium' : 'text-gray-600'
-                  }`}>
+                  <span className="font-sans text-xs sm:text-sm whitespace-nowrap">
                     {service.name}
-                  </p>
-                  <p className="font-playfair text-gold text-sm sm:text-lg">
-                    {service.price.toLocaleString()} RWF
-                  </p>
+                  </span>
+                  <span className={`text-[10px] sm:text-xs tracking-wider whitespace-nowrap ${selectedService === service.id ? 'text-charcoal' : 'text-gold'}`}>
+                    • {service.price.toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>
@@ -173,8 +171,8 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
               <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Please select your preferred arrival slot.</p>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex flex-col gap-2 font-sans relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="flex flex-col gap-1 font-sans relative">
                  <label htmlFor="preferredDate" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
                   Select Date
                 </label>
@@ -184,20 +182,20 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
                   value={preferredDate}
                   onChange={(e) => setPreferredDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-sm sm:text-base text-charcoal focus:outline-none focus:border-gold transition-colors duration-300"
                 />
               </div>
 
-              <div className="flex flex-col gap-3 font-sans relative pt-4">
-                <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase mb-2">
+              <div className="flex flex-col gap-2 font-sans relative">
+                <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase mb-1">
                   Select Arrival Time
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {timeSlots.map(time => (
                     <div
                       key={time}
                       onClick={() => setPreferredTime(time)}
-                      className={`cursor-pointer border py-3 sm:py-4 px-2 text-center text-sm sm:text-base transition-all duration-300 ${
+                      className={`cursor-pointer border py-2 px-1 text-center text-[11px] sm:text-xs tracking-wider transition-all duration-300 ${
                         preferredTime === time 
                           ? 'border-gold bg-gold text-charcoal font-medium shadow-sm' 
                           : 'border-[#eaeaea] text-gray-600 hover:border-gold/50 hover:text-charcoal bg-white'
@@ -235,38 +233,40 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
               <p className="font-sans text-xs sm:text-sm text-gray-500 mt-1">Almost done. We just need your contact information to confirm your slot.</p>
             </div>
 
-            <div className="space-y-4 sm:space-y-6">
-               <div className="flex flex-col gap-2 font-sans relative">
-                <label htmlFor="name" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
-                  Full Name
-                </label>
-                <input 
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="E.g. Amani Fadhili"
-                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
-                  required
-                />
+            <div className="space-y-4">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-1 font-sans relative">
+                  <label htmlFor="name" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                    Full Name
+                  </label>
+                  <input 
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="E.g. Amani Fadhili"
+                    className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-sm sm:text-base text-charcoal focus:outline-none focus:border-gold transition-colors duration-300"
+                    required
+                  />
+                </div>
+
+                 <div className="flex flex-col gap-1 font-sans relative">
+                  <label htmlFor="phone" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
+                    WhatsApp Number
+                  </label>
+                  <input 
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+250 7..."
+                    className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-sm sm:text-base text-charcoal focus:outline-none focus:border-gold transition-colors duration-300"
+                    required
+                  />
+                </div>
               </div>
 
-               <div className="flex flex-col gap-2 font-sans relative">
-                <label htmlFor="phone" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
-                  WhatsApp Number
-                </label>
-                <input 
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+250 7..."
-                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300"
-                  required
-                />
-              </div>
-
-               <div className="flex flex-col gap-2 font-sans relative pb-4">
+               <div className="flex flex-col gap-1 font-sans relative pb-2">
                 <label htmlFor="notes" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
                   Special Notes (Optional)
                 </label>
@@ -275,8 +275,8 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="E.g., It's my first time..."
-                  rows={2}
-                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal focus:outline-none focus:border-gold focus:ring-0 transition-colors duration-300 resize-none"
+                  rows={1}
+                  className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-sm sm:text-base text-charcoal focus:outline-none focus:border-gold transition-colors duration-300 resize-none"
                 />
               </div>
             </div>
