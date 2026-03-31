@@ -1,4 +1,5 @@
 import { LoginForm } from '@/components/auth/LoginForm';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Admin Portal | Mike Beauty Studio',
@@ -8,6 +9,14 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Escape Hatch */}
+      <Link href="/" className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors duration-300 font-sans text-[10px] sm:text-xs uppercase tracking-[0.2em] z-50 group">
+        <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Return to Site
+      </Link>
+
       {/* Ambient background glows for enhanced glassmorphism depth */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] pointer-events-none" />
