@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { createBooking } from '@/app/actions';
 import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,156 @@ interface BookingFormProps {
   onClose?: () => void;
 }
 
+const getFlagEmoji = (countryCode: string) => {
+  if (!countryCode) return '';
+  const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+};
+
+const COUNTRY_CODES = [
+  // Primary (East Africa & Neighbors)
+  { code: '+250', label: 'RW' },
+  { code: '+254', label: 'KE' },
+  { code: '+256', label: 'UG' },
+  { code: '+257', label: 'BI' },
+  { code: '+255', label: 'TZ' },
+  { code: '+243', label: 'CD' },
+  { code: '+211', label: 'SS' },
+  { code: '+251', label: 'ET' },
+  { code: '+252', label: 'SO' },
+  { code: '+260', label: 'ZM' },
+  { code: '+265', label: 'MW' },
+  { code: '+258', label: 'MZ' },
+  { code: '+263', label: 'ZW' },
+  { code: '+27', label: 'ZA' },
+  { code: '+264', label: 'NA' },
+  { code: '+267', label: 'BW' },
+  { code: '+244', label: 'AO' },
+  { code: '+234', label: 'NG' },
+  { code: '+233', label: 'GH' },
+  { code: '+221', label: 'SN' },
+  { code: '+225', label: 'CI' },
+  { code: '+237', label: 'CM' },
+  { code: '+20', label: 'EG' },
+  { code: '+212', label: 'MA' },
+  { code: '+216', label: 'TN' },
+  { code: '+213', label: 'DZ' },
+  // Americas
+  { code: '+1', label: 'US/CA' },
+  { code: '+52', label: 'MX' },
+  { code: '+55', label: 'BR' },
+  { code: '+54', label: 'AR' },
+  { code: '+57', label: 'CO' },
+  { code: '+56', label: 'CL' },
+  { code: '+51', label: 'PE' },
+  // Europe
+  { code: '+44', label: 'UK' },
+  { code: '+33', label: 'FR' },
+  { code: '+32', label: 'BE' },
+  { code: '+49', label: 'DE' },
+  { code: '+31', label: 'NL' },
+  { code: '+41', label: 'CH' },
+  { code: '+39', label: 'IT' },
+  { code: '+34', label: 'ES' },
+  { code: '+46', label: 'SE' },
+  { code: '+47', label: 'NO' },
+  { code: '+45', label: 'DK' },
+  { code: '+358', label: 'FI' },
+  { code: '+353', label: 'IE' },
+  { code: '+43', label: 'AT' },
+  { code: '+351', label: 'PT' },
+  { code: '+48', label: 'PL' },
+  { code: '+420', label: 'CZ' },
+  { code: '+36', label: 'HU' },
+  { code: '+30', label: 'GR' },
+  { code: '+90', label: 'TR' },
+  // Middle East
+  { code: '+971', label: 'UAE' },
+  { code: '+966', label: 'SA' },
+  { code: '+974', label: 'QA' },
+  { code: '+965', label: 'KW' },
+  { code: '+968', label: 'OM' },
+  { code: '+973', label: 'BH' },
+  { code: '+972', label: 'IL' },
+  // Asia
+  { code: '+86', label: 'CN' },
+  { code: '+81', label: 'JP' },
+  { code: '+82', label: 'KR' },
+  { code: '+91', label: 'IN' },
+  { code: '+92', label: 'PK' },
+  { code: '+880', label: 'BD' },
+  { code: '+94', label: 'LK' },
+  { code: '+65', label: 'SG' },
+  { code: '+60', label: 'MY' },
+  { code: '+62', label: 'ID' },
+  { code: '+66', label: 'TH' },
+  { code: '+84', label: 'VN' },
+  { code: '+63', label: 'PH' },
+  // Oceania
+  { code: '+61', label: 'AU' },
+  { code: '+64', label: 'NZ' }
+];
+
+function ModernPickerField({ 
+  type, 
+  value, 
+  onChange, 
+  placeholder, 
+  icon,
+  min
+}: { 
+  type: 'date' | 'time'; 
+  value: string; 
+  onChange: (val: string) => void; 
+  placeholder: string; 
+  icon: React.ReactNode;
+  min?: string;
+}) {
+  const displayValue = value ? (
+    type === 'date' 
+      ? new Date(value).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) 
+      : (() => {
+          const [h, m] = value.split(':');
+          const hr = parseInt(h, 10);
+          const ampm = hr >= 12 ? 'PM' : 'AM';
+          const hr12 = hr % 12 || 12;
+          return `${hr12}:${m} ${ampm}`;
+        })()
+  ) : placeholder;
+
+  return (
+    <div className="relative w-full group">
+      <style dangerouslySetInnerHTML={{__html: `
+        .picker-expand::-webkit-calendar-picker-indicator {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          width: 100%; height: 100%;
+          opacity: 0; cursor: pointer;
+        }
+      `}} />
+      <input 
+        type={type}
+        value={value}
+        min={min}
+        onChange={(e) => onChange(e.target.value)}
+        className="picker-expand absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+      />
+      <div className={`flex items-center justify-between w-full px-5 py-4 sm:py-5 border-[0.5px] transition-all duration-300 rounded-sm font-sans tracking-widest uppercase text-xs sm:text-sm ${
+        value 
+          ? 'border-gold bg-charcoal text-white shadow-xl' 
+          : 'border-gray-300 bg-transparent text-gray-500 hover:border-gray-400 hover:bg-[#faf9f5]'
+      }`}>
+        <span className={value ? 'font-medium' : 'opacity-80'}>
+          {displayValue}
+        </span>
+        <div className={value ? 'text-gold' : 'text-gray-400 group-hover:text-charcoal transition-colors'}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BookingForm({ services, preSelectedServiceId, onClose }: BookingFormProps) {
   const [[step, direction], setPage] = useState([1, 0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,17 +179,23 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
   const [preferredTime, setPreferredTime] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [notes, setNotes] = useState('');
+  const [countryCode, setCountryCode] = useState('+250');
+  const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const phoneInputRef = useRef<HTMLInputElement>(null);
 
-  const timeSlots = ["09:00", "11:00", "13:30", "15:30", "17:30"];
-  
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(':');
-    const h = parseInt(hours, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${h12}:${minutes} ${ampm}`;
-  };
+  const [notes, setNotes] = useState('');
+  const [touched, setTouched] = useState({ name: false, phone: false });
+
+  const isPhoneValid = phone.length >= 7 && phone.length <= 15;
+  const isNameValid = name.trim().length > 1;
+  const canSubmit = isNameValid && isPhoneValid && !isSubmitting;
+
+  const filteredCountries = useMemo(() => {
+    if (!searchQuery) return COUNTRY_CODES;
+    const query = searchQuery.toLowerCase();
+    return COUNTRY_CODES.filter(c => c.label.toLowerCase().includes(query) || c.code.includes(query));
+  }, [searchQuery]);
 
   const paginate = (newDirection: number) => {
     setPage([step + newDirection, newDirection]);
@@ -48,18 +204,6 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
   const handleNext = () => paginate(1);
   const handleBack = () => paginate(-1);
 
-  // Generate elegant 30-day horizontal date selector
-  const dateOptions = useMemo(() => {
-    const dates = [];
-    const today = new Date();
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      dates.push(d);
-    }
-    return dates;
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
@@ -67,7 +211,7 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
 
     const data = {
       name,
-      phone,
+      phone: `${countryCode}${phone}`,
       serviceId: selectedService,
       preferredDate: new Date(preferredDate),
       preferredTime,
@@ -158,7 +302,7 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
         </div>
       </div>
 
-      <form className="flex-grow flex flex-col overflow-hidden relative" onSubmit={(e) => step === 3 ? handleSubmit(e) : e.preventDefault()}>
+      <form className="flex-grow flex flex-col overflow-hidden relative" noValidate onSubmit={(e) => step === 3 ? handleSubmit(e) : e.preventDefault()}>
         
         {errorPayload && (
           <div className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-sans mb-6">
@@ -252,59 +396,40 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
                 transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
                 className="space-y-8 w-full flex flex-col h-full"
               >
-                <div className="flex flex-col gap-3 font-sans relative">
-                  <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
-                    Select Day
-                  </label>
-                  
-                  {/* Premium Horizontal Date Selector */}
-                  <div className="flex overflow-x-auto gap-3 pb-4 pt-1 px-1 custom-scrollbar snap-x">
-                    {dateOptions.map((date) => {
-                      const dateStr = date.toISOString().split('T')[0];
-                      const isSelected = preferredDate === dateStr;
-                      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                      const dayNumber = date.getDate();
-                      
-                      return (
-                        <div 
-                          key={dateStr}
-                          onClick={() => setPreferredDate(dateStr)}
-                          className={`flex flex-col items-center justify-center w-16 h-[80px] sm:w-[72px] sm:h-[88px] border transition-all duration-300 cursor-pointer shrink-0 snap-start ${
-                            isSelected 
-                              ? 'border-gold bg-gold text-charcoal shadow-md' 
-                              : 'border-[#eaeaea] hover:border-gold/50 text-gray-600 bg-white'
-                          }`}
-                        >
-                          <span className={`text-[10px] sm:text-xs uppercase tracking-wider mb-1 ${isSelected ? 'text-charcoal/80' : 'text-gray-400'}`}>
-                            {dayName}
-                          </span>
-                          <span className={`font-playfair text-xl sm:text-2xl ${isSelected ? 'font-medium' : ''}`}>
-                            {dayNumber}
-                          </span>
-                        </div>
-                      )
-                    })}
+                <div className="flex flex-col gap-8 font-sans relative flex-grow justify-center py-4">
+                  <div className="space-y-3">
+                    <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase px-1">
+                      Date
+                    </label>
+                    <ModernPickerField 
+                      type="date"
+                      value={preferredDate}
+                      onChange={setPreferredDate}
+                      placeholder="Select Appointment Date"
+                      min={new Date().toISOString().split('T')[0]}
+                      icon={
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      }
+                    />
                   </div>
-                </div>
 
-                <div className="flex flex-col gap-3 font-sans relative">
-                  <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase">
-                    Select Arrival Time
-                  </label>
-                  <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                    {timeSlots.map(time => (
-                      <div
-                        key={time}
-                        onClick={() => setPreferredTime(time)}
-                        className={`cursor-pointer border py-3 sm:py-4 px-2 text-center text-xs sm:text-sm tracking-widest transition-all duration-300 ${
-                          preferredTime === time 
-                            ? 'border-gold bg-gold/5 text-charcoal font-medium shadow-sm ring-1 ring-gold/20' 
-                            : 'border-[#eaeaea] text-gray-500 hover:border-gold/50 hover:text-charcoal bg-white'
-                        }`}
-                      >
-                        {formatTime(time)}
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    <label className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase px-1">
+                      Time
+                    </label>
+                    <ModernPickerField 
+                      type="time"
+                      value={preferredTime}
+                      onChange={setPreferredTime}
+                      placeholder="Select Arrival Time"
+                      icon={
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      }
+                    />
                   </div>
                 </div>
 
@@ -337,65 +462,122 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
                 transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
                 className="space-y-6 w-full flex flex-col h-full"
               >
-                <div className="space-y-6 sm:space-y-8 flex-grow">
+                <div className="space-y-4 flex-grow py-4">
                   
-                  {/* Sleek Floating-style inputs via bottom-border transitions */}
-                  <div className="flex flex-col gap-2 relative group pt-2">
-                    <label htmlFor="name" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase transition-colors group-focus-within:text-charcoal">
-                      Full Name
-                    </label>
-                    <input 
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="E.g. Amani Fadhili" // Optional floating style can go here
-                      className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal font-sans placeholder-gray-300 focus:outline-none focus:border-gold transition-colors duration-300"
-                      required
-                    />
+                  {/* Name Pill */}
+                  <div className="relative group pb-4">
+                    <div className={`flex w-full bg-[#f8f8f8] border-b-2 rounded-t-sm transition-colors duration-300 ${
+                        touched.name && !isNameValid 
+                          ? 'border-red-400 focus-within:border-red-500' 
+                          : 'border-[#eaeaea] focus-within:border-charcoal'
+                      }`}>
+                      <div className="flex flex-col relative w-full pt-6 pb-2 px-4">
+                        <label htmlFor="name" className={`absolute left-4 top-2 text-[10px] tracking-widest uppercase transition-all duration-300 ${
+                          touched.name && !isNameValid ? 'text-red-400' : 'text-gray-400 group-focus-within:text-charcoal'
+                        }`}>
+                          Full Name
+                        </label>
+                        <input 
+                          id="name"
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          onBlur={() => setTouched({ ...touched, name: true })}
+                          placeholder="e.g. Amani Fadhili" 
+                          className="bg-transparent w-full text-base sm:text-lg text-charcoal focus:outline-none placeholder-gray-300"
+                        />
+                      </div>
+                    </div>
+                    {touched.name && !isNameValid && (
+                      <p className="text-[10px] text-red-400 mt-1 uppercase tracking-widest absolute bottom-0 left-0">Please enter your full name</p>
+                    )}
                   </div>
 
-                  <div className="flex flex-col gap-2 relative group pt-2">
-                    <label htmlFor="phone" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase transition-colors group-focus-within:text-charcoal">
-                      WhatsApp Number
-                    </label>
-                    <input 
-                      id="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+250 7..."
-                      className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-base sm:text-lg text-charcoal font-sans placeholder-gray-300 focus:outline-none focus:border-gold transition-colors duration-300"
-                      required
-                    />
+                  {/* WhatsApp Pill */}
+                  <div className="relative group pb-4">
+                    <div className={`flex w-full bg-[#f8f8f8] border-b-2 rounded-t-sm transition-colors duration-300 ${
+                        touched.phone && !isPhoneValid 
+                          ? 'border-red-400 focus-within:border-red-500' 
+                          : 'border-[#eaeaea] focus-within:border-charcoal'
+                      }`}>
+                      <div className="flex flex-col relative w-full pt-6 pb-2 px-4">
+                        <label htmlFor="phone" className={`absolute left-4 top-2 text-[10px] tracking-widest uppercase transition-all duration-300 ${
+                          touched.phone && !isPhoneValid ? 'text-red-400' : 'text-gray-400 group-focus-within:text-charcoal'
+                        }`}>
+                          WhatsApp Number
+                        </label>
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => setIsCountryModalOpen(true)}
+                            className="flex items-center gap-1.5 focus:outline-none pr-1 group/btn"
+                          >
+                            <span className="text-xl leading-none">{getFlagEmoji(COUNTRY_CODES.find(c => c.code === countryCode)?.label || 'RW')}</span>
+                            <span className="text-charcoal/80 font-medium text-base sm:text-lg tracking-widest">{countryCode}</span>
+                            <svg className="w-4 h-4 text-gray-400 group-hover/btn:text-charcoal transition-colors pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          <div className="w-[1px] h-5 bg-[#eaeaea] mx-1"></div>
+                          <input 
+                            id="phone"
+                            type="tel"
+                            ref={phoneInputRef}
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                            onBlur={() => setTouched({ ...touched, phone: true })}
+                            placeholder="7..."
+                            className="bg-transparent w-full text-base sm:text-lg text-charcoal focus:outline-none placeholder-gray-300 tracking-widest"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {touched.phone && !isPhoneValid && (
+                      <p className="text-[10px] text-red-400 mt-1 uppercase tracking-widest absolute bottom-0 left-0">Valid number required</p>
+                    )}
                   </div>
 
-                  <div className="flex flex-col gap-2 relative group pt-2">
-                    <label htmlFor="notes" className="text-xs sm:text-sm tracking-widest text-gray-400 uppercase transition-colors group-focus-within:text-charcoal">
-                      Special Notes <span className="text-gray-300 lowercase">(Optional)</span>
-                    </label>
-                    <textarea 
-                      id="notes"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="E.g., It's my first time..."
-                      rows={2}
-                      className="w-full bg-transparent border-b border-[#eaeaea] px-0 py-2 sm:py-3 text-sm sm:text-base text-charcoal font-sans placeholder-gray-300 focus:outline-none focus:border-gold transition-colors duration-300 resize-none"
-                    />
+                  {/* Notes Pill */}
+                  <div className="relative group pb-4">
+                    <div className="flex w-full bg-[#f8f8f8] border-b-2 rounded-t-sm border-[#eaeaea] focus-within:border-charcoal transition-colors duration-300">
+                      <div className="flex flex-col relative w-full pt-6 pb-2 px-4">
+                        <label htmlFor="notes" className="absolute left-4 top-2 text-[10px] tracking-widest uppercase text-gray-400 group-focus-within:text-charcoal transition-colors">
+                          Special Notes <span className="opacity-60 lowercase">(optional)</span>
+                        </label>
+                        <input 
+                          id="notes"
+                          type="text"
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="e.g. It's my first time..."
+                          className="bg-transparent w-full text-base sm:text-lg text-charcoal focus:outline-none placeholder-gray-300"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-6 mt-auto grid grid-cols-2 gap-4">
-                  <Button type="button" variant="outline" onClick={handleBack} fullWidth>
+                <div className="pt-2 mt-auto grid grid-cols-2 gap-4">
+                  <Button type="button" variant="outline" onClick={handleBack} fullWidth className="tracking-widest uppercase text-xs sm:text-sm h-12">
                     Back
                   </Button>
                   <Button 
                     type="submit" 
-                    variant="primary" 
-                    disabled={!name || !phone || isSubmitting}
+                    disabled={!canSubmit}
                     fullWidth
+                    className={`tracking-widest uppercase text-xs sm:text-sm h-12 flex items-center justify-center gap-2 transition-all duration-300 ${
+                      canSubmit && !isSubmitting ? 'bg-charcoal text-white hover:bg-black border-transparent shadow-lg' : ''
+                    }`}
                   >
-                    {isSubmitting ? 'Sending...' : 'Confirm Book'}
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-inherit" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading</span>
+                      </>
+                    ) : 'Confirm Book'}
                   </Button>
                 </div>
               </motion.div>
@@ -403,6 +585,77 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
           </AnimatePresence>
         </div>
       </form>
+
+      {/* Searchable Country Modal Overlay */}
+      <AnimatePresence>
+        {isCountryModalOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="absolute inset-0 z-50 bg-white flex flex-col h-full rounded-sm shadow-2xl overflow-hidden"
+          >
+            {/* Search Header */}
+            <div className="flex-none p-4 border-b border-[#eaeaea] bg-white text-charcoal flex items-center gap-3">
+              <button 
+                type="button" 
+                onClick={() => setIsCountryModalOpen(false)}
+                className="p-2 hover:bg-[#f8f8f8] rounded-full transition-colors focus:outline-none"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex-grow relative">
+                <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Search country..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#f8f8f8] border border-transparent focus:border-[#eaeaea] focus:bg-white focus:outline-none rounded-md py-2 pl-9 pr-4 text-sm font-sans text-charcoal transition-all placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Scrolling List */}
+            <div className="flex-grow overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style dangerouslySetInnerHTML={{__html: `::-webkit-scrollbar { display: none; }`}} />
+              {filteredCountries.length === 0 ? (
+                <div className="p-8 text-center text-gray-400 text-xs tracking-widest uppercase font-sans">
+                  No matches found
+                </div>
+              ) : (
+                filteredCountries.map((country, idx) => (
+                  <button
+                    key={`${country.code}-${idx}`}
+                    type="button"
+                    onClick={() => {
+                      setCountryCode(country.code);
+                      setIsCountryModalOpen(false);
+                      setSearchQuery('');
+                      setTimeout(() => phoneInputRef.current?.focus(), 100);
+                    }}
+                    className="w-full flex items-center justify-between h-[48px] px-4 border-b border-[#eaeaea]/50 hover:bg-[#faf9f5] focus:bg-[#faf9f5] focus:outline-none transition-colors group text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-[22px] leading-none">{getFlagEmoji(country.label)}</span>
+                      <span className="text-charcoal font-medium font-sans text-base">{country.label}</span>
+                    </div>
+                    <span className="text-gray-400 group-hover:text-gold text-sm tracking-widest font-sans transition-colors">
+                      {country.code}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
