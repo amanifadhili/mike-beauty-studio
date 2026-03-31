@@ -9,25 +9,22 @@ export function LoginForm() {
   return (
     <form action={dispatch} className="space-y-5">
       
-      <div className="space-y-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-gray-500 uppercase tracking-wider text-[10px] font-sans" htmlFor="email">
-            Email Address
-          </label>
+      <div className="space-y-6 pt-2">
+        <div className="relative group pb-2">
           <input
             id="email"
             type="email"
             name="email"
             placeholder="mike@beauty.com"
             required
-            className="w-full bg-[#1e1e1e] border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-700 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all font-sans text-sm"
+            className="w-full bg-transparent border-b border-white/20 px-0 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold transition-colors duration-300 font-sans text-base sm:text-lg tracking-wide peer"
           />
+          <label className="absolute left-0 -top-3 text-[10px] text-white/50 tracking-widest uppercase transition-all duration-300 peer-focus:text-gold peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-transparent pointer-events-none" htmlFor="email">
+            Email Address
+          </label>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-gray-500 uppercase tracking-wider text-[10px] font-sans" htmlFor="password">
-            Password
-          </label>
+        <div className="relative group pb-2">
           <input
             id="password"
             type="password"
@@ -35,8 +32,11 @@ export function LoginForm() {
             placeholder="••••••••"
             required
             minLength={6}
-            className="w-full bg-[#1e1e1e] border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-700 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all font-sans text-sm"
+            className="w-full bg-transparent border-b border-white/20 px-0 py-3 text-white focus:outline-none placeholder-white/20 focus:border-gold transition-colors duration-300 font-sans text-base sm:text-lg tracking-widest peer"
           />
+          <label className="absolute left-0 -top-3 text-[10px] text-white/50 tracking-widest uppercase transition-all duration-300 peer-focus:text-gold peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-transparent pointer-events-none" htmlFor="password">
+            Secure Password
+          </label>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export function LoginForm() {
 
       <button 
         type="submit"
-        className="w-full flex items-center justify-center gap-2 bg-gold text-charcoal rounded-lg py-3 font-sans font-semibold tracking-wide hover:bg-[#c9a633] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        className="w-full flex items-center justify-center gap-2 bg-gold text-charcoal rounded-sm py-4 font-sans font-bold tracking-widest hover:brightness-110 hover:shadow-[0_0_20px_rgba(200,160,80,0.3)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-8 uppercase text-xs sm:text-sm"
         disabled={isPending}
       >
         {isPending ? (
