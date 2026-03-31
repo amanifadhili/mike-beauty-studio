@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BookingTable } from '@/components/admin/BookingTable';
+import { BookingKanban } from '@/components/admin/BookingKanban';
 import { PageHeader } from '@/components/ui';
 
 export const metadata = {
@@ -48,7 +48,9 @@ export default async function AdminBookingsPage() {
         }
       />
 
-      <BookingTable initialBookings={bookings} staff={staff} />
+      <div className="h-[calc(100vh-200px)]">
+        <BookingKanban initialBookings={bookings} staff={staff} />
+      </div>
       
     </div>
   );
