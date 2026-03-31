@@ -61,7 +61,7 @@ export function Navbar() {
   const isHomePage = pathname === '/';
 
   const bgColor = isScrolled || isMenuOpen || !isHomePage
-    ? 'bg-cream/95 backdrop-blur-sm shadow-sm'
+    ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-[#eaeaea]/30'
     : 'bg-transparent';
 
   const textColor = isScrolled || isMenuOpen || !isHomePage

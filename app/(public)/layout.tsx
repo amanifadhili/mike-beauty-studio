@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import { BookingProvider } from '@/components/booking/BookingContext';
 import { BookingModal } from '@/components/booking/BookingModal';
+import { MobileStickyCTA } from '@/components/booking/MobileStickyCTA';
 import { getServices } from '@/app/actions';
 
 export default async function PublicLayout({
@@ -19,6 +20,7 @@ export default async function PublicLayout({
         <main className="flex-grow">{children}</main>
         <Footer />
         <WhatsAppButton />
+        <MobileStickyCTA />
         
         {/* Render Global Booking Modal Overlay */}
         <BookingModal />
