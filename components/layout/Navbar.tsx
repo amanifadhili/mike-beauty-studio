@@ -59,12 +59,14 @@ export function Navbar() {
   // On all other pages (gallery, about, contact, etc.): always show frosted bg
   // so that charcoal text is readable over the dark bg-charcoal page background.
   const isHomePage = pathname === '/';
+  
+  const isSolidNav = isScrolled || isMenuOpen || !isHomePage;
 
-  const bgColor = isScrolled || isMenuOpen || !isHomePage
+  const bgColor = isSolidNav
     ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-[#eaeaea]/30'
     : 'bg-transparent';
 
-  const textColor = isScrolled || isMenuOpen || !isHomePage
+  const textColor = isSolidNav
     ? 'text-charcoal'
     : 'text-cream';
 
@@ -98,7 +100,7 @@ export function Navbar() {
 
           <div className="hidden md:block shrink-0">
             <Button 
-              variant={isScrolled ? 'primary' : 'outline'} 
+              variant={isSolidNav ? 'primary' : 'outline-light'} 
               size="sm"
               onClick={() => openBooking()}
             >
