@@ -22,9 +22,11 @@ export default async function AdminServicesPage() {
   });
 
   // Fetch all services, displaying active ones first, then alphabetical
+  // Update: Included medias relation to support graphical grid layout
   const services = await prisma.service.findMany({
     include: {
-      workers: { select: { id: true } }
+      workers: { select: { id: true } },
+      medias: { select: { id: true, url: true, type: true } }
     },
     orderBy: [
       { active: 'desc' },

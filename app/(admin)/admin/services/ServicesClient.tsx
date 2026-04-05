@@ -2,9 +2,11 @@
 
 // We create a Client wrapper so we can hold the state of the ServiceModal
 import { useState } from 'react';
-import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ServiceModal } from '@/components/admin/ServiceModal';
 import { toggleServiceStatus, deleteService } from '@/app/actions/adminServices';
+
+type MediaObj = { id: string; url: string; type: string };
 
 type ServiceData = {
   id: string;
@@ -15,6 +17,7 @@ type ServiceData = {
   active: boolean;
   categoryId?: string | null;
   workers?: { id: string }[];
+  medias?: MediaObj[];
 };
 
 type CategoryData = { id: string; name: string; order: number };
@@ -59,6 +62,108 @@ export function ServicesDashboardClient({
     }
   };
 
+  function renderServiceCard(service: ServiceData) {
+    const coverImage = service.medias?.find(m => m.type === 'image' || m.url.match(/\.(jpeg|jpg|gif|png|webp)$/i))?.url;
+
+    return (
+      <motion.div 
+        key={service.id}
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.3 }}
+        className={`relative flex flex-col rounded-2xl overflow-hidden shadow-lg border border-white/5 transition-all group ${
+          service.active ? 'bg-white/5 hover:bg-white/10 hover:border-white/10' : 'bg-black/40 opacity-80'
+        }`}
+      >
+        {/* Banner Image */}
+        <div className="h-40 w-full bg-charcoal relative shrink-0">
+          {coverImage ? (
+            <img 
+              src={coverImage} 
+              alt={service.name}
+              className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${!service.active && 'grayscale opacity-50'}`}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-tr from-white/5 to-white/10 flex items-center justify-center">
+              <span className="text-white/20 font-sans text-xs tracking-widest uppercase">No Image</span>
+            </div>
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+
+          {/* Quick Actions overlayed on image */}
+          <div className="absolute top-4 left-4 flex gap-2">
+            {!service.active && (
+              <span className="bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest backdrop-blur-md">
+                Inactive
+              </span>
+            )}
+            <span className="bg-black/40 text-white border border-white/10 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest backdrop-blur-md">
+              {service.workers?.length || 0} Staff
+            </span>
+          </div>
+
+          <div className="absolute top-4 right-4 z-10">
+            <button 
+              aria-label={service.active ? 'Disable service' : 'Enable service'}
+              onClick={(e) => { e.stopPropagation(); handleToggleActive(service.id, service.active); }}
+              className={`w-4 h-4 rounded-full border-2 border-transparent transition-all shadow-[0_0_8px_rgba(0,0,0,0.5)] ${
+                service.active ? 'bg-emerald-400 hover:bg-emerald-300' : 'bg-red-400 hover:bg-red-300'
+              }`}
+              title={service.active ? "Click to Disable" : "Click to Enable"}
+            />
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="p-5 flex flex-col flex-grow">
+          <h3 className={`font-playfair text-xl mb-2 ${service.active ? 'text-gold' : 'text-gray-400'}`}>
+            {service.name}
+          </h3>
+          
+          <p className="text-gray-400 text-sm font-sans mb-6 line-clamp-3 leading-relaxed flex-grow">
+            {service.description}
+          </p>
+
+          {/* Footer Info & Actions */}
+          <div className="pt-4 mt-auto border-t border-white/10 flex items-end justify-between">
+            <div>
+              <div className={`font-playfair text-xl tracking-wide ${service.active ? 'text-white' : 'text-gray-500'}`}>
+                {service.price.toLocaleString()} RWF
+              </div>
+              <div className="font-sans text-xs text-gray-500 mt-0.5 uppercase tracking-widest">
+                {service.duration} mins
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleOpenEdit(service)}
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 text-gray-400 hover:text-white flex items-center justify-center transition-all"
+                title="Edit"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button 
+                onClick={() => handleDelete(service.id)}
+                className="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/10 hover:border-red-500/30 text-red-400 hover:text-red-300 flex items-center justify-center transition-all"
+                title="Delete"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <>
       <div className="flex items-end justify-between mb-8">
@@ -69,7 +174,7 @@ export function ServicesDashboardClient({
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2.5 rounded-lg font-sans text-sm tracking-wide hover:bg-gold/90 transition-colors"
+          className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2.5 rounded-lg font-sans text-sm tracking-wide hover:bg-gold/90 transition-colors shadow-[0_0_15px_rgba(255,215,0,0.3)]"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -78,8 +183,7 @@ export function ServicesDashboardClient({
         </button>
       </div>
 
-      <div className="space-y-12">
-        {/* Helper function to render a category block */}
+      <div className="space-y-16">
         {(() => {
           const categorizedSections = categories.map(cat => ({
             ...cat,
@@ -91,137 +195,32 @@ export function ServicesDashboardClient({
           return (
             <>
               {categorizedSections.map(section => (
-                <div key={section.id} className="space-y-4">
-                  <h2 className="text-xl font-playfair text-gold border-b border-white/10 pb-2">{section.name}</h2>
-                  <DataTable
-                    data={section.services}
-                    columns={['Status', 'Service Name', 'Details / Description', 'Price & Duration', 'Actions']}
-                    emptyStateMessage="No services in this category."
-                    renderRow={(service) => (
-                      <tr key={service.id} className={`transition-colors hover:bg-white/[0.02] ${!service.active ? 'opacity-50' : ''}`}>
-                        <td className="px-6 py-4">
-                          <button 
-                            aria-label={service.active ? 'Disable service' : 'Enable service'}
-                            onClick={() => handleToggleActive(service.id, service.active)}
-                            className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 ${
-                              service.active ? 'toggle-active' : 'toggle-inactive'
-                            }`}
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="font-playfair text-lg text-white">{service.name}</span>
-                            <span className="text-[10px] uppercase tracking-widest text-gray-500">
-                              {service.workers?.length || 0} Staff Assigned
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-gray-400 text-xs line-clamp-2 max-w-xs">{service.description}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="text-gold font-medium">{service.price.toLocaleString()} RWF</span>
-                            <span className="text-[10px] text-gray-500">{service.duration} mins</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleOpenEdit(service)} className="text-xs text-gray-400 hover:text-white">Edit</button>
-                            <button onClick={() => handleDelete(service.id)} className="text-xs text-gray-400 hover:text-red-400">Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                    renderCard={(service) => (
-                      <div className="p-6 flex flex-col relative group">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <span className="text-xs uppercase tracking-widest text-gray-500 mb-1 block">
-                              {service.workers?.length || 0} Assig. Staff
-                            </span>
-                            <h3 className="font-playfair text-xl text-white">{service.name}</h3>
-                          </div>
-                          <button 
-                            aria-label={service.active ? 'Disable service' : 'Enable service'}
-                            onClick={() => handleToggleActive(service.id, service.active)}
-                            className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
-                              service.active ? 'toggle-active' : 'toggle-inactive'
-                            }`}
-                          />
-                        </div>
-                        <p className="text-gray-400 text-sm font-sans mb-6"> {service.description} </p>
-                        <div className="flex justify-between items-end pt-4 border-t border-white/5">
-                          <div>
-                            <div className="font-playfair text-lg text-gold">{service.price.toLocaleString()} RWF</div>
-                            <div className="font-sans text-xs text-gray-500">{service.duration} mins</div>
-                          </div>
-                          <div className="flex gap-3">
-                            <button onClick={() => handleOpenEdit(service)} className="text-gray-400 hover:text-white transition-colors text-sm">Edit</button>
-                            <button onClick={() => handleDelete(service.id)} className="text-gray-400 hover:text-red-400 transition-colors text-sm">Delete</button>
-                          </div>
-                        </div>
-                        {!service.active && (
-                          <div className="absolute inset-0 bg-black/40 pointer-events-none flex items-center justify-center">
-                            <span className="bg-charcoal/80 border border-white/10 px-4 py-1 font-sans text-[10px] uppercase tracking-widest text-red-400">Inactive</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  />
+                <div key={section.id} className="space-y-6">
+                  <h2 className="text-2xl font-playfair text-white border-b border-white/10 pb-3 flex items-center justify-between">
+                    <span>{section.name}</span>
+                    <span className="text-sm font-sans text-white/30 tracking-widest uppercase">{section.services.length} services</span>
+                  </h2>
+                  
+                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <AnimatePresence>
+                      {section.services.map(service => renderServiceCard(service))}
+                    </AnimatePresence>
+                  </motion.div>
                 </div>
               ))}
               
               {uncategorized.length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-playfair text-gray-400 border-b border-white/10 pb-2">Uncategorized Services</h2>
-                  <DataTable
-                    data={uncategorized}
-                    columns={['Status', 'Service Name', 'Details', 'Price', 'Actions']}
-                    emptyStateMessage="No uncategorized services."
-                    renderRow={(service) => (
-                      <tr key={service.id} className={`hover:bg-white/[0.02] ${!service.active ? 'opacity-50' : ''}`}>
-                        <td className="px-6 py-4">
-                            <button 
-                                aria-label={service.active ? 'Disable service' : 'Enable service'}
-                                onClick={() => handleToggleActive(service.id, service.active)}
-                                className={`w-3 h-3 rounded-full transition-colors ${
-                                    service.active ? 'toggle-active' : 'toggle-inactive'
-                                }`}
-                            />
-                        </td>
-                        <td className="px-6 py-4 text-white font-medium">{service.name}</td>
-                        <td className="px-6 py-4 text-gray-400 text-xs">{service.description}</td>
-                        <td className="px-6 py-4 text-gold font-medium">{service.price.toLocaleString()} RWF</td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleOpenEdit(service)} className="text-xs text-gray-400 hover:text-white">Edit</button>
-                            <button onClick={() => handleDelete(service.id)} className="text-xs text-gray-400 hover:text-red-400">Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                    renderCard={(service) => (
-                      <div className="p-4 border border-white/5 relative group">
-                        <div className="flex justify-between">
-                            <h3 className="text-white font-medium">{service.name}</h3>
-                            <button 
-                                aria-label={service.active ? 'Disable service' : 'Enable service'}
-                                onClick={() => handleToggleActive(service.id, service.active)}
-                                className={`w-3 h-3 rounded-full ${service.active ? 'toggle-active' : 'toggle-inactive'}`}
-                            />
-                        </div>
-                        <p className="text-xs text-gray-500 my-2">{service.description}</p>
-                        <div className="flex justify-between items-center mt-2">
-                            <span className="text-gold font-bold">RWF {service.price.toLocaleString()}</span>
-                            <div className="flex gap-2">
-                                <button onClick={() => handleOpenEdit(service)} className="text-xs text-gray-400">Edit</button>
-                                <button onClick={() => handleDelete(service.id)} className="text-xs text-red-500/70">Delete</button>
-                            </div>
-                        </div>
-                      </div>
-                    )}
-                  />
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-playfair text-gray-500 border-b border-white/10 pb-3 flex items-center justify-between">
+                    <span>Uncategorized</span>
+                    <span className="text-sm font-sans text-white/30 tracking-widest uppercase">{uncategorized.length} services</span>
+                  </h2>
+                  
+                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <AnimatePresence>
+                      {uncategorized.map(service => renderServiceCard(service))}
+                    </AnimatePresence>
+                  </motion.div>
                 </div>
               )}
             </>
@@ -239,62 +238,4 @@ export function ServicesDashboardClient({
       )}
     </>
   );
-
-  function renderServiceCard(service: ServiceData) {
-    return (
-      <div key={service.id} className="admin-surface-alt border border-white/5 p-6 flex flex-col relative group">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <span className="text-xs uppercase tracking-widest text-gray-500 mb-1 block">
-              {service.workers?.length || 0} Assig. Staff
-            </span>
-            <h3 className="font-playfair text-xl text-white">{service.name}</h3>
-          </div>
-          
-          <button 
-            aria-label={service.active ? 'Disable service' : 'Enable service'}
-            onClick={() => handleToggleActive(service.id, service.active)}
-            className={`w-3 h-3 rounded-full cursor-pointer transition-colors shrink-0 mt-1 ${
-              service.active ? 'toggle-active' : 'toggle-inactive'
-            }`}
-            title={service.active ? "Click to Disable" : "Click to Enable"}
-          />
-        </div>
-
-        <p className="text-gray-400 text-sm font-sans mb-6 flex-grow">
-          {service.description}
-        </p>
-
-        <div className="flex justify-between items-end pt-4 border-t border-white/5">
-          <div>
-            <div className="font-playfair text-lg text-gold">{service.price.toLocaleString()} RWF</div>
-            <div className="font-sans text-xs text-gray-500">{service.duration} mins</div>
-          </div>
-
-          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button 
-              onClick={() => handleOpenEdit(service)}
-              className="text-gray-400 hover:text-white transition-colors text-sm"
-            >
-              Edit
-            </button>
-            <button 
-              onClick={() => handleDelete(service.id)}
-              className="text-gray-400 hover:text-red-400 transition-colors text-sm"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-
-        {!service.active && (
-          <div className="absolute inset-0 bg-black/60 pointer-events-none flex items-center justify-center">
-            <span className="bg-charcoal/80 border border-white/10 px-4 py-2 font-sans text-xs uppercase tracking-widest text-red-400">
-              Inactive
-            </span>
-          </div>
-        )}
-      </div>
-    );
-  }
 }
