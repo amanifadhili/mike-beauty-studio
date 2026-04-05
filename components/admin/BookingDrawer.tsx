@@ -2,16 +2,24 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { ActionButton, StatusBadge } from '@/components/ui';
 
 type BookingDrawerProps = {
   booking: any | null;
   onClose: () => void;
   onConvert: (booking: any) => void;
+  onStatusChange?: (status: string) => void;
+  isUpdating?: boolean;
 };
 
-export function BookingDrawer({ booking, onClose, onConvert }: BookingDrawerProps) {
+export function BookingDrawer({ booking, onClose, onConvert, onStatusChange, isUpdating }: BookingDrawerProps) {
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (onStatusChange) {
+      onStatusChange(e.target.value);
+    }
+  };
+
   return (
     <AnimatePresence>
       {booking && (
@@ -37,11 +45,33 @@ export function BookingDrawer({ booking, onClose, onConvert }: BookingDrawerProp
               </button>
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-white/40 mb-1 font-sans">Status</p>
-                <div className="inline-block">
-                  <StatusBadge status={booking.status} />
+            <div className={`space-y-6 ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex flex-col">
+                <p className="text-xs uppercase tracking-widest text-white/40 mb-2 font-sans">Current Status</p>
+                <div className="flex items-center gap-3">
+                  <div className="inline-block pointer-events-none">
+                    <StatusBadge status={booking.status} />
+                  </div>
+                  
+                  {onStatusChange && (
+                    <div className="relative flex-1">
+                      <select
+                        value={booking.status}
+                        onChange={handleStatusChange}
+                        disabled={isUpdating || booking.status === 'CONVERTED'}
+                        className="appearance-none w-full bg-black/40 text-white/90 text-sm px-4 py-2 pr-10 rounded-xl border border-white/10 focus:border-white/30 focus:outline-none transition-colors cursor-pointer hover:bg-black/60 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="NEW">New</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="CONVERTED">Convert to Sale ✨</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white/40">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

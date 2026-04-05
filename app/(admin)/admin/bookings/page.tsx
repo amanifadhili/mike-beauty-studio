@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BookingKanban } from '@/components/admin/BookingKanban';
-import { PageHeader } from '@/components/ui';
+import { BookingGrid } from '@/components/admin/BookingGrid';
 
 export const metadata = {
   title: 'Manage Bookings | Mike Beauty Studio Admin',
@@ -36,20 +35,20 @@ export default async function AdminBookingsPage() {
   });
 
   return (
-    <div className="animate-fade-in-up space-y-6">
-      <PageHeader
-        title="Booking Requests"
-        subtitle="Manage all incoming client requests and update their status."
-        right={
-          <div className="admin-card flex items-center gap-2 px-4 py-2">
-            <span className="font-sans text-xs" style={{ color: 'var(--admin-text-muted)' }}>Total</span>
-            <span className="font-semibold font-sans" style={{ color: 'var(--admin-text-primary)' }}>{bookings.length}</span>
-          </div>
-        }
-      />
+    <div className="animate-fade-in-up flex flex-col h-[calc(100vh-80px)] pt-2 md:pt-4">
+      {/* Compact Header optimized for vertical space */}
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h1 className="font-playfair text-xl sm:text-2xl" style={{ color: 'var(--admin-text-primary)' }}>
+          Booking Requests
+        </h1>
+        <div className="flex items-center gap-2 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-white/10" style={{ background: 'var(--admin-surface)' }}>
+          <span className="font-sans text-xs tracking-wider uppercase opacity-50" style={{ color: 'var(--admin-text-muted)' }}>Total</span>
+          <span className="font-semibold font-sans text-sm sm:text-base" style={{ color: 'var(--admin-text-primary)' }}>{bookings.length}</span>
+        </div>
+      </div>
 
-      <div className="h-[calc(100vh-200px)]">
-        <BookingKanban initialBookings={bookings} staff={staff} />
+      <div className="flex-1 overflow-hidden">
+        <BookingGrid initialBookings={bookings} staff={staff} />
       </div>
       
     </div>
