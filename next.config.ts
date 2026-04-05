@@ -50,6 +50,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/portfolio/**',
       },
+      {
+        pathname: '/certificate/**',
+      },
     ],
   },
 };

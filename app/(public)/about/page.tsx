@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import Link from 'next/link';
 import { BookingTrigger } from '@/components/booking/BookingTrigger';
+import { CertificateShowcase } from '@/components/about/CertificateShowcase';
 
 export const metadata = {
   title: 'About Mike | Luxury Lash Artist in Kigali',
@@ -55,6 +56,15 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-[#eaeaea]" />
+
+        {/* Certificate Section */}
+        <CertificateShowcase />
+
+        {/* Divider */}
+        <div className="border-t border-[#eaeaea]" />
 
         {/* Global Standard Section */}
         <div className="bg-cream p-8 sm:p-12 md:p-24 text-center border-t border-[#eaeaea] relative">

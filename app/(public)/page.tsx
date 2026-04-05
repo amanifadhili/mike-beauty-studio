@@ -2,6 +2,7 @@ import { Hero } from '@/components/home/Hero';
 import { ServicesPreview } from '@/components/home/ServicesPreview';
 import { BeforeAfterSlider } from '@/components/home/BeforeAfterSlider';
 import { ReviewsCarousel } from '@/components/home/ReviewsCarousel';
+import { CertificateShowcase } from '@/components/about/CertificateShowcase';
 import Script from 'next/script';
 
 import { getBusinessSchema } from '@/lib/seo';
@@ -20,6 +21,7 @@ export default async function Home() {
       <BeforeAfterSlider />
       <ServicesPreview />
       <ReviewsCarousel />
+      <CertificateShowcase />
     </>
   );
 }
