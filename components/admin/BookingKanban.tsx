@@ -28,7 +28,7 @@ const COLUMNS = [
   { id: 'COMPLETED', title: 'COMPLETED' },
 ];
 
-function DroppableColumn({ col, colBookings, setSelectedBookingId }: { col: any; colBookings: any[]; setSelectedBookingId: (id: string) => void }) {
+function DroppableColumn({ col, colBookings, setSelectedBookingId, onStatusChange }: { col: any; colBookings: any[]; setSelectedBookingId: (id: string) => void; onStatusChange: (bookingId: string, newStatus: string) => void }) {
   const { setNodeRef } = useDroppable({
     id: col.id,
   });
@@ -46,7 +46,12 @@ function DroppableColumn({ col, colBookings, setSelectedBookingId }: { col: any;
         <SortableContext id={col.id} items={colBookings.map((b) => b.id)} strategy={verticalListSortingStrategy}>
           <div className="min-h-[200px]">
             {colBookings.map((b) => (
-              <BookingCard key={b.id} booking={b} onClick={() => setSelectedBookingId(b.id)} />
+              <BookingCard
+                key={b.id}
+                booking={b}
+                onClick={() => setSelectedBookingId(b.id)}
+                onStatusChange={(status) => onStatusChange(b.id, status)}
+              />
             ))}
             {colBookings.length === 0 && (
               <div className="h-full flex items-center justify-center text-xs text-white/20 italic font-sans py-10 border border-dashed border-white/5 rounded-xl">
@@ -150,6 +155,28 @@ export function BookingKanban({ initialBookings, staff = [] }: { initialBookings
     setConverting(false);
   };
 
+  const handleStatusChange = async (bookingId: string, newStatus: string) => {
+    const booking = optimisticBookings.find((b) => b.id === bookingId);
+    if (!booking) return;
+
+    if (newStatus === 'CONVERTED') {
+      setConvertingBooking(booking);
+      setSelectedBookingId(null);
+      return;
+    }
+
+    startTransition(() => {
+      addOptimisticBooking({ id: bookingId, status: newStatus });
+    });
+
+    const result = await updateBookingStatus(bookingId, newStatus);
+    if (result.success) {
+      setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b)));
+    } else {
+      alert('Failed to update status');
+    }
+  };
+
   return (
     <div className="flex flex-col h-full animate-fade-in-up">
       <DndContext
@@ -166,14 +193,15 @@ export function BookingKanban({ initialBookings, staff = [] }: { initialBookings
                 key={col.id} 
                 col={col} 
                 colBookings={colBookings} 
-                setSelectedBookingId={setSelectedBookingId} 
+                setSelectedBookingId={setSelectedBookingId}
+                onStatusChange={handleStatusChange}
               />
             );
           })}
         </div>
         
         <DragOverlay>
-          {activeBooking ? <BookingCard booking={activeBooking} onClick={() => {}} /> : null}
+          {activeBooking ? <BookingCard booking={activeBooking} onClick={() => {}} onStatusChange={() => {}} /> : null}
         </DragOverlay>
       </DndContext>
 

@@ -63,7 +63,6 @@ async function main() {
   await prisma.booking.deleteMany();
   await prisma.media.deleteMany();
   await prisma.service.deleteMany();
-  await prisma.serviceCategory.deleteMany();
   await prisma.client.deleteMany();
   await prisma.user.deleteMany();
 
