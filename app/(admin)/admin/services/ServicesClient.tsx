@@ -15,22 +15,16 @@ type ServiceData = {
   price: number;
   duration: string;
   active: boolean;
-  categoryId?: string | null;
   workers?: { id: string }[];
   medias?: MediaObj[];
 };
 
-type CategoryData = { id: string; name: string; order: number };
 type UserData = { id: string; name: string };
 
 export function ServicesDashboardClient({ 
-  initialServices,
-  categories,
-  users 
+  initialServices
 }: { 
   initialServices: ServiceData[];
-  categories: CategoryData[];
-  users: UserData[];
 }) {
   const [services] = useState<ServiceData[]>(initialServices);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,9 +94,6 @@ export function ServicesDashboardClient({
                 Inactive
               </span>
             )}
-            <span className="bg-black/40 text-white border border-white/10 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest backdrop-blur-md">
-              {service.workers?.length || 0} Staff
-            </span>
           </div>
 
           <div className="absolute top-4 right-4 z-10">
@@ -183,56 +174,22 @@ export function ServicesDashboardClient({
         </button>
       </div>
 
-      <div className="space-y-16">
-        {(() => {
-          const categorizedSections = categories.map(cat => ({
-            ...cat,
-            services: services.filter(s => s.categoryId === cat.id)
-          })).filter(cat => cat.services.length > 0);
-
-          const uncategorized = services.filter(s => !s.categoryId);
-
-          return (
-            <>
-              {categorizedSections.map(section => (
-                <div key={section.id} className="space-y-6">
-                  <h2 className="text-2xl font-playfair text-white border-b border-white/10 pb-3 flex items-center justify-between">
-                    <span>{section.name}</span>
-                    <span className="text-sm font-sans text-white/30 tracking-widest uppercase">{section.services.length} services</span>
-                  </h2>
-                  
-                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <AnimatePresence>
-                      {section.services.map(service => renderServiceCard(service))}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-              ))}
-              
-              {uncategorized.length > 0 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-playfair text-gray-500 border-b border-white/10 pb-3 flex items-center justify-between">
-                    <span>Uncategorized</span>
-                    <span className="text-sm font-sans text-white/30 tracking-widest uppercase">{uncategorized.length} services</span>
-                  </h2>
-                  
-                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <AnimatePresence>
-                      {uncategorized.map(service => renderServiceCard(service))}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-              )}
-            </>
-          );
-        })()}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-playfair text-white border-b border-white/10 pb-3 flex items-center justify-between">
+          <span>All Services</span>
+          <span className="text-sm font-sans text-white/30 tracking-widest uppercase">{services.length} services</span>
+        </h2>
+        
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence>
+            {services.map(service => renderServiceCard(service))}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {isModalOpen && (
         <ServiceModal 
           initialData={editingService} 
-          categories={categories}
-          workers={users}
           onClose={() => setIsModalOpen(false)} 
         />
       )}

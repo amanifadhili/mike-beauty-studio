@@ -11,8 +11,7 @@ const SaveServiceSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   price: z.number().int().min(0, 'Price must be positive'),
   duration: z.string().min(1, 'Duration is required'),
-  categoryId: z.string().nullable().optional(),
-  userIds: z.array(z.string()).optional()
+  imageUrl: z.string().nullable().optional()
 });
 
 export async function toggleServiceStatus(serviceId: string, currentStatus: boolean) {
@@ -42,8 +41,7 @@ export async function saveService(rawPayload: {
   description: string;
   price: number;
   duration: string;
-  categoryId?: string | null;
-  userIds?: string[];
+  imageUrl?: string;
 }) {
   try {
     await requireAdmin();
@@ -52,6 +50,8 @@ export async function saveService(rawPayload: {
       return { success: false, error: parsed.error.issues[0].message };
     }
     const data = parsed.data;
+
+    let serviceId = data.id;
 
     if (data.id) {
       // Update existing
@@ -62,27 +62,48 @@ export async function saveService(rawPayload: {
           description: data.description,
           price: data.price,
           duration: data.duration,
-          categoryId: data.categoryId || null,
-          workers: {
-            set: data.userIds ? data.userIds.map(id => ({ id })) : []
-          }
         }
       });
     } else {
       // Create new
-      await prisma.service.create({
+      const newService = await prisma.service.create({
         data: {
           name: data.name,
           description: data.description,
           price: data.price,
           duration: data.duration,
           active: true, // Default to true on creation
-          categoryId: data.categoryId || null,
-          workers: {
-            connect: data.userIds ? data.userIds.map(id => ({ id })) : []
-          }
         }
       });
+      serviceId = newService.id;
+    }
+
+    // Handle Image Relation
+    if (serviceId) {
+      if (data.imageUrl && data.imageUrl.trim().length > 0) {
+        const existingMedia = await prisma.media.findFirst({
+          where: { serviceId: serviceId, type: 'image' }
+        });
+        if (existingMedia) {
+          await prisma.media.update({
+            where: { id: existingMedia.id },
+            data: { url: data.imageUrl }
+          });
+        } else {
+          await prisma.media.create({
+            data: {
+              url: data.imageUrl,
+              type: 'image',
+              serviceId: serviceId
+            }
+          });
+        }
+      } else {
+        // If imageUrl was cleared out, delete the relation
+        await prisma.media.deleteMany({
+          where: { serviceId: serviceId, type: 'image' }
+        });
+      }
     }
 
     revalidatePath('/admin/services');
@@ -101,8 +122,6 @@ export async function saveService(rawPayload: {
 export async function deleteService(serviceId: string) {
   try {
     await requireAdmin();
-    // Note: Due to foreign key constraints, you can only delete a service 
-    // if it has no associated Bookings or Media, OR if you configured cascading deletes in Prisma.
     // Assuming cascading isn't blindly on for bookings (we want to keep history), 
     // it's usually safer to just 'deactivate' it. But we provide the delete method for truly orphaned records.
     await prisma.service.delete({
