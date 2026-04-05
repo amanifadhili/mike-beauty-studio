@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +21,7 @@ type ClientCredit = {
 
 export function ClientCreditsClient({ initialCredits }: { initialCredits: ClientCredit[] }) {
   const [credits, setCredits] = useState<ClientCredit[]>(initialCredits);
+  useEffect(() => { setCredits(initialCredits); }, [initialCredits]);
   const [filter, setFilter] = useState<'PENDING' | 'CLEARED'>('PENDING');
   
   const [repaying, setRepaying] = useState<ClientCredit | null>(null);

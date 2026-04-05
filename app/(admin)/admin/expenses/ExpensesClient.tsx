@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { ExpenseModal } from '@/components/admin/ExpenseModal';
 
@@ -18,6 +18,7 @@ const CATEGORY_CLASS: Record<string, string> = {
 
 export default function ExpensesClient({ initialExpenses }: { initialExpenses: Expense[] }) {
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
+  useEffect(() => { setExpenses(initialExpenses); }, [initialExpenses]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSuccess = (newExpense: Expense) => {

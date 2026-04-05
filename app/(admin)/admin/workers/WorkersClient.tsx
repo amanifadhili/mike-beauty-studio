@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ActionButton, StatusBadge, DataTable } from '@/components/ui';
 import { WorkerModal } from '@/components/admin/WorkerModal';
 
@@ -28,6 +28,7 @@ type StaffUser = {
 
 export default function WorkersClient({ workers }: { workers: StaffUser[] }) {
   const [list, setList] = useState(workers);
+  useEffect(() => { setList(workers); }, [workers]);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, { text: string; ok: boolean }>>({});
   
