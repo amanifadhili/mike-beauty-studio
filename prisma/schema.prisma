@@ -259,3 +259,13 @@ model AppSetting {
   category  String // 'GENERAL', 'BOOKING', 'SOCIAL'
   updatedAt DateTime @updatedAt
 }
+
+model ExternalIncome {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Int
+  source    String? // e.g. "Salon rental", "Product sale"
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

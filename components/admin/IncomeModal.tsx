@@ -3,36 +3,34 @@
 import { useState, useEffect } from 'react';
 import { ActionButton } from '@/components/ui';
 
-const CATEGORIES = ['RENT', 'SUPPLIES', 'MAINTENANCE', 'UTILITIES', 'MARKETING', 'OTHER'] as const;
-type Category = typeof CATEGORIES[number];
-type Expense = { id: string; title: string; amount: number; category: string; date: Date };
+export type ExternalIncome = { id: string; title: string; amount: number; source: string | null; date: Date };
 
-interface ExpenseModalProps {
+interface IncomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (expense: Expense, isEdit?: boolean) => void;
-  expenseToEdit?: Expense | null;
+  onSuccess: (income: ExternalIncome, isEdit?: boolean) => void;
+  incomeToEdit?: ExternalIncome | null;
 }
 
-export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: ExpenseModalProps) {
-  const [form, setForm] = useState({ title: '', amount: '', category: 'SUPPLIES' as Category });
+export function IncomeModal({ isOpen, onClose, onSuccess, incomeToEdit }: IncomeModalProps) {
+  const [form, setForm] = useState({ title: '', amount: '', source: '' });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState({ text: '', ok: false });
 
   useEffect(() => {
     if (isOpen) {
-      if (expenseToEdit) {
+      if (incomeToEdit) {
         setForm({
-          title: expenseToEdit.title,
-          amount: expenseToEdit.amount.toString(),
-          category: expenseToEdit.category as Category,
+          title: incomeToEdit.title,
+          amount: incomeToEdit.amount.toString(),
+          source: incomeToEdit.source || '',
         });
       } else {
-        setForm({ title: '', amount: '', category: 'SUPPLIES' });
+        setForm({ title: '', amount: '', source: '' });
       }
       setMsg({ text: '', ok: false });
     }
-  }, [isOpen, expenseToEdit]);
+  }, [isOpen, incomeToEdit]);
 
   if (!isOpen) return null;
 
@@ -43,8 +41,8 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: Expe
     setMsg({ text: '', ok: false });
 
     try {
-      const isEdit = !!expenseToEdit;
-      const endpoint = isEdit ? `/api/admin/expenses/${expenseToEdit.id}` : '/api/admin/expenses';
+      const isEdit = !!incomeToEdit;
+      const endpoint = isEdit ? `/api/admin/income/${incomeToEdit.id}` : '/api/admin/income';
       const method = isEdit ? 'PUT' : 'POST';
 
       const res = await fetch(endpoint, {
@@ -54,7 +52,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: Expe
       });
       const data = await res.json();
       if (data.success) {
-        onSuccess(data.expense, isEdit);
+        onSuccess(data.income, isEdit);
         onClose();
       } else {
         setMsg({ text: `❌ ${data.error}`, ok: false });
@@ -68,7 +66,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: Expe
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose} style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
       <div className="admin-card p-6 w-full max-w-md animate-fade-in-up shadow-2xl" onClick={e => e.stopPropagation()} style={{ background: 'var(--admin-elevated)' }}>
-        <h2 className="font-playfair text-xl mb-6" style={{ color: 'var(--admin-text-primary)' }}>{expenseToEdit ? 'Edit Expense' : 'Log Expense'}</h2>
+        <h2 className="font-playfair text-xl mb-6" style={{ color: 'var(--admin-text-primary)' }}>{incomeToEdit ? 'Edit Income' : 'Log External Income'}</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -77,27 +75,31 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: Expe
               autoFocus
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="e.g. Lash glue restock"
+              placeholder="e.g. Masterclass ticket sale"
               disabled={loading}
               className="admin-input w-full"
             />
           </div>
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Amount (RWF)</label>
+            <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Amount In (RWF)</label>
             <input
               type="number"
               value={form.amount}
               onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
-              placeholder="e.g. 45000"
+              placeholder="e.g. 50000"
               disabled={loading}
               className="admin-input w-full"
             />
           </div>
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Category</label>
-            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as Category }))} className="admin-select w-full" disabled={loading}>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase().replace('_', ' ')}</option>)}
-            </select>
+            <label className="block text-xs font-sans uppercase tracking-wider mb-1.5" style={{ color: 'var(--admin-text-muted)' }}>Source (Optional)</label>
+            <input
+              value={form.source}
+              onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
+              placeholder="e.g. Online Store"
+              disabled={loading}
+              className="admin-input w-full"
+            />
           </div>
 
           {msg.text && (
@@ -109,7 +111,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expenseToEdit }: Expe
           <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.06]">
             <button type="button" onClick={onClose} disabled={loading} className="px-4 py-2 text-sm font-sans text-gray-400 hover:text-white transition-colors">Cancel</button>
             <ActionButton type="submit" variant="gold" loading={loading} disabled={!form.title || !form.amount}>
-              {expenseToEdit ? 'Save Changes' : 'Add Expense'}
+              {incomeToEdit ? 'Save Changes' : 'Log Income'}
             </ActionButton>
           </div>
         </form>

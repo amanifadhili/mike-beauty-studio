@@ -11,7 +11,7 @@ export default async function POSPage() {
   });
 
   const staff = await prisma.user.findMany({
-    where: { role: Role.WORKER, status: 'ACTIVE' },
+    where: { role: { in: [Role.WORKER, Role.ADMIN] }, status: 'ACTIVE' },
     select: { id: true, name: true, roleTitle: true },
   });
 

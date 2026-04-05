@@ -30,7 +30,7 @@ export default async function AdminBookingsPage() {
 
   // Fetch active Staff Users for the booking conversion modal
   const staff = await prisma.user.findMany({
-    where: { role: 'WORKER' },
+    where: { role: { in: ['WORKER', 'ADMIN'] }, status: 'ACTIVE' },
     select: { id: true, name: true }
   });
 
