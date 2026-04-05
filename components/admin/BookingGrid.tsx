@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PaymentMethod } from '@prisma/client';
 import { updateBookingStatus } from '@/app/actions/adminBookings';
@@ -20,6 +20,12 @@ const FILTERS = [
 
 export function BookingGrid({ initialBookings, staff = [] }: { initialBookings: any[]; staff?: any[] }) {
   const [bookings, setBookings] = useState(initialBookings);
+  
+  // Sync the optimistic state if the server pushes a new initialBookings array (via revalidatePath)
+  useEffect(() => {
+    setBookings(initialBookings);
+  }, [initialBookings]);
+
   const [filter, setFilter] = useState('NEW');
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   

@@ -26,7 +26,7 @@ export function ServicesDashboardClient({
 }: { 
   initialServices: ServiceData[];
 }) {
-  const [services] = useState<ServiceData[]>(initialServices);
+  const services = initialServices;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceData | null>(null);
 
