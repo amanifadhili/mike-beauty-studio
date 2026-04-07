@@ -247,6 +247,7 @@ model AuditLog {
 model Review {
   id        String   @id @default(uuid())
   name      String
+  role      String?  // Optional occupation or title (e.g. "Model")
   rating    Int // 1-5
   comment   String
   approved  Boolean  @default(false)
