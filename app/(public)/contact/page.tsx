@@ -10,6 +10,30 @@ export const metadata = {
 
 export default async function ContactPage() {
   const settings = await getSettings();
+
+  // Intelligent map link parser
+  let rawMapUrl = settings['MAP_EMBED_URL'] || '';
+  let mapSrc = '';
+
+  if (rawMapUrl) {
+    if (rawMapUrl.includes('<iframe')) {
+      // If user accidentally pasted the whole embed code from Google Maps
+      const match = rawMapUrl.match(/src="([^"]+)"/);
+      if (match) mapSrc = match[1];
+    } else if (rawMapUrl.includes('goo.gl') || !rawMapUrl.includes('embed')) {
+      // Google blocks framing 'goo.gl' shortlinks via CSP.
+      // Auto-fallback to generating an embed map based on their physical address.
+      const addressQuery = encodeURIComponent(settings['STUDIO_ADDRESS'] || 'Kigali, Rwanda');
+      mapSrc = `https://maps.google.com/maps?q=${addressQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    } else {
+      mapSrc = rawMapUrl;
+    }
+  } else {
+    // If absolutely nothing is provided, fallback to physical address search
+    const addressQuery = encodeURIComponent(settings['STUDIO_ADDRESS'] || 'Kigali, Rwanda');
+    mapSrc = `https://maps.google.com/maps?q=${addressQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }
+
   return (
     <div className="bg-cream-white min-h-[calc(100vh-80px)] pt-20 pb-12 text-charcoal relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,22 +108,18 @@ export default async function ContactPage() {
 
           </div>
 
-          {/* Map Column — Dynamic Iframe or Fallback Leaflet */}
-          <div className="h-[300px] lg:h-auto min-h-[300px] border border-[#eaeaea] relative overflow-hidden flex-1">
-            {settings['MAP_EMBED_URL'] ? (
-              <iframe 
-                src={settings['MAP_EMBED_URL']} 
-                width="100%" 
-                height="100%" 
-                style={{ border: 0, minHeight: '400px' }} 
-                allowFullScreen={false}
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade" 
-                className="absolute inset-0 w-full h-full"
-              />
-            ) : (
-              <MapWrapper />
-            )}
+          {/* Map Column — Dynamic Iframe */}
+          <div className="h-[300px] lg:h-auto min-h-[400px] border border-[#eaeaea] relative overflow-hidden flex-1">
+            <iframe 
+              src={mapSrc} 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={false}
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade" 
+              className="absolute inset-0 w-full h-full"
+            />
           </div>
 
         </div>
