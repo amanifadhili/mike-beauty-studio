@@ -105,6 +105,7 @@ export function SettingsEditor({ initialSettings }: { initialSettings: Record<st
             <SettingField label="Primary Phone Number" name="PHONE_NUMBER" defaultValue={initialSettings['PHONE_NUMBER'] || '+250788000000'} placeholder="e.g. +250 788 000 000" />
             <SettingField label="Support Email" name="CONTACT_EMAIL" defaultValue={initialSettings['CONTACT_EMAIL'] || 'hello@mikebeautystudio.rw'} type="email" />
             <SettingField label="Studio Physical Address" name="STUDIO_ADDRESS" defaultValue={initialSettings['STUDIO_ADDRESS'] || '123 Beauty Lane, KN 5 Rd. Kigali, Rwanda'} />
+            <SettingField label="Google Maps Embed URL" name="MAP_EMBED_URL" defaultValue={initialSettings['MAP_EMBED_URL'] || ''} placeholder="e.g. https://www.google.com/maps/embed?pb=..." />
             
             <SettingField label="Weekday Hours (Mon-Fri)" name="HOURS_WEEKDAY" defaultValue={initialSettings['HOURS_WEEKDAY'] || '9:00 AM - 7:00 PM'} />
             <SettingField label="Weekend Hours (Sat)" name="HOURS_WEEKEND" defaultValue={initialSettings['HOURS_WEEKEND'] || '10:00 AM - 6:00 PM'} />

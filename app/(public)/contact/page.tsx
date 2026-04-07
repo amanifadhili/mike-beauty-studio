@@ -84,9 +84,22 @@ export default async function ContactPage() {
 
           </div>
 
-          {/* Map Column — Interactive Leaflet + OpenStreetMap, zero API key */}
-          <div className="h-[300px] lg:h-auto min-h-[300px] border border-[#eaeaea] relative overflow-hidden">
-            <MapWrapper />
+          {/* Map Column — Dynamic Iframe or Fallback Leaflet */}
+          <div className="h-[300px] lg:h-auto min-h-[300px] border border-[#eaeaea] relative overflow-hidden flex-1">
+            {settings['MAP_EMBED_URL'] ? (
+              <iframe 
+                src={settings['MAP_EMBED_URL']} 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, minHeight: '400px' }} 
+                allowFullScreen={false}
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade" 
+                className="absolute inset-0 w-full h-full"
+              />
+            ) : (
+              <MapWrapper />
+            )}
           </div>
 
         </div>
