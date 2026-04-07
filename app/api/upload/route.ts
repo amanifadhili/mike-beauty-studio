@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 import { auth } from '@/auth';
+
 
 export async function POST(req: NextRequest) {
   // Ensure the user is authenticated before allowing uploads
@@ -31,27 +30,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File too large. Maximum file size is 25MB.' }, { status: 400 });
     }
 
-    // Build the upload directory path (inside public/ so Next.js can serve it)
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    // Create a unique filename to prevent overwrites
-    const ext = path.extname(file.name);
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    const fullPath = path.join(uploadDir, uniqueName);
-
-    // Convert file to buffer and write to disk
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(fullPath, buffer);
 
-    // Return the public URL for the saved file
-    const publicUrl = `/uploads/${uniqueName}`;
+    // Upload directly to Cloudinary using a stream
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'mike-beauty-studio',
+          resource_type: 'auto',
+        },
+        (error: cloudinary.UploadApiErrorResponse | undefined, result: cloudinary.UploadApiResponse | undefined) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      
+      uploadStream.end(buffer);
+    }) as any;
+
     const mediaType = file.type.startsWith('video') ? 'video' : 'image';
 
-    return NextResponse.json({ url: publicUrl, type: mediaType }, { status: 200 });
+    return NextResponse.json({ url: result.secure_url, type: mediaType }, { status: 200 });
 
   } catch (error) {
     console.error('[upload] Error handling file upload:', error);
