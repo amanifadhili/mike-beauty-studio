@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
           folder: 'mike-beauty-studio',
           resource_type: 'auto',
         },
-        (error: cloudinary.UploadApiErrorResponse | undefined, result: cloudinary.UploadApiResponse | undefined) => {
+        (error: any, result: any) => {
           if (error) reject(error);
           else resolve(result);
         }

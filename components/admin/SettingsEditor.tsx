@@ -144,6 +144,10 @@ export function SettingsEditor({ initialSettings }: { initialSettings: Record<st
             <h3 className="font-playfair text-2xl text-white mb-6">Social Links & SEO</h3>
             
             <SettingField label="Instagram Profile URL" name="INSTAGRAM_URL" defaultValue={initialSettings['INSTAGRAM_URL'] || 'https://instagram.com/mikebeautystudio'} />
+            <SettingField label="TikTok Profile URL" name="TIKTOK_URL" defaultValue={initialSettings['TIKTOK_URL'] || 'https://tiktok.com/@mikebeautystudio'} />
+            <SettingField label="YouTube Profile URL" name="YOUTUBE_URL" defaultValue={initialSettings['YOUTUBE_URL'] || ''} />
+            <SettingField label="Facebook Profile URL" name="FACEBOOK_URL" defaultValue={initialSettings['FACEBOOK_URL'] || ''} />
+            <SettingField label="X (Twitter) Profile URL" name="TWITTER_URL" defaultValue={initialSettings['TWITTER_URL'] || ''} />
             <SettingField label="Default SEO Description" name="SEO_DESCRIPTION" defaultValue={initialSettings['SEO_DESCRIPTION'] || 'Award-winning luxury beauty studio offering classic, hybrid, volume, and mega volume eyelash extensions in Kigali, Rwanda.'} type="textarea" />
             
             <div className="pt-4 border-t border-white/10">

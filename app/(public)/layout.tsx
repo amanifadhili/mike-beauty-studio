@@ -6,17 +6,22 @@ import { BookingModal } from '@/components/booking/BookingModal';
 import { MobileStickyCTA } from '@/components/booking/MobileStickyCTA';
 import { getServices } from '@/app/actions';
 
+import { getSettings } from '@/lib/settings';
+
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const services = await getServices();
+  const [services, settings] = await Promise.all([
+    getServices(),
+    getSettings()
+  ]);
   
   return (
     <BookingProvider services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))}>
       <div className="flex flex-col min-h-screen">
-        <Navbar />
+        <Navbar settings={settings} />
         <main className="flex-grow">{children}</main>
         <Footer />
         <WhatsAppButton />
