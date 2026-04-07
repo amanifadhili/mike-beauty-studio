@@ -38,10 +38,14 @@ export default function ExpensesClient({ initialExpenses, totalAmount }: { initi
     if (!confirm('Are you sure you want to delete this expense?')) return;
     try {
       const res = await fetch(`/api/admin/expenses/${id}`, { method: 'DELETE' });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success !== false) {
         setExpenses(prev => prev.filter(e => e.id !== id));
+      } else {
+        alert(data.error || 'Failed to delete expense due to a system constraint.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      alert(err.message || 'Network error occurred.');
       console.error(err);
     }
   };
