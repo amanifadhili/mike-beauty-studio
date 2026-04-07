@@ -70,7 +70,7 @@ export default function POSClient({ services, staff, recentTransactions }: { ser
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-white font-playfair tracking-wide text-xl">{tx.service?.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1 font-sans">
+                  <p suppressHydrationWarning className="text-xs text-gray-500 mt-1 font-sans">
                     {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>

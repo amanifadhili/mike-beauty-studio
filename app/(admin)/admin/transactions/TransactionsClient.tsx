@@ -58,7 +58,7 @@ export default function TransactionsClient({ initialData }: { initialData: any[]
               className="relative admin-card p-5 space-y-4 hover:border-white/20 transition-all flex flex-col"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-sans text-gray-400">
+                <span suppressHydrationWarning className="text-[11px] font-sans text-gray-400">
                   {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
                 <StatusBadge status={t.source} />
