@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import Link from 'next/link';
 import { SectionHeading } from '../ui/SectionHeading';
 
 // Mock reviews removed per user request
@@ -104,6 +105,19 @@ export function ReviewsCarousel({ reviews = [] }: { reviews?: ReviewProp[] }) {
           ))}
         </div>
       )}
+
+      {/* Call to Action Button */}
+      <div className="w-full flex justify-center mt-12 md:mt-16 px-4">
+        <Link 
+          href="/review"
+          className="inline-flex items-center gap-3 px-8 py-4 border border-charcoal text-charcoal font-sans text-xs tracking-[0.2em] uppercase hover:bg-charcoal hover:text-white transition-all duration-300"
+        >
+          Share Your Experience
+          <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </Link>
+      </div>
     </section>
   );
 }
