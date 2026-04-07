@@ -103,7 +103,7 @@ export default function ReviewsClient({ initialReviews }: { initialReviews: Revi
 
               <div>
                 <p className="font-playfair text-xl text-white tracking-wide">{r.name}</p>
-                {r.role && <p className="text-[10px] uppercase font-sans text-gold/80 mt-0.5 tracking-wider">{r.role}</p>}
+                {(r as any).role && <p className="text-[10px] uppercase font-sans text-gold/80 mt-0.5 tracking-wider">{(r as any).role}</p>}
                 <p suppressHydrationWarning className="text-[10px] font-sans text-gray-500 mt-1">
                   {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </p>

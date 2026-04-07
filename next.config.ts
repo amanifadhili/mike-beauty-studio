@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://images.unsplash.com https://images.pexels.com https://res.cloudinary.com; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://maps.google.com https://www.google.com; frame-ancestors 'none'; block-all-mixed-content; ${process.env.NODE_ENV === 'production' ? 'upgrade-insecure-requests;' : ''}`,
+            value: `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://images.unsplash.com https://images.pexels.com https://res.cloudinary.com https://*.basemaps.cartocdn.com; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://maps.google.com https://www.google.com; frame-ancestors 'none'; block-all-mixed-content; ${process.env.NODE_ENV === 'production' ? 'upgrade-insecure-requests;' : ''}`,
           },
         ],
       },

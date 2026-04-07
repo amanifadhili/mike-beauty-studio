@@ -2,6 +2,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { getSettings } from '@/lib/settings';
 import { MapWrapper } from '@/components/contact/MapWrapper';
+import { MapReveal } from '@/components/contact/MapReveal';
 
 export const metadata = {
   title: 'Contact Us | Mike Beauty Studio Kigali',
@@ -11,25 +12,20 @@ export const metadata = {
 export default async function ContactPage() {
   const settings = await getSettings();
 
-  // Intelligent map link parser
   let rawMapUrl = settings['MAP_EMBED_URL'] || '';
   let mapSrc = '';
 
   if (rawMapUrl) {
     if (rawMapUrl.includes('<iframe')) {
-      // If user accidentally pasted the whole embed code from Google Maps
       const match = rawMapUrl.match(/src="([^"]+)"/);
       if (match) mapSrc = match[1];
     } else if (rawMapUrl.includes('goo.gl') || !rawMapUrl.includes('embed')) {
-      // Google blocks framing 'goo.gl' shortlinks via CSP.
-      // Auto-fallback to generating an embed map based on their physical address.
       const addressQuery = encodeURIComponent(settings['STUDIO_ADDRESS'] || 'Kigali, Rwanda');
       mapSrc = `https://maps.google.com/maps?q=${addressQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     } else {
       mapSrc = rawMapUrl;
     }
   } else {
-    // If absolutely nothing is provided, fallback to physical address search
     const addressQuery = encodeURIComponent(settings['STUDIO_ADDRESS'] || 'Kigali, Rwanda');
     mapSrc = `https://maps.google.com/maps?q=${addressQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   }
@@ -54,8 +50,22 @@ export default async function ContactPage() {
             
             <div>
               <h3 className="font-playfair text-xl text-gold mb-3">Studio Location</h3>
-              <div className="font-sans text-gray-600 space-y-1 text-sm leading-relaxed whitespace-pre-line">
+              <div className="font-sans text-gray-600 space-y-4 text-sm leading-relaxed whitespace-pre-line">
                 <p>{settings['STUDIO_ADDRESS'] || 'Kigali Heights, 4th Floor\nKG 7 Ave, Kigali\nRwanda'}</p>
+                
+                {/* Get Directions Button */}
+                <a 
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings['STUDIO_ADDRESS'] || '-1.9547517,30.0881958')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-gold border border-gold/40 px-5 py-2.5 hover:bg-gold/5 transition-colors mt-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Get Directions
+                </a>
               </div>
             </div>
 
