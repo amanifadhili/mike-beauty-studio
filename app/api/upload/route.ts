@@ -34,12 +34,28 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Automated SEO Image Renaming
+    // Instead of forcing the user to rename IMG_1234.jpg, we intercept all uploads 
+    // and physically rename them to targeted local search queries on the CDN server.
+    const seoKeywords = [
+      'luxury-lash-extensions-kigali', 
+      'classic-volume-lashes-rwanda', 
+      'mike-beauty-studio-lashes', 
+      'professional-eyelash-extensions-kigali', 
+      'best-lash-salon-kigali',
+      'hybrid-lash-specialist-kigali'
+    ];
+    const randomKeyword = seoKeywords[Math.floor(Math.random() * seoKeywords.length)];
+    const uniqueSuffix = Date.now().toString(36).substring(3, 8); // e.g. "l7xyz"
+    const optimizedPublicId = `${randomKeyword}-${uniqueSuffix}`;
+
     // Upload directly to Cloudinary using a stream
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'mike-beauty-studio',
           resource_type: 'auto',
+          public_id: optimizedPublicId, // Forces the highly ranking URL path
         },
         (error: any, result: any) => {
           if (error) reject(error);

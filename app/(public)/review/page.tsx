@@ -5,12 +5,6 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { submitReview } from '@/app/actions/submitReview';
 
-export const metadata = {
-  title: 'Share Your Experience | Mike Beauty Studio',
-  description: 'Rate your service and share your thoughts to help us continue providing luxury experiences in Kigali.',
-  alternates: { canonical: 'https://mikebeautystudio.com/review' },
-  robots: { index: false },
-};
 
 export default function ReviewPage() {
   const [rating, setRating] = useState(5);
