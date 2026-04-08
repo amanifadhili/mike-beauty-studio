@@ -9,7 +9,7 @@ type MediaObj = { id: string; url: string; type: string };
 type ServiceData = {
   id?: string;
   name: string;
-  slug?: string;
+  slug?: string | null;
   description: string;
   price: number;
   duration: string;
@@ -140,7 +140,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
               <label htmlFor="slug" className="uppercase tracking-wider text-[10px] pl-1 transition-colors">URL Slug (Auto-generated if left blank)</label>
               <input
                 id="slug" name="slug" type="text"
-                defaultValue={initialData?.slug}
+                defaultValue={initialData?.slug ?? ''}
                 className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:bg-white/[0.08] focus:border-gold/50 transition-all text-sm"
                 placeholder="e.g. classic-full-set"
               />

@@ -11,7 +11,7 @@ type MediaObj = { id: string; url: string; type: string };
 type ServiceData = {
   id: string;
   name: string;
-  slug: string;
+  slug: string | null;
   description: string;
   price: number;
   duration: string;
