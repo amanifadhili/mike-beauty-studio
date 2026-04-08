@@ -269,10 +269,12 @@ export function BookingForm({ services, preSelectedServiceId, onClose, bookingSe
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="font-playfair text-3xl sm:text-4xl text-charcoal">Request Received</h2>
+        <h2 className="font-playfair text-3xl sm:text-4xl text-charcoal">Booking Received</h2>
         <p className="font-sans text-gray-500 max-w-sm sm:max-w-md mx-auto leading-relaxed text-sm sm:text-base px-4">
-          Thank you for choosing Mike Beauty Studio. Our team is reviewing your requested time slot. 
-          We will contact you via WhatsApp shortly to confirm.
+          Thank you for choosing Mike Beauty Studio. 
+          {bookingSettings && bookingSettings.depositAmount > 0 
+            ? " Your booking will be confirmed once you have deposited the required amount. We will contact you via WhatsApp shortly." 
+            : " Our team is reviewing your requested time slot. We will contact you via WhatsApp shortly to confirm."}
         </p>
 
         {/* Admin-set Booking Policies + MoMo Payment */}
