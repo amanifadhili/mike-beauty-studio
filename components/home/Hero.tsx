@@ -68,6 +68,7 @@ export function Hero() {
               alt={`Mike Beauty Studio Premium Detail ${index + 1}`}
               fill
               priority={index === 0}
+              sizes="100vw"
               className={`object-cover transition-transform duration-[10000ms] ease-linear ${
                 isActive ? 'scale-110' : 'scale-100'
               }`}
@@ -87,11 +88,10 @@ export function Hero() {
         ref={textRef}
         className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-20 sm:mt-16"
       >
-        <span className="text-[var(--color-gold)] font-sans tracking-[0.2em] text-sm md:text-base uppercase mb-4 block drop-shadow-md">
-          Award-Winning Beauty Studio
-        </span>
-        
-        <h1 className="text-white font-playfair text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-tight mb-6 drop-shadow-xl">
+        <h1 className="text-white font-playfair text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-tight mb-6 drop-shadow-xl text-center">
+          <span className="text-[var(--color-gold)] font-sans tracking-[0.2em] text-sm md:text-base uppercase mb-4 block drop-shadow-md">
+            Mike Beauty Studio Kigali
+          </span>
           Elevate Your <br/> <span className="italic text-[var(--color-gold)]">Natural Beauty</span>
         </h1>
         

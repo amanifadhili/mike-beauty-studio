@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 // We reuse the same type definition format
 type GalleryItem = {
@@ -92,10 +93,12 @@ export function Lightbox({ items, initialIndex, onClose }: LightboxProps) {
 
       {/* Main Image Area */}
       <div className="relative w-full h-full max-w-6xl max-h-[85vh] flex items-center justify-center px-4 md:px-16">
-        <img 
+        <Image 
           src={currentItem.url} 
           alt={currentItem.service?.name || 'Uncategorized'} 
-          className="max-w-full max-h-full object-contain pointer-events-none"
+          fill
+          unoptimized
+          className="object-contain pointer-events-none"
         />
       </div>
 

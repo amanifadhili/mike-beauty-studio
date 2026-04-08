@@ -7,6 +7,7 @@ import { MapReveal } from '@/components/contact/MapReveal';
 export const metadata = {
   title: 'Contact Us | Mike Beauty Studio Kigali',
   description: 'Get in touch with Mike Beauty Studio for lash extension inquiries, group bookings, or to locate our premium studio in Kigali.',
+  alternates: { canonical: 'https://mikebeautystudio.com/contact' },
 };
 
 // Next.js Server-Side parser that traces map shortlink redirects to bypass Iframe origin block
@@ -73,7 +74,8 @@ export default async function ContactPage() {
             title="Get In Touch"
             subtitle="Whether you have questions about our treatments or need assistance finding the studio, our concierge team is ready to assist you."
             alignment="center"
-            className="[&>span]:text-gold [&>h2]:text-3xl md:[&>h2]:text-4xl [&>p]:text-sm md:[&>p]:text-base mb-0"
+            className="[&>span]:text-gold [&>h2]:text-3xl md:[&>h2]:text-4xl [&>h1]:text-3xl md:[&>h1]:text-4xl [&>p]:text-sm md:[&>p]:text-base mb-0"
+            isH1={true}
           />
         </div>
 

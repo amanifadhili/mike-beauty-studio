@@ -5,6 +5,7 @@ interface SectionHeadingProps {
   subtitle?: string;
   alignment?: 'left' | 'center' | 'right';
   className?: string;
+  isH1?: boolean;
 }
 
 export function SectionHeading({
@@ -12,6 +13,7 @@ export function SectionHeading({
   subtitle,
   alignment = 'center',
   className = '',
+  isH1 = false,
 }: SectionHeadingProps) {
   const alignments = {
     left: 'text-left',
@@ -26,9 +28,15 @@ export function SectionHeading({
           {subtitle}
         </span>
       )}
-      <h2 className="font-playfair text-2xl md:text-4xl text-charcoal tracking-tight">
-        {title}
-      </h2>
+      {isH1 ? (
+        <h1 className="font-playfair text-3xl md:text-5xl text-charcoal tracking-tight">
+          {title}
+        </h1>
+      ) : (
+        <h2 className="font-playfair text-2xl md:text-4xl text-charcoal tracking-tight">
+          {title}
+        </h2>
+      )}
     </div>
   );
 }

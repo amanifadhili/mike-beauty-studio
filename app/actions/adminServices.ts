@@ -4,10 +4,12 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { requireAdmin } from '@/lib/auth/requireRole';
 import { z } from 'zod';
+import { slugify } from '@/lib/slug';
 
 const SaveServiceSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Name is required'),
+  slug: z.string().regex(/^[a-z0-9-]+$/, 'Slug must be lowercase, alphanumeric, and dashes only').optional().or(z.literal('')),
   description: z.string().min(1, 'Description is required'),
   price: z.number().int().min(0, 'Price must be positive'),
   duration: z.string().min(1, 'Duration is required'),
@@ -38,6 +40,7 @@ export async function toggleServiceStatus(serviceId: string, currentStatus: bool
 export async function saveService(rawPayload: {
   id?: string;
   name: string;
+  slug?: string;
   description: string;
   price: number;
   duration: string;
@@ -52,6 +55,7 @@ export async function saveService(rawPayload: {
     const data = parsed.data;
 
     let serviceId = data.id;
+    let finalSlug = data.slug && data.slug.trim().length > 0 ? data.slug : slugify(data.name);
 
     if (data.id) {
       // Update existing
@@ -59,6 +63,7 @@ export async function saveService(rawPayload: {
         where: { id: data.id },
         data: {
           name: data.name,
+          slug: finalSlug,
           description: data.description,
           price: data.price,
           duration: data.duration,
@@ -69,6 +74,7 @@ export async function saveService(rawPayload: {
       const newService = await prisma.service.create({
         data: {
           name: data.name,
+          slug: finalSlug,
           description: data.description,
           price: data.price,
           duration: data.duration,

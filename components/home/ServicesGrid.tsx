@@ -71,6 +71,8 @@ export function ServicesGrid({ services }: ServicesGridProps) {
               price={`RWF ${service.price.toLocaleString()}`}
               duration={service.duration}
               imageUrl={imageMedia?.url} // We will handle actual image loading in the gallery phase
+              // @ts-ignore
+              href={service.slug ? `/services/${service.slug}` : undefined}
               onBookClick={() => openBooking(service.id)}
             />
           </div>

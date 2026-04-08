@@ -7,6 +7,7 @@ import { CertificateShowcase } from '@/components/about/CertificateShowcase';
 export const metadata = {
   title: 'About Mike | Luxury Lash Artist in Kigali',
   description: 'Discover the philosophy behind Mike Beauty Studio. Award-winning lash artistry dedicated to framing your natural beauty in Kigali.',
+  alternates: { canonical: 'https://mikebeautystudio.com/about' },
 };
 
 export default function AboutPage() {
@@ -33,6 +34,7 @@ export default function AboutPage() {
             <SectionHeading 
               title="The Philosophy"
               subtitle="Bespoke luxury lash artistry Kigali."
+              isH1={true}
             />
             
             <div className="space-y-6 font-sans text-gray-600 leading-relaxed text-sm">

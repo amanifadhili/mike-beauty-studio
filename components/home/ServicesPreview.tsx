@@ -27,6 +27,15 @@ export async function ServicesPreview() {
         <div className="mt-20">
           <ServicesGrid services={displayServices} />
         </div>
+
+        <div className="mt-16 text-center">
+          <a
+            href="/services"
+            className="inline-block border-b-2 border-gold text-charcoal pb-1 font-playfair text-xl hover:text-gold transition-colors duration-300"
+          >
+            Explore All Signature Treatments &rarr;
+          </a>
+        </div>
       </div>
     </section>
   );

@@ -9,6 +9,7 @@ type MediaObj = { id: string; url: string; type: string };
 type ServiceData = {
   id?: string;
   name: string;
+  slug?: string;
   description: string;
   price: number;
   duration: string;
@@ -58,6 +59,7 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
     const data = {
       id: initialData?.id,
       name: formData.get('name') as string,
+      slug: (formData.get('slug') as string) || undefined,
       description: formData.get('description') as string,
       price: parseInt(formData.get('price') as string, 10),
       duration: formData.get('duration') as string,
@@ -131,6 +133,16 @@ export function ServiceModal({ initialData, onClose }: ServiceModalProps) {
                 defaultValue={initialData?.name}
                 className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:bg-white/[0.08] focus:border-gold/50 transition-all text-sm"
                 placeholder="e.g. Classic Full Set"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5 focus-within:text-gold text-gray-400 mb-5">
+              <label htmlFor="slug" className="uppercase tracking-wider text-[10px] pl-1 transition-colors">URL Slug (Auto-generated if left blank)</label>
+              <input
+                id="slug" name="slug" type="text"
+                defaultValue={initialData?.slug}
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:bg-white/[0.08] focus:border-gold/50 transition-all text-sm"
+                placeholder="e.g. classic-full-set"
               />
             </div>
 

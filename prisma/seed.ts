@@ -216,7 +216,8 @@ async function main() {
 
   const createdServices: { id: string; name: string }[] = [];
   for (const s of servicesData) {
-    const svc = await prisma.service.create({ data: s });
+    const slug = s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const svc = await prisma.service.create({ data: { ...s, slug } });
     createdServices.push({ id: svc.id, name: svc.name });
     console.log(`    ✔ Service: "${svc.name}"`);
   }

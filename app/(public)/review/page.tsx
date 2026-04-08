@@ -5,6 +5,13 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { submitReview } from '@/app/actions/submitReview';
 
+export const metadata = {
+  title: 'Share Your Experience | Mike Beauty Studio',
+  description: 'Rate your service and share your thoughts to help us continue providing luxury experiences in Kigali.',
+  alternates: { canonical: 'https://mikebeautystudio.com/review' },
+  robots: { index: false },
+};
+
 export default function ReviewPage() {
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
@@ -63,7 +70,8 @@ export default function ReviewPage() {
                   title="Share Your Experience"
                   subtitle="We take pride in our artistry. Please rate your service and share your thoughts to help us continue providing luxury experiences."
                   alignment="center"
-                  className="[&>h2]:text-3xl md:[&>h2]:text-4xl [&>p]:text-[13px] md:[&>p]:text-sm mb-0"
+                  className="[&>h2]:text-3xl md:[&>h2]:text-4xl [&>h1]:text-3xl md:[&>h1]:text-4xl [&>p]:text-[13px] md:[&>p]:text-sm mb-0"
+                  isH1={true}
                 />
               </div>
               

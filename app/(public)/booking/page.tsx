@@ -5,6 +5,10 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 export const metadata = {
   title: 'Book an Appointment | Mike Beauty Studio',
   description: 'Schedule your luxury lash extension appointment in Kigali. Secure your spot for Classic, Hybrid, or Volume sets.',
+  alternates: {
+    canonical: 'https://mikebeautystudio.com/booking',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default async function BookingPage({
@@ -28,6 +32,7 @@ export default async function BookingPage({
             subtitle="Please provide your details below. We require a 20% non-refundable deposit to secure all bookings. Our team will contact you via WhatsApp for payment details."
             alignment="center"
             className="[&>span]:text-gold"
+            isH1={true}
           />
         </div>
 

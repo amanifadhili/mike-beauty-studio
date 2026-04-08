@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from './Button';
 
 interface ServiceCardProps {
@@ -8,6 +9,7 @@ interface ServiceCardProps {
   price: string;
   duration?: string;
   imageUrl?: string;
+  href?: string;
   onBookClick?: () => void;
 }
 
@@ -17,6 +19,7 @@ export function ServiceCard({
   price,
   duration,
   imageUrl,
+  href,
   onBookClick,
 }: ServiceCardProps) {
   return (
@@ -28,6 +31,7 @@ export function ServiceCard({
               src={imageUrl}
               alt={title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </div>
@@ -51,6 +55,11 @@ export function ServiceCard({
         <Button variant="primary" fullWidth onClick={onBookClick}>
           Book Now
         </Button>
+        {href && (
+          <Link href={href} className="text-center font-sans text-[10px] uppercase tracking-widest text-charcoal/60 hover:text-gold transition-colors py-2 mt-1 border border-transparent hover:border-gold/10 rounded">
+            View Service Details &rarr;
+          </Link>
+        )}
       </div>
     </div>
   );

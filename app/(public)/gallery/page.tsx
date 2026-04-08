@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Portfolio & Gallery | Mike Beauty Studio Kigali',
   description: 'View our stunning portfolio of luxury lash extensions, featuring Classic, Hybrid, and Volume transformations.',
+  alternates: { canonical: 'https://mikebeautystudio.com/gallery' },
 };
 
 export default async function GalleryPage() {
@@ -31,6 +32,7 @@ export default async function GalleryPage() {
             subtitle="Browse our recent transformations. Filter by style to find the exact look you desire for your next appointment."
             alignment="center"
             className="[&>span]:text-gold"
+            isH1={true}
           />
         </div>
 
