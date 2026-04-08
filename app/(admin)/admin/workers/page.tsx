@@ -11,14 +11,13 @@ export default async function WorkersPage() {
   // Admin is also technically a worker (owner of the business)
   const staff = await prisma.user.findMany({
     where: {
-      role: { in: [Role.WORKER, Role.ADMIN] }
+      role: Role.WORKER,
     },
     include: {
       advances: { where: { status: 'PENDING' } },
       payments: { orderBy: { date: 'desc' }, take: 1 },
     },
     orderBy: [
-      { role: 'asc' },     // ADMIN first
       { createdAt: 'desc' }
     ],
   });

@@ -41,10 +41,12 @@ export async function createPOSTransaction(data: {
     }
 
     // 3. Calculate Commissions
+    // ADMIN/Owner short-circuit: role is passed so the engine returns workerCut=0
     const { workerCut, salonCut } = calculateCommission(
       service.price,
       user.commissionType, 
-      user.commissionRate
+      user.commissionRate,
+      user.role
     );
 
     // 4. Execute Transaction
@@ -63,13 +65,15 @@ export async function createPOSTransaction(data: {
         }
       });
 
-      // 4b. Update Staff Balance
-      await tx.user.update({
-        where: { id: user.id },
-        data: {
-          balance: { increment: workerCut }
-        }
-      });
+      // 4b. Update Staff Balance — skipped for ADMIN/Owner (they are never paid out)
+      if (user.role !== 'ADMIN') {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            balance: { increment: workerCut }
+          }
+        });
+      }
 
       // 4c. Auto-generate Client Credit IOU if payment method is CREDIT
       if (data.paymentMethod === PaymentMethod.CREDIT) {
