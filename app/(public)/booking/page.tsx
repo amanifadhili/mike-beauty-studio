@@ -20,8 +20,10 @@ export default async function BookingPage({
   const [services, settings] = await Promise.all([getServices(), getSettings()]);
   const preSelectedServiceId = (await searchParams).service || '';
   const cancellationPolicy = settings['CANCELLATION_POLICY'] || 'Please provide at least 24 hours notice for any cancellations.';
-  const depositAmount = parseInt(settings['DEPOSIT_AMOUNT'] || '0', 10);
-  const bookingSettings = { cancellationPolicy, depositAmount };
+  const depositAmount = parseInt(settings['DEPOSIT_REQUIRED'] || '0', 10);
+  const momoNumber = settings['MOMO_NUMBER'] || '';
+  const momoName = settings['MOMO_NAME'] || '';
+  const bookingSettings = { cancellationPolicy, depositAmount, momoNumber, momoName };
 
   return (
     <div className="bg-cream-white min-h-screen pt-24 md:pt-32 pb-24 text-charcoal relative z-10">

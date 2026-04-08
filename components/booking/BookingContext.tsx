@@ -11,6 +11,8 @@ export interface ServiceOption {
 export interface BookingSettings {
   cancellationPolicy: string;
   depositAmount: number;
+  momoNumber: string;
+  momoName: string;
 }
 
 interface BookingContextType {

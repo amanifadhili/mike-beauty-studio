@@ -19,8 +19,10 @@ export default async function PublicLayout({
   ]);
   
   const cancellationPolicy = settings['CANCELLATION_POLICY'] || 'Please provide at least 24 hours notice for any cancellations.';
-  const depositAmount = parseInt(settings['DEPOSIT_AMOUNT'] || '0', 10);
-  const bookingSettings = { cancellationPolicy, depositAmount };
+  const depositAmount = parseInt(settings['DEPOSIT_REQUIRED'] || '0', 10);
+  const momoNumber = settings['MOMO_NUMBER'] || '';
+  const momoName = settings['MOMO_NAME'] || '';
+  const bookingSettings = { cancellationPolicy, depositAmount, momoNumber, momoName };
 
   return (
     <BookingProvider

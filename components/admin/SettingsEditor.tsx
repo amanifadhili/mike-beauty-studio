@@ -135,6 +135,8 @@ export function SettingsEditor({ initialSettings }: { initialSettings: Record<st
               defaultValue={initialSettings['CANCELLATION_POLICY'] || 'Please provide at least 24 hours notice for any cancellations. Late cancellations may be subject to a 50% fee.'} 
             />
             <SettingField label="Required Deposit Amount (RWF)" name="DEPOSIT_REQUIRED" defaultValue={initialSettings['DEPOSIT_REQUIRED'] || '10000'} type="number" />
+            <SettingField label="MoMo Payment Number" name="MOMO_NUMBER" defaultValue={initialSettings['MOMO_NUMBER'] || ''} placeholder="e.g. 0788 000 000" />
+            <SettingField label="MoMo Account Name" name="MOMO_NAME" defaultValue={initialSettings['MOMO_NAME'] || ''} placeholder="e.g. NDAYIZEYE MECHAQUE" />
             
             <div className="pt-4 border-t border-white/10">
               <Button type="submit" variant="primary" disabled={isSaving}>

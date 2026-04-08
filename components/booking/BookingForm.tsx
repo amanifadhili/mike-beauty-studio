@@ -275,22 +275,69 @@ export function BookingForm({ services, preSelectedServiceId, onClose, bookingSe
           We will contact you via WhatsApp shortly to confirm.
         </p>
 
-        {/* Admin-set Booking Policies */}
-        {bookingSettings && (
-          <div className="w-full px-4 space-y-3 border-t border-[#eaeaea] pt-6">
-            {bookingSettings.depositAmount > 0 && (
-              <div className="flex items-start gap-3 text-left">
-                <span className="text-gold mt-0.5 shrink-0">•</span>
-                <p className="font-sans text-xs sm:text-sm text-gray-600">
-                  <strong className="text-charcoal">Required Deposit:</strong>{' '}
-                  {bookingSettings.depositAmount.toLocaleString()} RWF to secure your slot.
-                </p>
+        {/* Admin-set Booking Policies + MoMo Payment */}
+        {bookingSettings && (bookingSettings.depositAmount > 0 || bookingSettings.momoNumber) && (
+          <div className="w-full px-4 space-y-4 border-t border-[#eaeaea] pt-6">
+            
+            {/* MoMo Payment Card */}
+            {bookingSettings.momoNumber && bookingSettings.depositAmount > 0 && (
+              <div className="bg-[#faf9f5] border border-gold/30 rounded-sm p-5 text-left space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-gold text-lg">💳</span>
+                  <p className="font-playfair text-base text-charcoal font-semibold">
+                    Secure Your Slot — Pay Deposit
+                  </p>
+                </div>
+
+                {/* Amount */}
+                <div className="flex items-baseline gap-2">
+                  <span className="font-playfair text-2xl text-gold font-bold">
+                    {bookingSettings.depositAmount.toLocaleString()}
+                  </span>
+                  <span className="font-sans text-xs text-gray-500 uppercase tracking-widest">RWF</span>
+                </div>
+
+                {/* MoMo details box */}
+                <div className="bg-white border border-[#eaeaea] rounded-sm p-4 space-y-2 font-sans text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-xs uppercase tracking-widest">Send To</span>
+                    <span className="font-bold text-charcoal tracking-widest">{bookingSettings.momoNumber}</span>
+                  </div>
+                  {bookingSettings.momoName && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-xs uppercase tracking-widest">Name</span>
+                      <span className="text-charcoal">{bookingSettings.momoName}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Steps */}
+                <ol className="space-y-2 font-sans text-xs text-gray-600 list-none">
+                  <li className="flex gap-2 items-start">
+                    <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold shrink-0 text-[10px]">1</span>
+                    <span>Open your <strong>MTN Mobile Money</strong> app or dial <strong>*182#</strong></span>
+                  </li>
+                  <li className="flex gap-2 items-start">
+                    <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold shrink-0 text-[10px]">2</span>
+                    <span>Select <strong>Transfer Money</strong> → <strong>Enter number</strong> above</span>
+                  </li>
+                  <li className="flex gap-2 items-start">
+                    <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold shrink-0 text-[10px]">3</span>
+                    <span>Enter <strong>{bookingSettings.depositAmount.toLocaleString()} RWF</strong> and confirm</span>
+                  </li>
+                  <li className="flex gap-2 items-start">
+                    <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold shrink-0 text-[10px]">4</span>
+                    <span>Screenshot your receipt and send it to us <strong>via WhatsApp</strong> to confirm your booking</span>
+                  </li>
+                </ol>
               </div>
             )}
+
+            {/* Cancellation Policy */}
             {bookingSettings.cancellationPolicy && (
               <div className="flex items-start gap-3 text-left">
                 <span className="text-gold mt-0.5 shrink-0">•</span>
-                <p className="font-sans text-xs sm:text-sm text-gray-600">
+                <p className="font-sans text-xs text-gray-500">
                   <strong className="text-charcoal">Cancellation Policy:</strong>{' '}
                   {bookingSettings.cancellationPolicy}
                 </p>
