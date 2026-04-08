@@ -8,12 +8,18 @@ export interface ServiceOption {
   price: number;
 }
 
+export interface BookingSettings {
+  cancellationPolicy: string;
+  depositAmount: number;
+}
+
 interface BookingContextType {
   isOpen: boolean;
   preSelectedServiceId: string | undefined;
   openBooking: (serviceId?: string) => void;
   closeBooking: () => void;
   services: ServiceOption[];
+  bookingSettings: BookingSettings;
 }
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
@@ -21,9 +27,11 @@ const BookingContext = createContext<BookingContextType | undefined>(undefined);
 export function BookingProvider({
   children,
   services,
+  bookingSettings,
 }: {
   children: ReactNode;
   services: ServiceOption[];
+  bookingSettings: BookingSettings;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [preSelectedServiceId, setPreSelectedServiceId] = useState<string | undefined>();
@@ -40,7 +48,7 @@ export function BookingProvider({
 
   return (
     <BookingContext.Provider
-      value={{ isOpen, preSelectedServiceId, openBooking, closeBooking, services }}
+      value={{ isOpen, preSelectedServiceId, openBooking, closeBooking, services, bookingSettings }}
     >
       {children}
     </BookingContext.Provider>

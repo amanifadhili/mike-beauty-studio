@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from 'react';
 import { createBooking } from '@/app/actions';
 import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { BookingSettings } from '@/components/booking/BookingContext';
 
 interface ServiceOption {
   id: string;
@@ -15,6 +16,7 @@ interface BookingFormProps {
   services: ServiceOption[];
   preSelectedServiceId: string;
   onClose?: () => void;
+  bookingSettings?: BookingSettings;
 }
 
 const getFlagEmoji = (countryCode: string) => {
@@ -167,7 +169,7 @@ function ModernPickerField({
   );
 }
 
-export function BookingForm({ services, preSelectedServiceId, onClose }: BookingFormProps) {
+export function BookingForm({ services, preSelectedServiceId, onClose, bookingSettings }: BookingFormProps) {
   const [[step, direction], setPage] = useState([1, 0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -272,7 +274,32 @@ export function BookingForm({ services, preSelectedServiceId, onClose }: Booking
           Thank you for choosing Mike Beauty Studio. Our team is reviewing your requested time slot. 
           We will contact you via WhatsApp shortly to confirm.
         </p>
-        <div className="pt-8 w-full px-4">
+
+        {/* Admin-set Booking Policies */}
+        {bookingSettings && (
+          <div className="w-full px-4 space-y-3 border-t border-[#eaeaea] pt-6">
+            {bookingSettings.depositAmount > 0 && (
+              <div className="flex items-start gap-3 text-left">
+                <span className="text-gold mt-0.5 shrink-0">•</span>
+                <p className="font-sans text-xs sm:text-sm text-gray-600">
+                  <strong className="text-charcoal">Required Deposit:</strong>{' '}
+                  {bookingSettings.depositAmount.toLocaleString()} RWF to secure your slot.
+                </p>
+              </div>
+            )}
+            {bookingSettings.cancellationPolicy && (
+              <div className="flex items-start gap-3 text-left">
+                <span className="text-gold mt-0.5 shrink-0">•</span>
+                <p className="font-sans text-xs sm:text-sm text-gray-600">
+                  <strong className="text-charcoal">Cancellation Policy:</strong>{' '}
+                  {bookingSettings.cancellationPolicy}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="pt-4 w-full px-4">
           <Button variant="outline" fullWidth onClick={() => onClose ? onClose() : window.location.href = '/'}>
             Return Home
           </Button>

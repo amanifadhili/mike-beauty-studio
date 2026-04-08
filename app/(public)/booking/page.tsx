@@ -1,6 +1,7 @@
 import { getServices } from '@/app/actions';
 import { BookingForm } from '@/components/booking/BookingForm';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { getSettings } from '@/lib/settings';
 
 export const metadata = {
   title: 'Book an Appointment | Mike Beauty Studio',
@@ -16,11 +17,11 @@ export default async function BookingPage({
 }: {
   searchParams: { service?: string };
 }) {
-  // Fetch services for the dropdown
-  const services = await getServices();
-  
-  // Extract pre-selected service if coming from a /services/[id] CTA
-  const preSelectedServiceId = searchParams.service || '';
+  const [services, settings] = await Promise.all([getServices(), getSettings()]);
+  const preSelectedServiceId = (await searchParams).service || '';
+  const cancellationPolicy = settings['CANCELLATION_POLICY'] || 'Please provide at least 24 hours notice for any cancellations.';
+  const depositAmount = parseInt(settings['DEPOSIT_AMOUNT'] || '0', 10);
+  const bookingSettings = { cancellationPolicy, depositAmount };
 
   return (
     <div className="bg-cream-white min-h-screen pt-24 md:pt-32 pb-24 text-charcoal relative z-10">
@@ -43,6 +44,7 @@ export default async function BookingPage({
             <BookingForm 
               services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))} 
               preSelectedServiceId={preSelectedServiceId}
+              bookingSettings={bookingSettings}
             />
           </div>
 

@@ -18,8 +18,15 @@ export default async function PublicLayout({
     getSettings()
   ]);
   
+  const cancellationPolicy = settings['CANCELLATION_POLICY'] || 'Please provide at least 24 hours notice for any cancellations.';
+  const depositAmount = parseInt(settings['DEPOSIT_AMOUNT'] || '0', 10);
+  const bookingSettings = { cancellationPolicy, depositAmount };
+
   return (
-    <BookingProvider services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))}>
+    <BookingProvider
+      services={services.map(s => ({ id: s.id, name: s.name, price: s.price }))}
+      bookingSettings={bookingSettings}
+    >
       <div className="flex flex-col min-h-screen">
         <Navbar settings={settings} />
         <main className="flex-grow">{children}</main>

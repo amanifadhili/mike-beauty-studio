@@ -6,7 +6,7 @@ import { BookingForm } from './BookingForm';
 import { useEffect } from 'react';
 
 export function BookingModal() {
-  const { isOpen, closeBooking, services, preSelectedServiceId } = useBooking();
+  const { isOpen, closeBooking, services, preSelectedServiceId, bookingSettings } = useBooking();
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -57,7 +57,8 @@ export function BookingModal() {
                <BookingForm 
                  services={services} 
                  preSelectedServiceId={preSelectedServiceId || ''} 
-                 onClose={closeBooking} 
+                 onClose={closeBooking}
+                 bookingSettings={bookingSettings}
                />
             </div>
 
